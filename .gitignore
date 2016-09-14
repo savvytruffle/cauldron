@@ -1,0 +1,4 @@
+src/
+kics/
+*.so
+*.pyc
