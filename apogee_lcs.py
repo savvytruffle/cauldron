@@ -305,37 +305,41 @@ def lnlike_lmfit(fisopars, lc_constraints=None, ebv_arr=None, qua=[1], polyorder
         return np.ones(len(keblat.magsobs)+len(keblat.flux[keblat.clip]) + extra)*1e20
     return res
 
-def se_search(pars0, ecosws, esinws):
+def ew_search_lmfit(ew_trials, pars0, argpars, fit_ecosw=True):
+    fit_ew = Parameters()
+    fit_ew.add('esinw', value=pars0[5], min=-0.9, max=0.9, vary=True)
+    fit_ew.add('ecosw', value=pars0[6], min=-0.9, max=0.9, vary=fit_ecosw)
+    chisq = 1e18
+    for ii in range(len(ew_trials)):
+        fit_ew['esinw'].value=ew_trials[ii][0]
+        fit_ew['ecosw'].value=ew_trials[ii][1]
+        result = minimize(ew_search, fit_ew, kws={'pars0':pars0, 'argpars':argpars})
+        if result.redchi < chisq or ii==0:
+            chisq = result.redchi * 1.0
+            ew_best = result.params['esinw'].value, result.params['ecosw'].value
+            print "Better redchi: ", chisq, result.redchi, ew_best
+    return ew_best
+
+def ew_search(ew, pars0=None, argpars=None):
     pars = np.array(pars0).copy()
-    chi2 = np.zeros((ecosws.size, esinws.size))
-    good_ews = np.zeros((2,))
-    plt.figure()
-    plt.plot(keblat.phase, keblat.flux, 'k.')
-    for ii in range(ecosws.size):
-        for jj in range(esinws.size):
-            pars[6] = ecosws[ii] * np.cos(esinws[jj])
-            pars[5] = esinws[jj] * np.sin(esinws[jj])
-            mod,_ = keblat.lcfit(pars, keblat.jd, keblat.phase, keblat.flux, keblat.fluxerr, keblat.crowd, polyorder=0)
-            if np.any(np.isinf(mod)):
-                print mod
-                chi2[ii, jj] = -np.inf
-            else:
-                chi2[ii, jj] = np.sum(((mod-keblat.flux)/keblat.fluxerr)**2)
-                pe = (abs(keblat.phase) < 1.5*keblat.pwidth)
-                se = (abs(keblat.phase-keblat.sep) < 1.5*keblat.swidth)
-                pe_centers = np.median(keblat.phase[pe])
-                se_centers = np.median(keblat.phase[se])
-                try:
-                    plt.plot(keblat.phase, mod, '.', label=str((esinws[jj], ecosws[ii])))
-                except:
-                    print len(mod), len(keblat.phase[keblat.clip])
-                # if (abs(pe_centers) < 0.5*keblat.pwidth) and (abs(se_centers-keblat.sep) < 0.5*keblat.swidth) and \
-                #     (np.sum(abs(mod[pe]-1.))>0.) and (np.sum(abs(mod[se]-1.))>0.):
-                #     good_ews = np.vstack((good_ews, np.array([esinws[jj], ecosws[ii]])))
-                #     plt.plot(keblat.phase[keblat.clip], mod, '.', label=str((esinws[jj], ecosws[ii])))
-    plt.legend(fontsize=10)
-    plt.show()
-    return chi2#, good_ews[1:, :]
+    #esinw, ecosw = ew
+    pars[5], pars[6] = ew['esinw'].value, ew['ecosw'].value
+    mod, _ = keblat.lcfit(pars, keblat.jd, keblat.phase, keblat.flux, keblat.fluxerr, keblat.crowd, polyorder=0)
+    # _phasesort = np.argsort(keblat.phase)
+    # _phase = keblat.phase[_phasesort]
+    # _flux = keblat.flux[_phasesort]
+    # _dflux = keblat.dflux[_phasesort]
+    # Nbins = int(1./min(keblat.pwidth, keblat.swidth))*4
+    # bins = np.linspace(_phase[0], _phase[-1], Nbins)
+    # digitized = np.digitize(_phase, bins)
+    # x_means = [_phase[digitized == i].mean() for i in range(1, len(bins))]
+    # y_means = [_flux[digitized == i].mean() for i in range(1, len(bins))]
+    # y_means /= y_means
+    #
+    if np.any(np.isinf(mod)):
+        return np.ones_like(keblat.jd+1)*1e10
+    return np.append((keblat.flux - mod)/keblat.fluxerr, tse_residuals((pars[5],pars[6]), *argpars))
+
 
 def get_age_trials(mass):
     if np.log10(mass) <= 0.02:
@@ -708,7 +712,7 @@ def tse_residuals(ew, *args):
         return 1e3
     period, tpe, tse0 = args[0], args[1], args[2]
     tse = tpe - sudarsky(np.pi/2.-w, e, period) + sudarsky(-np.pi/2.-w, e, period)
-    return (tse % period - tse0 % period)**2
+    return (tse % period - tse0 % period) / 0.01#**2
 
 def init_keblat(kic, exclude_sed=[]):
     goodv = keblat.kiclookup(kic, target=keblat.vkeb[:, 0])
@@ -1096,19 +1100,24 @@ if not os.path.isfile(prefix+'lcpars2.lmfit') or clobber_lc:
                                         args=(period, 2*(keblat.pwidth+keblat.swidth)),
                                         bounds=[(1e-3, 1e3)], approx_grad=True)[0][0]
 
-    ew = scipy.optimize.fmin(tse_residuals, np.array([1e-3, ecosw]),
-                             args=(period, tpe, tpe+keblat.sep*period))
-
+    # ew = scipy.optimize.fmin(tse_residuals, np.array([1e-3, ecosw]),
+    #                          args=(period, tpe, tpe+keblat.sep*period))
     b = flatbottom(keblat.phase[keblat.clip], keblat.flux[keblat.clip], keblat.sep, keblat.swidth)
+    if sdeplist[goodlist][goodlist_ind] < 0.05 and pdeplist[goodlist][goodlist_ind] < 0.05:
+        b = 1.0
     rrat = guess_rrat(sdeplist[goodlist][goodlist_ind], pdeplist[goodlist][goodlist_ind])
     frat = rrat**(2.5)
+
+    ew_trials = [[esinw, ecosw], [-esinw, ecosw], [-0.521, ecosw], [-0.332, ecosw], [-0.142, ecosw], [0.521, ecosw], [0.332, ecosw], [0.142, ecosw]]
+    lcpars0 = np.array([rsum, rsum, rrat, period, tpe, esinw, ecosw, 1.0, frat, q1, q2, q3, q4])
+    ew = ew_search_lmfit(ew_trials, lcpars0, (period, tpe, tpe+keblat.sep*period), fit_ecosw=False)
+
     b_trials = [0.01, 0.1, 0.4]
     rrat_trials = [0.3, 0.7, 0.95]
 
 
     b_trials = [b] + [float(jj) for jj in np.array(b_trials)[~np.in1d(b_trials, b)]]
     rrat_trials = [rrat] + [float(jj) for jj in np.array(rrat_trials)[~np.in1d(rrat_trials, rrat)]]
-    ew_trials = [[esinw, ecosw], [ew[0], ew[1]], [-esinw, ecosw], [-0.521, ecosw], [-0.332, ecosw], [-0.142, ecosw], [0.521, ecosw], [0.332, ecosw], [0.142, ecosw]]
     lc_search_counts=0
     bestlcchi2 = 1e25
 
@@ -1116,13 +1125,14 @@ if not os.path.isfile(prefix+'lcpars2.lmfit') or clobber_lc:
     ########################### LC ONLY OPTIMIZATION FIRST ############################
     ###################################################################################
 
-    for i_b, i_rrat, i_ew in list(itertools.product(b_trials, rrat_trials, ew_trials)):
-        lcpars0 = np.array([rsum, rsum, i_rrat, period, tpe, i_ew[0], i_ew[1], i_b, i_rrat**(2.5),
+    # for i_b, i_rrat, i_ew in list(itertools.product(b_trials, rrat_trials, ew_trials)):
+    for i_b, i_rrat in list(itertools.product(b_trials, rrat_trials)):
+        lcpars0 = np.array([rsum, rsum, i_rrat, period, tpe, ew[0], ew[1], i_b, i_rrat**(2.5),
                             q1, q2, q3, q4])
         upper_b = 2.*i_b if i_b==0.01 else 3.0
 
         opt_lcpars0 = opt_lc(lcpars0, keblat.jd, keblat.phase, keblat.flux, keblat.fluxerr, keblat.crowd, \
-                            keblat.clip, set_upperb=upper_b, prefix=prefix, fit_se=True)
+                            keblat.clip, set_upperb=upper_b, prefix=prefix, fit_se=False)
 
         lcchi2 = np.sum(rez(opt_lcpars0, polyorder=2)**2)/np.sum(keblat.clip)
         if (lcchi2 < bestlcchi2) or (lc_search_counts < 1):
@@ -1131,7 +1141,7 @@ if not os.path.isfile(prefix+'lcpars2.lmfit') or clobber_lc:
         lc_search_counts+=1
 
         if (bestlcchi2 < 10) and opt_lcpars[2]<=1.0:
-            print "These init b, rrat, esinw, ecosw lcpars are: ", i_b, i_rrat, i_ew
+            print "These init b, rrat, esinw, ecosw lcpars are: ", i_b, i_rrat, ew
             break
 
         # opt_lcpars0 = opt_lc(lcpars0, keblat.jd, keblat.phase, keblat.flux, keblat.fluxerr, keblat.crowd, \
