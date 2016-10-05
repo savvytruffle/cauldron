@@ -38,7 +38,8 @@ class Keblat(object):
         self.res = []
         self.ldtype = 1 # quadratic limb darkening
         self.parnames = ['m1', 'm2', 'z0', 'age', 'dist', 'ebv', 'h0', 'period', 'tpe',
-                         'esinw', 'ecosw', 'b', 'q1', 'q2', 'q3', 'q4', 'lcerr', 'isoerr']
+                         'esinw', 'ecosw', 'b', 'q1', 'q2', 'q3', 'q4', 'lcerr', 'isoerr',
+                         'k0', 'rverr']
 
         self.pars = OrderedDict(zip(self.parnames, [None]*len(self.parnames)))
 
@@ -49,7 +50,8 @@ class Keblat(object):
                           ('tpe', [0., 1e8]), ('esinw', [-.99, .99]),
                           ('ecosw', [-.99, .99]), ('b', [0., 3.]), ('q1', [0., 1.]),
                           ('q2', [0., 1.]), ('q3', [0., 1.]), ('q4', [0., 1.]), 
-                          ('lcerr', [0., 0.05]), ('isoerr', [0., 0.3])])
+                          ('lcerr', [0., 0.01]), ('isoerr', [0., 0.3]),
+                                      ('k0', [-1e8, 1e8]), ('rverr', [0., 1e4])])
         if preload:
             self.loadiso()
             self.loadsed()
@@ -71,12 +73,22 @@ class Keblat(object):
 
     def updatepars(self, **kwargs):
         """Update free parameters to present values"""
-        for ii in range(len(kwargs.keys())):
-            if kwargs.keys()[ii] in self.pars:
-                self.pars[kwargs.keys()[ii]] = kwargs.values()[ii]
+        assert type(kwargs) is dict, "Must be dict"
+        for key, val in kwargs.iteritems():
+            if key in self.pars:
+                self.pars[key] = val
             else:
-                print("""{} is not a free parameter, sorry.""".format(kwargs.keys()[ii]))
-        self.updatephase(self.tpe, self.period, self.clip_tol)
+                print("""{} is not a free parameter, sorry.""".format(key))
+        #print "Updated pars"
+        return
+        # for ii in range(len(kwargs.keys())):
+        #     if kwargs.keys()[ii] in self.pars:
+        #         self.pars[kwargs.keys()[ii]] = kwargs.values()[ii]
+        #     else:
+        #         print("""{} is not a free parameter, sorry.""".format(kwargs.keys()[ii]))
+        # print "made changes to updatepars"
+        # return
+        # #self.updatephase(self.tpe, self.period, self.clip_tol)
 
     def getpars(self, partype='allpars'):
         """Returns the values of the parameters for lc only, iso only, and iso+lc fits
@@ -93,17 +105,25 @@ class Keblat(object):
 
         """
         if partype == 'allpars':
-            return self.pars.values()
+            return np.asarray(self.pars.values())
         elif partype == 'lc':
             lcpars = np.array([self.pars['m1'] + self.pars['m2'], self.r2+self.r1, self.r2/self.r1,
                     self.pars['period'], self.pars['tpe'], self.pars['esinw'], self.pars['ecosw'],
                     self.pars['b'], self.frat, self.pars['q1'], self.pars['q2'], self.pars['q3'],
-                    self.pars['q4']])
+                    self.pars['q4'], self.pars['lcerr']])
             return lcpars
         elif partype == 'sed':
             isopars = np.array([self.pars['m1'], self.pars['m2'], self.pars['z0'], self.pars['age'],
                                 self.pars['dist'], self.pars['ebv'], self.pars['h0'], self.pars['isoerr']])
             return isopars
+        elif partype == 'rv':
+            inc = self.get_inc(self.pars['b'], self.r1,
+                               self.get_a(self.pars['period'], self.pars['m1']+self.pars['m2']))
+            rvpars = np.array([self.pars['m1'], self.pars['m2'], self.pars['period'], self.pars['tpe'],
+                               self.pars['esinw'], self.pars['ecosw'], inc, self.pars['k0'], self.pars['rverr']])
+            return rvpars
+        elif partype == 'lcsed':
+            return np.asarray(self.pars.values()[:-2])
         else:
             print "Not recognized parameter type, try again"
             return False
@@ -162,7 +182,7 @@ class Keblat(object):
             return None
         return sedidx[0]
         
-    def loadiso(self, isodir = 'data/'):
+    def loadiso_defunct(self, isodir = 'data/'):
         """Function which loads Padova isochrone data
         
         Parameters
@@ -235,7 +255,7 @@ class Keblat(object):
         self.maxt, self.mint = np.max(self.tvals), np.min(self.tvals)  
         return True
         
-    def loadiso2(self, isodir = 'data/'):
+    def loadiso2(self, isodir = 'data/', ipnames=None):
         """Function which loads Padova isochrone data
         
         Parameters
@@ -276,7 +296,8 @@ class Keblat(object):
         self.maxz, self.minz = np.max(self.zvals), np.min(self.zvals)
         self.maxt, self.mint = np.max(self.tvals), np.min(self.tvals)
 
-        self.ipname = np.array(['mkep', 'logl', 'logte', 'logg'])
+        if ipnames is None:
+            self.ipname = np.array(['mkep', 'logl', 'logte', 'logg'])
         self.ipinds = np.array([self.isodict[ii] for ii in self.ipname]).astype(int)
 
         return True
@@ -364,6 +385,8 @@ class Keblat(object):
         extinction = (self.sed[sedidx, -2], self.sed[sedidx, -1])
         glat = self.sed[sedidx, 4]
         zkic = 10**self.sed[sedidx, 7] * self.zsun
+        if np.isnan(zkic):
+            zkic = keblat.zsun
         return magsobs, emagsobs, extinction, glat, zkic
         
     def isoprep(self, magsobs, emagsobs, extinction, glat, zkic, exclude=[]):
@@ -596,6 +619,8 @@ class Keblat(object):
         mags2 = fp2[:len(self.magsobs)]
         self.temp1 = fp1[-2]
         self.temp2 = fp2[-2]
+        self.logg1 = fp1[-1]
+        self.logg2 = fp2[-1]
         self.frat = 10**((fp2[-4]-fp1[-4])/(-2.5))
 
         absmagsmod = mags1 - 2.5 * np.log10(1. + 10**((mags1-mags2)/2.5))
@@ -1424,10 +1449,43 @@ class Keblat(object):
         #     if np.sum(totmod[se]-1.) == 0.:
         #         return np.ones_like(totmod), totpol
         # if np.sum(totmod-1.) == 0.:
-        #     return totmod, totmod
+        #   return totmod, totmod
         return totmod, totpol
 
-    def lcfit(self, lcpars, jd, phase, flux, dflux, crowd, 
+    def rvprep(self, t, rv1, rv2, drv1, drv2):
+        self.rv1_obs = rv1
+        self.rv2_obs = rv2
+        self.rv1_err_obs = drv1
+        self.rv2_err_obs = drv2
+        self.rv_t = t
+        return
+
+    def rvfit(self, rvpars, t):
+        m1, m2, period, tpe, esinw, ecosw, inc, k0, rverr = rvpars
+        a = ((period / d2y) ** 2 * (m1+m2)) ** (1. / 3.)
+        e = np.sqrt(esinw**2+ecosw**2)
+        omega = np.arctan2(esinw, ecosw)
+
+        fpe = np.pi/2. - omega
+
+        # transform time of center of PE to time of periastron (t0)
+        # from Eq 9 of Sudarsky et al (2005)
+        t0 = tpe - (-np.sqrt(1.-e**2) * period / (2.*np.pi)) * \
+            (e*np.sin(fpe)/(1.+e*np.cos(fpe)) - 2.*(1.-e**2)**(-0.5) * \
+            np.arctan(np.sqrt(1.-e**2) * np.tan((fpe)/2.) / (1.+e)))
+
+
+        maf = rsky(e, period, t0, 1e-8, t)
+        #r = a*(1.-e**2) / (1.+e*np.cos(maf))
+        #z = r*np.sqrt(1.-np.sin(omega+maf)**2*np.sin(inc)**2)
+        vr2 = np.sqrt(8.875985e12 * m1**2 / (m1+m2) / (a * (1-e**2))) * np.sin(inc) * \
+              (np.cos(omega+maf) + e * np.cos(omega))
+        omega+=np.pi # periapse of primary is 180 offset
+        vr1 = np.sqrt(8.875985e12 * m2**2 / (m1+m2) / (a * (1-e**2))) * np.sin(inc) * \
+              (np.cos(omega+maf) + e * np.cos(omega))
+        return vr1+k0, vr2+k0
+
+    def lcfit(self, lcpars, jd, quarter, flux, dflux, crowd,
               polyorder=2):
         """Computes light curve model
         
@@ -1481,10 +1539,12 @@ class Keblat(object):
             #print "e>=1", e
             return -np.inf, -np.inf
             
-        r1 = rsum/(1.+rrat)
-        r2 = rsum/(1.+1./rrat)
-        a = ((period/d2y)**2 * (msum))**(1./3.)
-        inc = np.arccos(b*r1/(a/r2au))
+        # r1 = rsum/(1.+rrat)
+        # r2 = rsum/(1.+1./rrat)
+        r1, r2 = self.sumrat_to_12(rsum, rrat)
+        a = self.get_a(period, msum)
+        inc = self.get_inc(b, r1, a)
+        #inc = np.arccos(b*r1/(a/r2au))
         
         if np.isnan(inc):
             #print "inc is nan", inc
@@ -1495,12 +1555,14 @@ class Keblat(object):
 
         # transform time of center of PE to time of periastron (t0)
         # from Eq 9 of Sudarsky et al (2005)
-        t0 = tpe - (-np.sqrt(1.-e**2) * period / (2.*np.pi)) * \
-            (e*np.sin(fpe)/(1.+e*np.cos(fpe)) - 2.*(1.-e**2)**(-0.5) * \
-            np.arctan(np.sqrt(1.-e**2) * np.tan((fpe)/2.) / (1.+e)))
-        tse = t0 + (-np.sqrt(1.-e**2) * period / (2.*np.pi)) * \
-            (e*np.sin(fse)/(1.+e*np.cos(fse)) - 2.*(1.-e**2)**(-0.5) * \
-            np.arctan(np.sqrt(1.-e**2) * np.tan((fse)/2.) / (1.+e)))
+        t0 = tpe - self.sudarsky(fpe, e, period)
+        tse = t0 + self.sudarsky(fse, e, period)
+        # t0 = tpe - (-np.sqrt(1.-e**2) * period / (2.*np.pi)) * \
+        #     (e*np.sin(fpe)/(1.+e*np.cos(fpe)) - 2.*(1.-e**2)**(-0.5) * \
+        #     np.arctan(np.sqrt(1.-e**2) * np.tan((fpe)/2.) / (1.+e)))
+        # tse = t0 + (-np.sqrt(1.-e**2) * period / (2.*np.pi)) * \
+        #     (e*np.sin(fse)/(1.+e*np.cos(fse)) - 2.*(1.-e**2)**(-0.5) * \
+        #     np.arctan(np.sqrt(1.-e**2) * np.tan((fse)/2.) / (1.+e)))
         self.tpe = tpe
         self.tse = tse
         # if tse<tpe:
@@ -1555,6 +1617,7 @@ class Keblat(object):
             _, chunk3 = np.unique(np.searchsorted(jd[chunk], jd), return_index=True)
             chunk=chunk3
             chunk[-1]+=1
+            chunk = np.unique(np.sort(np.append(chunk, np.where(np.diff(quarter)>0)[0]+1)))
             totpol = poly_lc_cwrapper(jd, flux, dflux, totmod, chunk, porder=polyorder)
 #            phase = ((jd - tpe) % period) / period
 #            sorting = np.argsort(phase)
@@ -1566,10 +1629,20 @@ class Keblat(object):
 #                _totpol[nopoly] = flux[sorting][nopoly] / tmp
 #                totpol[sorting] = _totpol
         return totmod, totpol
-        
-    def getvals(self, fit_params, ntotpars, lcpars=False):
+
+    def getvals(self, fit_params, partype='allpars'):
+        if type(fit_params) is dict:
+            self.updatepars(**fit_params)
+            return self.getpars(partype=partype)
+        elif type(fit_params) is np.ndarray:
+            return fit_params
+        else:
+            self.updatepars(**fit_params.valuesdict())
+            return self.getpars(partype=partype)
+
+    def getvals_defunct(self, fit_params, ntotpars, lctype):
         """Fetch values from parameters
-        
+
         Parameters
         ----------
         fit_params : dict or float array
@@ -1579,13 +1652,13 @@ class Keblat(object):
         lcpars : Boolean
             if True, returns set of parameters for light-curve fitting only
             if False, returns all parameters
-            
+
         Returns
         -------
         guess : float array
             array of values for each parameter
         """
-        
+
         guess=np.empty(ntotpars)
         for jj in range(ntotpars):
             try:
@@ -1597,11 +1670,11 @@ class Keblat(object):
             except IndexError:
                 guess[jj] = fit_params[jj]
         if lcpars:
-            return np.array([guess[0], guess[1], self.r1+self.r2, 
+            return np.array([guess[0], guess[1], self.r1+self.r2,
                                            self.r2/self.r1, guess[7], guess[8],
-                                           guess[9], guess[10], guess[11], 
+                                           guess[9], guess[10], guess[11],
                                             self.frat, guess[12], guess[13],
-                                            guess[14], guess[15]])            
+                                            guess[14], guess[15]])
         return guess
 
     def ilnlike(self, fisopars, lc_constraints=None, ebv_dist=None, ebv_arr=None,
@@ -1804,7 +1877,7 @@ class Keblat(object):
         if clip is None:
             clip = self.clip
         lcmod, lcpol = self.lcfit(lcpars, self.jd[clip],
-                                  self.phase[clip], self.flux[clip],
+                                  self.quarter[clip], self.flux[clip],
                                 self.fluxerr[clip], self.crowd[clip],
                                 polyorder=polyorder)
         lcres = (lcmod*lcpol - self.flux[clip]) / np.sqrt(self.fluxerr[clip]**2 + lcerr**2)
@@ -1821,6 +1894,115 @@ class Keblat(object):
         #chisq += ((isopars[6] - 119.)/(15.))**2        
 
         if residual:
+            # print lc_priors, totres.shape, isores.shape, self.magsobs.shape, self.jd[self.clip].shape, \
+            #     self.clip.sum(), clip.sum(), lcres.shape, lcmod.shape, lcpol.shape
+            return totres
+        lili = -0.5 * chisq
+        return lili
+
+    def lnlike_all(self, allpars, lc_constraints=None, qua=[1], polyorder=2,
+               residual=False, clip=None):
+        """Returns loglikelihood for both SED + LC fitting
+
+        Parameters
+        ----------
+        allpars : float array
+            array of parameter values
+        qua : list
+            list of quarters to include in LC analysis; default = [1]
+        polyorder : int
+            order of polynomial for detrending; default = 2
+        residual : boolean
+            True if want to return (weighted) residual array
+
+        Returns
+        -------
+        lili : float
+            log likelihood value of model; returns -np.inf if invalid
+        res : float array
+            residuals of model and data if residuals = True
+        """
+
+        self.ldtype = 1
+        #            allpars = self.getvals(fitpars, 18)
+        m1, m2, z0, age, dist, ebv, h0, period, tpe, esinw, \
+        ecosw, b, q1, q2, q3, q4, lcerr, isoerr, k0, rverr = allpars
+        #ldcoeffs = np.array([q1, q2, q3, q4])
+        # m1 = msum / (1. + mrat)
+        # m2 = msum / (1. + 1./mrat)
+        self.updatepars(m1=m1, m2=m2, z0=z0, age=age, dist=dist, ebv=ebv,
+                        h0=h0, period=period, tpe=tpe, esinw=esinw,
+                        ecosw=ecosw, b=b, q1=q1, q2=q2, q3=q3, q4=q4,
+                        lcerr=lcerr, isoerr=isoerr, k0=k0, rverr=rverr)
+        # do isochrone matching first
+        isopars = self.getpars(partype='sed')#[m1, m2, z0, age, dist, ebv, h0, isoerr]
+        magsmod = self.isofit(isopars)
+        if np.any(np.isinf(magsmod)):
+            return -np.inf  # / np.sqrt(self.emagsobs**2 + isoerr**2)
+
+        lc_inputs = np.array([(self.r1 + self.r2) / (m1 + m2) ** (1. / 3.), self.r2 / self.r1, self.frat])
+
+        if np.any(np.isinf(lc_inputs)):
+            return -np.inf
+        if lc_constraints is None:
+            lc_priors = np.array([])
+        else:
+            lc_priors = (lc_inputs - lc_constraints) / (0.03 * lc_constraints)
+        isores = np.concatenate(((magsmod - self.magsobs) / np.sqrt(self.emagsobs ** 2 + isoerr ** 2),
+                                 lc_priors))  # / np.sqrt(self.emagsobs**2 + isoerr**2)
+        for ii, dii, jj in zip([self.armstrongT1, self.armstrongT2],
+                               [self.armstrongdT1, self.armstrongdT2],
+                               [10 ** self.temp1, 10 ** self.temp2]):
+            if ii is not None:
+                if dii is None:
+                    dii = 0.05 * ii
+                isores = np.append(isores, (ii - jj) / dii)
+        chisq = np.sum(isores ** 2) + np.sum(np.log((self.emagsobs ** 2 + isoerr ** 2)))
+
+        # now the light curve fitting part
+        # lcpars = np.concatenate((np.array([m1 + m2, self.r1 + self.r2,
+        #                                    self.r2 / self.r1, period,
+        #                                    tpe, esinw, ecosw, b, self.frat]),
+        #                          ldcoeffs))
+
+        lcpars = self.getpars(partype='lc')
+
+        # conds = [self.quarter == ii for ii in np.array(qua)]
+        # conds = np.sum(np.array(conds), axis=0)
+        # conds = np.array(conds, dtype=bool)
+        # self.clip2 = (self.clip) #* conds
+        if clip is None:
+            clip = self.clip
+        lcmod, lcpol = self.lcfit(lcpars, self.jd[clip],
+                                  self.quarter[clip], self.flux[clip],
+                                  self.fluxerr[clip], self.crowd[clip],
+                                  polyorder=polyorder)
+        lcres = (lcmod * lcpol - self.flux[clip]) / np.sqrt(self.fluxerr[clip] ** 2 + lcerr ** 2)
+
+        if np.any(np.isinf(lcmod)):
+            return -np.inf
+
+        rvpars = self.getpars(partype='rv')
+        rv1, rv2 = self.rvfit(rvpars, self.rv_t)
+        rvres = np.concatenate(((rv1-self.rv1_obs)/np.sqrt(self.rv1_err_obs**2+rverr**2),
+                                (rv2-self.rv2_obs)/np.sqrt(self.rv2_err_obs**2+rverr**2)))
+
+        totres = np.concatenate((isores, lcres, rvres))
+        self.chi = np.sum(totres ** 2)
+
+        chisq += np.sum(lcres ** 2) + \
+                 np.sum(np.log((self.fluxerr[clip] ** 2 + lcerr ** 2)))
+        chisq += np.sum(rvres **2) + \
+                 np.sum(np.log((self.rv1_err_obs **2 + rverr **2))) + \
+                 np.sum(np.log((self.rv2_err_obs ** 2 + rverr ** 2)))
+
+        chisq += ((isopars[5] - self.ebv) / (self.debv)) ** 2
+        chisq += ((isopars[2] - self.z0) / (0.2 * np.log(10) * self.z0)) ** 2
+        # chisq += ((isopars[6] - 119.)/(15.))**2
+
+        if residual:
+            # print lc_priors, totres.shape, isores.shape, self.magsobs.shape, self.jd[self.clip].shape, \
+            #     self.clip.sum(), clip.sum(), lcres.shape, lcmod.shape, lcpol.shape
             return totres
         lili = -0.5 * chisq
         return lili
@@ -1909,7 +2091,61 @@ class Keblat(object):
         for ii in range(len(good)-1):
             cro_casted[good[ii]:good[ii+1]] = cro[ii]
         return cro_casted
-        
+
+    @staticmethod
+    def get_a(period, msum):
+        """Computes semi-major axis given period and total mass
+
+        Parameters
+        ----------
+        period: Period of system in days
+        msum: sum of masses in Msun
+
+        Returns
+        -------
+        a: semi-major axis in AU
+        """
+        return ((period/d2y)**2 * (msum))**(1./3.)
+
+    @staticmethod
+    def sumrat_to_12(xsum, xrat):
+        """Transforms sum and ratios of 2 quantities into individual components
+
+        Parameters
+        ----------
+        xsum: x1 + x2 value
+        xrat: x2/x1 value
+
+        Returns
+        -------
+        x1, x2
+        """
+        x1 = xsum / (1+xrat)
+        x2 = xsum / (1 + 1./xrat)
+        return x1, x2
+
+    @staticmethod
+    def sudarsky(theta, e, period):
+        tt = (-np.sqrt(1. - e ** 2) * period / TWOPI) * \
+             (e * np.sin(theta) / (1. + e * np.cos(theta)) - 2. * (1. - e ** 2) ** (-0.5) *
+              np.arctan(np.sqrt(1. - e ** 2) * np.tan((theta) / 2.) / (1. + e)))
+        return tt
+
+    @staticmethod
+    def get_inc(b, r1, a):
+        """Transforms impact parameter into inclination
+
+        Parameters
+        ----------
+        b: impact parameter
+        r1: radius of primary star (in Rsun)
+        a: semi-major axis in AU
+
+        Returns
+        -------
+        inc: inclination of system"""
+        return np.arccos(b*r1 / (a/r2au))
+
     @staticmethod
     def find_closest(base, target):
         """Returns indices of closest match between a base and target arrays
@@ -1941,3 +2177,11 @@ class Keblat(object):
         idx -= target - left < right - target
         return idx
 
+
+    @staticmethod
+    def feh2z(feh):
+        return self.zsun * 10**feh
+
+    @staticmethod
+    def z2feh(z):
+        return np.log10(z/self.zsun)
