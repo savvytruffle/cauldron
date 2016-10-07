@@ -80,8 +80,20 @@ class Keblat(object):
         self.armstrongdT2 = None
 
     def updatebounds(self, *args):
+        """Forces boundaries of specified arg parameters s.t. they are constrainted to 2% of parameter value
+
+        Parameters
+        ----------
+        args : str
+                for possible parameter names, see keblat.pars
+
+        Example
+        -------
+        keblat.updatebounds('period', 'tpe', 'esinw', 'ecosw')
+
+        """
         for i in args:
-            self.parbounds[i] = [self.pars[i]*0.98, self.pars[i]*1.02]
+            self.parbounds[i] = [self.pars[i]-abs(self.pars[i])*0.02, self.pars[i]+abs(self.pars[i])*0.02]
         if self.rv1_obs is not None and self.rv2_obs is not None:
             self.parbounds['k0'] = [min(self.rv1_obs.min(), self.rv2_obs.min()),
                                      max(self.rv1_obs.max(), self.rv2_obs.max())]
