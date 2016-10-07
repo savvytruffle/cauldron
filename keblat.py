@@ -134,12 +134,16 @@ class Keblat(object):
             return isopars
         elif partype == 'rv':
             inc = self.get_inc(self.pars['b'], self.pars['r1'],
-                               self.get_a(self.pars['period'], self.pars['m1']+self.pars['m2']))
+                               self.get_a(self.pars['period'], self.pars['msum']))
             rvpars = np.array([self.pars['msum'], self.pars['mrat'], self.pars['period'], self.pars['tpe'],
                                self.pars['esinw'], self.pars['ecosw'], inc, self.pars['k0'], self.pars['rverr']])
             return rvpars
         elif partype == 'lcsed':
-            return np.asarray(self.pars.values()[:-2])
+            return np.array([self.pars['m1'], self.pars['m2'], self.pars['z0'], self.pars['age'],
+                             self.pars['dist'], self.pars['ebv'], self.pars['h0'], self.pars['period'],
+                             self.pars['tpe'], self.pars['esinw'], self.pars['ecosw'], self.pars['b'],
+                             self.pars['q1'], self.pars['q2'], self.pars['q3'], self.pars['q4'],
+                             self.pars['lcerr'], self.pars['isoerr']])
         else:
             print "Not recognized parameter type, try again"
             return False
@@ -624,13 +628,12 @@ class Keblat(object):
         
         m1, m2, z0, age, dist, ebv, h0, isoerr = isopars
         #age = np.log10(age)
-        self.updatepars(m1=m1, m2=m2, z0=z0, age=age, dist=dist, 
-                        ebv=ebv, h0=h0, isoerr=isoerr)
         self.r1, fp1 = self.isoterpol(m1, z0, age)
         self.r2, fp2 = self.isoterpol(m2, z0, age)
         if np.isinf(self.r1) or np.isinf(self.r2):
             #print "^Bad."
             return -np.inf
+
         mags1 = fp1[:len(self.magsobs)]
         mags2 = fp2[:len(self.magsobs)]
         self.temp1 = fp1[-2]
@@ -638,6 +641,11 @@ class Keblat(object):
         self.logg1 = fp1[-1]
         self.logg2 = fp2[-1]
         self.frat = 10**((fp2[-4]-fp1[-4])/(-2.5))
+
+        self.updatepars(m1=m1, m2=m2, z0=z0, age=age, dist=dist,
+                        ebv=ebv, h0=h0, isoerr=isoerr, msum=m1+m2, mrat=m2/m1,
+                        frat=self.frat, r1=self.r1, r2=self.r2,
+                        rsum=self.r1+self.r2, rrat=self.r2/self.r1)
 
         absmagsmod = mags1 - 2.5 * np.log10(1. + 10**((mags1-mags2)/2.5))
 
@@ -1486,16 +1494,22 @@ class Keblat(object):
 
         Returns
         -------
-        None
+        m1, m2, k0 : tuple
+            guesses for the masses and systemic velocity of the binary from the RV semi-amplitudes
         """
         self.rv1_obs = rv1
         self.rv2_obs = rv2
         self.rv1_err_obs = drv1
         self.rv2_err_obs = drv2
         self.rv_t = t
-        return
+        k1 = (self.rv1_obs.max() - self.rv1_obs.min())/2.
+        k2 = (self.rv2_obs.max() - self.rv2_obs.min())/2.
+        k0 = np.median(np.append(self.rv1_obs, self.rv2_obs))
+        m1, m2 = self.rvpars_guess_mass(k1, k2, self.pars['period'],
+                                        np.sqrt(self.pars['esinw']**2 + self.pars['ecosw']**2))
+        return m1, m2, k0
 
-    def rvfit_old(self, rvpars, t):
+    def _rvfit_old(self, rvpars, t):
         m1, m2, period, tpe, esinw, ecosw, inc, k0, rverr = rvpars
 
         a = ((period / d2y) ** 2 * (m1+m2)) ** (1. / 3.)
@@ -1504,24 +1518,37 @@ class Keblat(object):
 
         fpe = np.pi/2. - omega
 
-        # transform time of center of PE to time of periastron (t0)
-        # from Eq 9 of Sudarsky et al (2005)
         t0 = tpe - (-np.sqrt(1.-e**2) * period / (2.*np.pi)) * \
             (e*np.sin(fpe)/(1.+e*np.cos(fpe)) - 2.*(1.-e**2)**(-0.5) * \
             np.arctan(np.sqrt(1.-e**2) * np.tan((fpe)/2.) / (1.+e)))
 
 
         maf = rsky(e, period, t0, 1e-8, t)
-        #r = a*(1.-e**2) / (1.+e*np.cos(maf))
-        #z = r*np.sqrt(1.-np.sin(omega+maf)**2*np.sin(inc)**2)
-        vr2 = np.sqrt(8.875985e12 * m1**2 / (m1+m2) / (a * (1-e**2))) * np.sin(inc) * \
+
+        # egative sign b/c observers' ref. frame is flipped
+        vr2 = -np.sqrt(8.875985e12 * m1**2 / (m1+m2) / (a * (1-e**2))) * np.sin(inc) * \
               (np.cos(omega+maf) + e * np.cos(omega))
         omega+=np.pi # periapse of primary is 180 offset
-        vr1 = np.sqrt(8.875985e12 * m2**2 / (m1+m2) / (a * (1-e**2))) * np.sin(inc) * \
+        vr1 = -np.sqrt(8.875985e12 * m2**2 / (m1+m2) / (a * (1-e**2))) * np.sin(inc) * \
               (np.cos(omega+maf) + e * np.cos(omega))
         return vr1+k0, vr2+k0
 
     def rvfit(self, rvpars, t):
+        """Computes the radial velocities of each binary component.
+
+        Parameters
+        ----------
+        rvpars : float array or list
+                msum, mrat, period, tpe, esinw, ecosw, inc, k0, rverr
+        t : float array or scalar
+                times of observations to compute RV
+
+        Returns
+        -------
+        vr1, vr2 : tuple
+                RVs in m/s, where vr1 and vr2 are of shape/type of input t
+        """
+
         msum, mrat, period, tpe, esinw, ecosw, inc, k0, rverr = rvpars
         e = np.sqrt(esinw**2+ecosw**2)
         omega = np.arctan2(esinw, ecosw)
@@ -1694,7 +1721,16 @@ class Keblat(object):
 #                totpol[sorting] = _totpol
         return totmod, totpol
 
-    def getvals(self, fit_params, partype='allpars'):
+    def _getvals_defunct2(self, fit_params, partype='allpars'):
+        """Grabs the values of input
+
+        Parameters
+        ----------
+        fit_params : float array or dict
+                    if dict, updates keblat parameters and returns pars according to input keys
+                    if array, returns array
+
+        """
         if type(fit_params) is dict:
             self.updatepars(**fit_params)
             return self.getpars(partype=partype)
@@ -1704,7 +1740,7 @@ class Keblat(object):
             self.updatepars(**fit_params.valuesdict())
             return self.getpars(partype=partype)
 
-    def getvals_defunct(self, fit_params, ntotpars, lctype):
+    def _getvals_defunct(self, fit_params, ntotpars, lctype):
         """Fetch values from parameters
 
         Parameters
@@ -1964,7 +2000,8 @@ class Keblat(object):
         lili = -0.5 * chisq
         return lili
 
-    def rvpars_guess_mass(self, k1, k2, P, e):
+    @staticmethod
+    def rvpars_guess_mass(k1, k2, P, e):
         mrat = k1/k2
         msum = ((k1+k2)/29794.509)**3 * (1-e**2)**(3./2.) * (P/d2y)
         return msum/(1.+mrat), msum/(1.+1./mrat)
@@ -2011,113 +2048,6 @@ class Keblat(object):
                  np.sum(np.log((self.rv1_err_obs ** 2 + rverr ** 2))) + \
                  np.sum(np.log((self.rv2_err_obs ** 2 + rverr ** 2)))
 
-        lili = -0.5 * chisq
-        return lili
-
-    def lnlike_all(self, allpars, lc_constraints=None, qua=[1], polyorder=2,
-               residual=False, clip=None):
-        """Returns loglikelihood for both SED + LC +RV fitting
-
-        Parameters
-        ----------
-        allpars : float array
-            array of parameter values
-        qua : list
-            list of quarters to include in LC analysis; default = [1]
-        polyorder : int
-            order of polynomial for detrending; default = 2
-        residual : boolean
-            True if want to return (weighted) residual array
-
-        Returns
-        -------
-        lili : float
-            log likelihood value of model; returns -np.inf if invalid
-        res : float array
-            residuals of model and data if residuals = True
-        """
-
-        self.ldtype = 1
-        #            allpars = self.getvals(fitpars, 18)
-        m1, m2, z0, age, dist, ebv, h0, period, tpe, esinw, \
-        ecosw, b, q1, q2, q3, q4, lcerr, isoerr, k0, rverr = allpars
-        #ldcoeffs = np.array([q1, q2, q3, q4])
-        # m1 = msum / (1. + mrat)
-        # m2 = msum / (1. + 1./mrat)
-        self.updatepars(m1=m1, m2=m2, z0=z0, age=age, dist=dist, ebv=ebv,
-                        h0=h0, period=period, tpe=tpe, esinw=esinw,
-                        ecosw=ecosw, b=b, q1=q1, q2=q2, q3=q3, q4=q4,
-                        lcerr=lcerr, isoerr=isoerr, k0=k0, rverr=rverr)
-        # do isochrone matching first
-        isopars = self.getpars(partype='sed')#[m1, m2, z0, age, dist, ebv, h0, isoerr]
-        magsmod = self.isofit(isopars)
-        if np.any(np.isinf(magsmod)):
-            return -np.inf  # / np.sqrt(self.emagsobs**2 + isoerr**2)
-
-        lc_inputs = np.array([(self.r1 + self.r2) / (m1 + m2) ** (1. / 3.), self.r2 / self.r1, self.frat])
-
-        if np.any(np.isinf(lc_inputs)):
-            return -np.inf
-        if lc_constraints is None:
-            lc_priors = np.array([])
-        else:
-            lc_priors = (lc_inputs - lc_constraints) / (0.03 * lc_constraints)
-        isores = np.concatenate(((magsmod - self.magsobs) / np.sqrt(self.emagsobs ** 2 + isoerr ** 2),
-                                 lc_priors))  # / np.sqrt(self.emagsobs**2 + isoerr**2)
-        for ii, dii, jj in zip([self.armstrongT1, self.armstrongT2],
-                               [self.armstrongdT1, self.armstrongdT2],
-                               [10 ** self.temp1, 10 ** self.temp2]):
-            if ii is not None:
-                if dii is None:
-                    dii = 0.05 * ii
-                isores = np.append(isores, (ii - jj) / dii)
-        chisq = np.sum(isores ** 2) + np.sum(np.log((self.emagsobs ** 2 + isoerr ** 2)))
-
-        # now the light curve fitting part
-        # lcpars = np.concatenate((np.array([m1 + m2, self.r1 + self.r2,
-        #                                    self.r2 / self.r1, period,
-        #                                    tpe, esinw, ecosw, b, self.frat]),
-        #                          ldcoeffs))
-
-        lcpars = self.getpars(partype='lc')
-        lcpars = lcpars[:13]
-        # conds = [self.quarter == ii for ii in np.array(qua)]
-        # conds = np.sum(np.array(conds), axis=0)
-        # conds = np.array(conds, dtype=bool)
-        # self.clip2 = (self.clip) #* conds
-        if clip is None:
-            clip = self.clip
-        lcmod, lcpol = self.lcfit(lcpars, self.jd[clip],
-                                  self.quarter[clip], self.flux[clip],
-                                  self.fluxerr[clip], self.crowd[clip],
-                                  polyorder=polyorder)
-        lcres = (lcmod * lcpol - self.flux[clip]) / np.sqrt(self.fluxerr[clip] ** 2 + lcerr ** 2)
-
-        if np.any(np.isinf(lcmod)):
-            return -np.inf
-
-        rvpars = self.getpars(partype='rv')
-        rv1, rv2 = self.rvfit(rvpars, self.rv_t)
-        rvres = np.concatenate(((rv1-self.rv1_obs)/np.sqrt(self.rv1_err_obs**2+rverr**2),
-                                (rv2-self.rv2_obs)/np.sqrt(self.rv2_err_obs**2+rverr**2)))
-
-        totres = np.concatenate((isores, lcres, rvres))
-        self.chi = np.sum(totres ** 2)
-
-        chisq += np.sum(lcres ** 2) + \
-                 np.sum(np.log((self.fluxerr[clip] ** 2 + lcerr ** 2)))
-        chisq += np.sum(rvres **2) + \
-                 np.sum(np.log((self.rv1_err_obs **2 + rverr **2))) + \
-                 np.sum(np.log((self.rv2_err_obs ** 2 + rverr ** 2)))
-
-        chisq += ((isopars[5] - self.ebv) / (self.debv)) ** 2
-        chisq += ((isopars[2] - self.z0) / (0.2 * np.log(10) * self.z0)) ** 2
-        # chisq += ((isopars[6] - 119.)/(15.))**2
-
-        if residual:
-            # print lc_priors, totres.shape, isores.shape, self.magsobs.shape, self.jd[self.clip].shape, \
-            #     self.clip.sum(), clip.sum(), lcres.shape, lcmod.shape, lcpol.shape
-            return totres
         lili = -0.5 * chisq
         return lili
 
@@ -2240,6 +2170,22 @@ class Keblat(object):
 
     @staticmethod
     def sudarsky(theta, e, period):
+        """Computes time as a function of mean anomaly+omega given period, eccentricity
+
+        Parameters
+        ----------
+        theta : float array or scalar
+                value of omega + maf (arg. periapse + mean anomaly) in radians
+        e : scalar
+            eccentricity of binary
+        period : scalar
+            period of binary
+
+        Returns
+        -------
+        t : float array or scalar
+            time given theta, e, P
+        """
         tt = (-np.sqrt(1. - e ** 2) * period / TWOPI) * \
              (e * np.sin(theta) / (1. + e * np.cos(theta)) - 2. * (1. - e ** 2) ** (-0.5) *
               np.arctan(np.sqrt(1. - e ** 2) * np.tan((theta) / 2.) / (1. + e)))
@@ -2294,8 +2240,29 @@ class Keblat(object):
 
     @staticmethod
     def feh2z(feh):
+        """Converts [Fe/H] value to Z metallicity fraction (zsun * 10**feh)
+
+        Parameters
+        ----------
+        feh : array or scalar
+            [Fe/H] value of object
+
+        Returns
+        -------
+        z : array or scalar
+            Z metallicity"""
         return self.zsun * 10**feh
 
     @staticmethod
     def z2feh(z):
+        """Converts Z metallicity value to [Fe/H] (log10(z/zsun))
+
+        Parameters
+        ----------
+        z : array or scalar
+
+        Returns
+        -------
+        feh : array or scalar
+        """
         return np.log10(z/self.zsun)
