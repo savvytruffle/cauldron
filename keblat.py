@@ -33,25 +33,33 @@ class Keblat(object):
         self.vkeb = None
         self.fluxerr = None
         self.cadence = None
+        self.rv1_obs = None
+        self.rv2_obs = None
+        self.rv1_err_obs = None
+        self.rv2_err_obs = None
         self.exp = None
         self.clip_tol = 1.5
         self.res = []
         self.ldtype = 1 # quadratic limb darkening
         self.parnames = ['m1', 'm2', 'z0', 'age', 'dist', 'ebv', 'h0', 'period', 'tpe',
                          'esinw', 'ecosw', 'b', 'q1', 'q2', 'q3', 'q4', 'lcerr', 'isoerr',
-                         'k0', 'rverr']
+                         'k0', 'rverr', 'msum', 'mrat', 'rsum', 'rrat', 'r1', 'r2', 'inc', 'frat']
 
         self.pars = OrderedDict(zip(self.parnames, [None]*len(self.parnames)))
 
         self.parbounds = OrderedDict([('m1', [.1, 12.]), ('m2', [.1, 12.]), 
                           ('z0', [0.001, 0.06]), ('age', [6., 10.1]),
                           ('dist', [10., 15000.]), ('ebv', [0., 1.]),
-                          ('h0', [119-20., 119+20.]), ('period', [5., 1000.]),
+                          ('h0', [119-1., 119+1.]), ('period', [5., 1000.]),
                           ('tpe', [0., 1e8]), ('esinw', [-.99, .99]),
                           ('ecosw', [-.99, .99]), ('b', [0., 3.]), ('q1', [0., 1.]),
                           ('q2', [0., 1.]), ('q3', [0., 1.]), ('q4', [0., 1.]), 
                           ('lcerr', [0., 0.01]), ('isoerr', [0., 0.3]),
-                                      ('k0', [-1e8, 1e8]), ('rverr', [0., 1e4])])
+                                      ('k0', [-1e8, 1e8]), ('rverr', [0., 1e4]),
+                                      ('msum', [0.2, 24.]), ('mrat', [0.0085, 1.0]),
+                                      ('rsum', [0.1, 1e6]), ('rrat', [1e-6, 1.0]),
+                                      ('r1', [0.01, 1e6]), ('r2', [0.01, 1e6]),
+                                      ('inc', [0., np.pi/2.]), ('frat', [1e-8, 1.])])
         if preload:
             self.loadiso()
             self.loadsed()
@@ -70,6 +78,14 @@ class Keblat(object):
         self.armstrongdT1 = None
         self.armstrongT2 = None
         self.armstrongdT2 = None
+
+    def updatebounds(self, *args):
+        for i in args:
+            self.parbounds[i] = [self.pars[i]*0.98, self.pars[i]*1.02]
+        if self.rv1_obs is not None and self.rv2_obs is not None:
+            self.parbounds['k0'] = [min(self.rv1_obs.min(), self.rv2_obs.min()),
+                                     max(self.rv1_obs.max(), self.rv2_obs.max())]
+        return
 
     def updatepars(self, **kwargs):
         """Update free parameters to present values"""
@@ -107,9 +123,9 @@ class Keblat(object):
         if partype == 'allpars':
             return np.asarray(self.pars.values())
         elif partype == 'lc':
-            lcpars = np.array([self.pars['m1'] + self.pars['m2'], self.r2+self.r1, self.r2/self.r1,
+            lcpars = np.array([self.pars['m1'] + self.pars['m2'], self.pars['rsum'], self.pars['rrat'],
                     self.pars['period'], self.pars['tpe'], self.pars['esinw'], self.pars['ecosw'],
-                    self.pars['b'], self.frat, self.pars['q1'], self.pars['q2'], self.pars['q3'],
+                    self.pars['b'], self.pars['frat'], self.pars['q1'], self.pars['q2'], self.pars['q3'],
                     self.pars['q4'], self.pars['lcerr']])
             return lcpars
         elif partype == 'sed':
@@ -117,9 +133,9 @@ class Keblat(object):
                                 self.pars['dist'], self.pars['ebv'], self.pars['h0'], self.pars['isoerr']])
             return isopars
         elif partype == 'rv':
-            inc = self.get_inc(self.pars['b'], self.r1,
+            inc = self.get_inc(self.pars['b'], self.pars['r1'],
                                self.get_a(self.pars['period'], self.pars['m1']+self.pars['m2']))
-            rvpars = np.array([self.pars['m1'], self.pars['m2'], self.pars['period'], self.pars['tpe'],
+            rvpars = np.array([self.pars['msum'], self.pars['mrat'], self.pars['period'], self.pars['tpe'],
                                self.pars['esinw'], self.pars['ecosw'], inc, self.pars['k0'], self.pars['rverr']])
             return rvpars
         elif partype == 'lcsed':
@@ -1453,6 +1469,25 @@ class Keblat(object):
         return totmod, totpol
 
     def rvprep(self, t, rv1, rv2, drv1, drv2):
+        """Stores observed radial velocity data points
+
+        Parameters
+        ----------
+        t : float array or scalar
+            times of observations
+        rv1 : float array or scalar
+            RV of primary in m/s
+        rv2 : float array or scalar
+            RV of secondary in m/s
+        dr1 : float array of scalar
+            RV err of primary in m/s
+        dr2 : float array or scalar
+            RV err of secondary in m/s
+
+        Returns
+        -------
+        None
+        """
         self.rv1_obs = rv1
         self.rv2_obs = rv2
         self.rv1_err_obs = drv1
@@ -1460,8 +1495,9 @@ class Keblat(object):
         self.rv_t = t
         return
 
-    def rvfit(self, rvpars, t):
+    def rvfit_old(self, rvpars, t):
         m1, m2, period, tpe, esinw, ecosw, inc, k0, rverr = rvpars
+
         a = ((period / d2y) ** 2 * (m1+m2)) ** (1. / 3.)
         e = np.sqrt(esinw**2+ecosw**2)
         omega = np.arctan2(esinw, ecosw)
@@ -1484,6 +1520,32 @@ class Keblat(object):
         vr1 = np.sqrt(8.875985e12 * m2**2 / (m1+m2) / (a * (1-e**2))) * np.sin(inc) * \
               (np.cos(omega+maf) + e * np.cos(omega))
         return vr1+k0, vr2+k0
+
+    def rvfit(self, rvpars, t):
+        msum, mrat, period, tpe, esinw, ecosw, inc, k0, rverr = rvpars
+        e = np.sqrt(esinw**2+ecosw**2)
+        omega = np.arctan2(esinw, ecosw)
+
+        fpe = np.pi/2. - omega
+
+        m1, m2 = self.sumrat_to_12(msum, mrat)
+
+        self.updatepars(msum=msum, mrat=mrat, m1=m1, m2=m2, period=period, tpe=tpe,
+                        esinw=esinw, ecosw=ecosw, k0=k0, rverr=rverr, inc=inc)
+
+        t0 = tpe - (-np.sqrt(1.-e**2) * period / (2.*np.pi)) * \
+            (e*np.sin(fpe)/(1.+e*np.cos(fpe)) - 2.*(1.-e**2)**(-0.5) * \
+            np.arctan(np.sqrt(1.-e**2) * np.tan((fpe)/2.) / (1.+e)))
+
+        maf = rsky(e, period, t0, 1e-8, t)
+        amp = 29794.509 / np.sqrt(1-e**2) * (period/d2y)**(-1/3.) / (m1+m2)**(2/3.)
+        vr2 = -amp * m1 * np.sin(inc) * \
+              (np.cos(omega+maf) + e * np.cos(omega))
+        omega+=np.pi # periapse of primary is 180 offset
+        vr1 = -amp * m2 * np.sin(inc) * \
+              (np.cos(omega+maf) + e * np.cos(omega))
+        return vr1+k0, vr2+k0
+
 
     def lcfit(self, lcpars, jd, quarter, flux, dflux, crowd,
               polyorder=2):
@@ -1516,9 +1578,8 @@ class Keblat(object):
         """
         # r1, r2, frat derive from m1, m2, z0, t0, dist, E(B-V), scaleheight
         msum, rsum, rrat, period, tpe, esinw, ecosw, b, frat, \
-            q1, q2, q3, q4 = lcpars       
-#        self.updatepars(m1=m1, m2=m2, period=period, tpe=tpe, esinw=esinw, 
-#                    ecosw=ecosw, b=b, q1=q1, q2=q2, q3=q3, q4=q4)
+            q1, q2, q3, q4 = lcpars
+
         # LD transformations (Kipping 2013)
         c1 = 2.*np.sqrt(q1)*q2
         c2 = np.sqrt(q1)*(1.-2.*q2)
@@ -1549,7 +1610,10 @@ class Keblat(object):
         if np.isnan(inc):
             #print "inc is nan", inc
             return -np.inf, -np.inf
-        
+
+        self.updatepars(msum=msum, rsum=rsum, rrat=rrat, period=period, tpe=tpe,
+                       esinw=esinw, ecosw=ecosw, b=b, q1=q1, q2=q2, q3=q3, q4=q4,
+                       frat=frat, r1=r1, r2=r2, inc=inc)
         fpe = np.pi/2. - omega
         fse = -np.pi/2. - omega
 
@@ -1900,9 +1964,59 @@ class Keblat(object):
         lili = -0.5 * chisq
         return lili
 
+    def rvpars_guess_mass(self, k1, k2, P, e):
+        mrat = k1/k2
+        msum = ((k1+k2)/29794.509)**3 * (1-e**2)**(3./2.) * (P/d2y)
+        return msum/(1.+mrat), msum/(1.+1./mrat)
+
+    def lnlike_lcrv(self, lcrvpars, qua=[1], polyorder=2, residual=False, clip=None):
+        self.ldtype = 1
+        #            allpars = self.getvals(fitpars, 18)
+        msum, mrat, rsum, rrat, period, tpe, esinw, ecosw, b, frat, q1, q2, q3, q4, lcerr, k0, rverr = lcrvpars
+
+        m1, m2 = self.sumrat_to_12(msum, mrat)
+        self.updatepars(m1=m1, m2=m2, period=period, tpe=tpe, esinw=esinw,
+                        ecosw=ecosw, b=b, q1=q1, q2=q2, q3=q3, q4=q4,
+                        lcerr=lcerr, k0=k0, rverr=rverr, frat=frat)
+
+        lcpars = [msum, rsum, rrat, period, tpe, esinw, ecosw, b, frat, q1, q2, q3, q4]
+        # conds = [self.quarter == ii for ii in np.array(qua)]
+        # conds = np.sum(np.array(conds), axis=0)
+        # conds = np.array(conds, dtype=bool)
+        # self.clip2 = (self.clip) #* conds
+        if clip is None:
+            clip = self.clip
+        lcmod, lcpol = self.lcfit(lcpars, self.jd[clip],
+                                  self.quarter[clip], self.flux[clip],
+                                  self.fluxerr[clip], self.crowd[clip],
+                                  polyorder=polyorder)
+        lcres = (lcmod * lcpol - self.flux[clip]) / np.sqrt(self.fluxerr[clip] ** 2 + lcerr ** 2)
+
+        if np.any(np.isinf(lcmod)):
+            return -np.inf
+
+        rvpars = [msum, mrat, period, tpe, esinw, ecosw, self.pars['inc'], k0, rverr]
+        rv1, rv2 = self.rvfit(rvpars, self.rv_t)
+        rvres = np.concatenate(((rv1 - self.rv1_obs) / np.sqrt(self.rv1_err_obs ** 2 + rverr ** 2),
+                                (rv2 - self.rv2_obs) / np.sqrt(self.rv2_err_obs ** 2 + rverr ** 2)))
+
+        totres = np.concatenate((lcres, rvres))
+        self.chi = np.sum(totres ** 2)
+        if residual:
+            return totres
+
+        chisq += np.sum(lcres ** 2) + \
+                 np.sum(np.log((self.fluxerr[clip] ** 2 + lcerr ** 2)))
+        chisq += np.sum(rvres ** 2) + \
+                 np.sum(np.log((self.rv1_err_obs ** 2 + rverr ** 2))) + \
+                 np.sum(np.log((self.rv2_err_obs ** 2 + rverr ** 2)))
+
+        lili = -0.5 * chisq
+        return lili
+
     def lnlike_all(self, allpars, lc_constraints=None, qua=[1], polyorder=2,
                residual=False, clip=None):
-        """Returns loglikelihood for both SED + LC fitting
+        """Returns loglikelihood for both SED + LC +RV fitting
 
         Parameters
         ----------
@@ -1966,7 +2080,7 @@ class Keblat(object):
         #                          ldcoeffs))
 
         lcpars = self.getpars(partype='lc')
-
+        lcpars = lcpars[:13]
         # conds = [self.quarter == ii for ii in np.array(qua)]
         # conds = np.sum(np.array(conds), axis=0)
         # conds = np.array(conds, dtype=bool)
