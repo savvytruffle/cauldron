@@ -102,12 +102,17 @@ def continuumFlattenSpec(waves, fluxes, win=50, varwin=60, varsig=100, weight=1.
 ## edit values below ##
 #######################
 # directory where wavelength file lives:
-wavedir = '../../../PHOENIX/PHOENIX-ACES-AGSS-COND-2011/'
+#wavedir = '../../../PHOENIX/PHOENIX-ACES-AGSS-COND-2011/'
 # directory where spectrum file lives:
-specdir = wavedir + 'Z-0.0/'
+#specdir = wavedir + 'Z-0.0/'
 # spectrum file you want to run the program on:
-specfile = 'lte07000-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits'
+#specfile = 'lte07000-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits'
 #specfile = 'lte04800-2.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits'
+specfile = '/Users/revhalzoo/SDSS/A4851217/lte07000-4.50-0.0.Alpha=-0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #A4851217
+#specfile = '/Users/revhalzoo/SDSS/B5285607/lte06400-5.00-0.0.Alpha=-0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #B5285607
+#specfile = '/Users/revhalzoo/SDSS/C6449358/lte06500-4.50-0.0.Alpha=+0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #C6449358
+
+
 # wavelength region that will be fit with a spline:
 wavestart = 4318; waveend = 7200
 #wavestart = 14000; waveend = 18000 
@@ -123,9 +128,15 @@ splineweight = 0.9
 ## edit values above ##
 #######################
 
-# define full input and output file paths
-wavefits = wavedir + 'WAVE_PHOENIX-ACES-AGSS-COND-2011.fits'
-infits = specdir + specfile
+wavefits = '/Users/revhalzoo/SDSS/A4851217/lte07000-4.50-0.0.Alpha=-0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #A4851217
+#wavefits = '/Users/revhalzoo/SDSS/B5285607/lte06400-5.00-0.0.Alpha=-0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #B5285607
+#wavefits = '/Users/revhalzoo/SDSS/C6449358/lte06500-4.50-0.0.Alpha=+0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #C6449358
+#infits = 'lte05000-3.00+0.5.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits'
+#infits = wavedir + specfile
+#infits = specdir + specfile
+infits = '/Users/revhalzoo/SDSS/A4851217/lte07000-4.50-0.0.Alpha=-0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #A4851217
+#infits = '/Users/revhalzoo/SDSS/B5285607/lte06400-5.00-0.0.Alpha=-0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #B5285607
+#infits = '/Users/revhalzoo/SDSS/C6449358/lte06500-4.50-0.0.Alpha=+0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #C6449358
 outtxt = specfile[:-5] + '_' + str(truncstart) + '-' + str(truncend) + '-norm.txt'
 
 # read in PHOENIX FITS spectrum and corresponding wavelength FITS file
