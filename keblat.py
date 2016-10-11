@@ -10,7 +10,7 @@ import os.path
 from collections import OrderedDict
 from helper_funcs import poly_lc_cwrapper, rsky, occultquad
 #from nbody import occultquad, rsky
-from scipy.optimize import minimize
+from scipy.optimize import minimize as sp_minimize
 
 #############################################
 ################ constants ##################
@@ -666,7 +666,7 @@ class Keblat(object):
                 magsmod = absmagsmod + 5. * np.log10(x / 10.) + \
                        self.a_lam * ebv * (1. - np.exp(-x * np.sin(self.glat * np.pi/180.) / h0))
                 return np.sum(((magsmod-self.magsobs)/self.emagsobs)**2)
-            res = minimize(magsmod_fn, dist, method='L-BFGS-B', bounds=((10., 15000.),))
+            res = sp_minimize(magsmod_fn, dist, method='L-BFGS-B', bounds=((10., 15000.),))
             dist = res.x
             self.message='marginalized distance'
         magsmod = absmagsmod + 5. * np.log10(dist / 10.) + \
