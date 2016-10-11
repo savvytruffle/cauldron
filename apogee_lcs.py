@@ -504,11 +504,8 @@ def get_pars2vals(fisopars, partype='lc', crow=False):
         for j in range(len(parnames)):
             parvals[j] = fisopars[parnames[j]].value
     elif isinstance(fisopars, dict):
-        try:
-            for j in range(len(parnames)):
-                parvals[j] = fisopars[parnames[j]]
-        except:
-            print j, parnames, parnames[j]
+        for j in range(len(parnames)):
+            parvals[j] = fisopars[parnames[j]]
     else:
         for j in range(len(parnames)):
             parvals[j] = fisopars[j]
@@ -549,7 +546,7 @@ def lnlike_lcrv(fisopars, qua=[1], polyorder=2, residual=True):
     return np.sum(res**2)
 
 def lnlike_lmfit(fisopars, lc_constraints=None, ebv_arr=None, qua=[1], polyorder=2, residual=False):
-    allpars = keblat.getvals(fisopars, partype='lcsed')
+    allpars = get_pars2vals(fisopars, partype='lcsed')
 
     if ebv_arr is not None:
         allpars[5] = np.interp(allpars[4], ebv_dist, ebv_arr)
@@ -626,7 +623,7 @@ def sed_chisq(sedpars0, lc_constraints):
     return residuals
 
 
-def opt_sed(sedpars0, lc_constraints, ebv_dist, ebv_arr, fit_ebv=True, ret_lcpars=True, prefix='', vary_z0=True):
+def opt_sed(sedpars0, lc_constraints, ebv_dist, ebv_arr, fit_ebv=True, ret_lcpars=True, vary_z0=True):
     m1, m2, z0, age, dist, ebv, h0, isoerr = sedpars0
     fit_params2 = Parameters()
     fit_params2.add('m1', value=m1, min=0.1, max=12.)
@@ -947,25 +944,9 @@ def opt_sedlc(fit_params2, guess, ebv_dist, ebv_arr, jd, phase, flux, dflux, cro
             redchi2 = current_redchi2
         niter+=1
     #print "logL of best allpars = ", keblat.lnlike(allpars, lc_constraints=None, qua=np.unique(keblat.quarter), polyorder=2)
-    allpars = keblat.getvals(fit_params, partype='lcsed')
+    allpars = get_pars2vals(fit_params, partype='lcsed')
     #print fit_params
     return allpars
-
-def lnlike_all_lmfit(fitpars, lc_constraints=None, qua=[1], polyorder=2, residual=False):
-    allpars = keblat.getvals(fitpars, partype='allpars')
-    print "ALLPARS", allpars
-    res = keblat.lnlike_all(allpars, lc_constraints=lc_constraints, qua=qua, polyorder=polyorder, residual=residual)
-    if np.any(np.isinf(res)):
-        print "Inf res"
-        extra = 0 if lc_constraints is None else len(lc_constraints)
-        return np.ones(len(keblat.magsobs)+len(keblat.flux[keblat.clip])+len(keblat.rv1_obs)+len(keblat.rv2_obs)+extra)*1e20
-    bads = np.isnan(res)
-    if np.sum(bads) > 0.05*len(res):
-        print "Seems to be a lot of Nans..."
-        extra = 0 if lc_constraints is None else len(lc_constraints)
-        return np.ones(len(keblat.magsobs) + len(keblat.flux[keblat.clip]) + len(keblat.rv1_obs) + len(keblat.rv2_obs) + extra) * 1e20
-    return res
-
 
 def opt_rv(**kwargs):
     fit_pars = Parameters()
@@ -1049,45 +1030,6 @@ def opt_lcrv(**kwargs):
     lcrvpars = get_pars2vals(fit_params, partype='lcrv')
     # print fit_params
     return lcrvpars
-
-
-def opt_sedlcrv_DEFUNCT(guess, lc_constraints=None):
-    m1, m2, z0, age, dist, ebv, h0, period, tpe, esinw, ecosw, b, q1, q2, q3, q4, lcerr, isoerr, k0, rverr = guess
-    fit_pars = Parameters()
-    for ii in range(len(guess)):
-        fit_pars.add(keblat.parnames[ii], value=guess[ii],
-                     min=keblat.parbounds[keblat.parnames[ii]][0],
-                     max=keblat.parbounds[keblat.parnames[ii]][1])
-    fit_pars['h0'].vary=False
-    kws = {'lc_constraints': None, 'qua':np.unique(keblat.quarter), 'polyorder': 2, 'residual': True}
-    fit_kws={'maxfev':2000*(len(fit_pars)+1)}
-    print "=========================================================================="
-    print "================= Starting SED + LC + RV simultaneous fit... ============="
-    print "=========================================================================="
-    result3 = minimize(lnlike_all_lmfit, fit_pars, kws=kws, iter_cb=MinimizeStopper(60), **fit_kws)
-    fit_params = result3.params.copy()
-    _allres = lnlike_all_lmfit(result3.params, lc_constraints=lc_constraints, qua=np.unique(keblat.quarter),
-                               polyorder=2, residual=True)
-    redchi2 = np.sum(_allres**2) / len(_allres)
-    print redchi2, result3.redchi
-    report_fit(result3)
-    print result3.message
-    niter=0
-    while (niter<10): #(redchi2>1.) and (niter<10):
-        result3 = minimize(lnlike_all_lmfit, fit_params, kws=kws, iter_cb=MinimizeStopper(60), **fit_kws)
-        _allres = lnlike_all_lmfit(result3.params, lc_constraints=lc_constraints, qua=np.unique(keblat.quarter), polyorder=2, residual=True)
-        current_redchi2 = np.sum(_allres**2) / len(_allres)
-        print "Iteration: ", niter, current_redchi2, result3.redchi
-        if current_redchi2 < redchi2:
-            print "The following results are saved:"
-            report_fit(result3)
-            fit_params = result3.params.copy()
-            redchi2 = current_redchi2
-        niter+=1
-    #print "logL of best allpars = ", keblat.lnlike(allpars, lc_constraints=None, qua=np.unique(keblat.quarter), polyorder=2)
-    allpars = keblat.getvals(fit_params, partype='allpars')
-    #print fit_params
-    return allpars
 
 def estimate_rsum(rsum, period, eclipse_widths, msum=1.0):
     if msum is None:
@@ -1847,53 +1789,6 @@ else:
     make_sedlc_plots(kic, opt_allpars, prefix, suffix='sedlc_opt', savefig=True, polyorder=2)
 
 
-
-
-opt_all_counter=0
-opt_allpars0 = allpars.copy()
-msum_trials = [2.0, 4.0, 5.5]
-mrat_trials = [0.5, 0.7, 0.9]
-allpars_bestchi2=1e25
-for i_msum, i_mrat in list(itertools.product(msum_trials, mrat_trials)):
-    m1 = i_msum/(1.+i_mrat)
-    m2 = i_msum/(1.+1./i_mrat)
-    for i_age in get_age_trials(m1):
-        opt_allpars0[:4] = [m1, m2, keblat.zsun, i_age]
-        print "Init aaaalllpars: ", opt_all_counter, opt_allpars0[:4]
-        res = opt_sedlcrv(opt_allpars0)
-        allres = lnlike_all_lmfit(res, qua=np.unique(keblat.quarter), polyorder=2, residual=True)
-        allpars_chi2 = np.sum(allres ** 2) / len(allres)
-        print "made it here"
-        if (opt_all_counter < 1) or (allpars_chi2 < allpars_bestchi2):
-            opt_allpars = res * 1.
-            allpars_bestchi2 = allpars_chi2
-        opt_all_counter += 1
-    if allpars_bestchi2 < 10:
-        break
-
-opt_all_counter=0
-opt_allpars0 = allpars.copy()
-msum_trials = [2.0, 4.0, 5.5]
-mrat_trials = [0.5, 0.7, 0.9]
-allpars_bestchi2=1e25
-for i_msum, i_mrat in list(itertools.product(msum_trials, mrat_trials)):
-    m1 = i_msum/(1.+i_mrat)
-    m2 = i_msum/(1.+1./i_mrat)
-    for i_age in get_age_trials(m1):
-        opt_allpars0[:4] = [m1, m2, keblat.zsun, i_age]
-        print "Init aaaalllpars: ", opt_all_counter, opt_allpars0[:4]
-        res_huber = least_squares(lnlike_all_lmfit, opt_allpars0, bounds=bounds,
-                                  method='trf', loss='huber', f_scale=1., xtol=1e-8,
-                                  kwargs={'residual': True, 'qua': np.unique(keblat.quarter)})
-        allres = lnlike_all_lmfit(res_huber.x, qua=np.unique(keblat.quarter), polyorder=2, residual=True)
-        allpars_chi2 = np.sum(allres ** 2) / len(allres)
-        print "made it here"
-        if (opt_all_counter < 1) or (allpars_chi2 < allpars_bestchi2):
-            opt_allpars = res_huber.x * 1.
-            allpars_bestchi2 = allpars_chi2
-        opt_all_counter += 1
-    if allpars_bestchi2 < 10:
-        break
 ###################################################################################
 ##################################### END HERE ####################################
 ###################################################################################
