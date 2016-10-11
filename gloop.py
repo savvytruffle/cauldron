@@ -39,10 +39,21 @@ goodlist = (perlist>0)
 goodlist_ind = np.where(kiclist[goodlist].astype(int) == kic)[0]
 q1, q2, q3, q4 = 0.01, 0.01, 0.01, 0.01
 
+# try:
+#     rvfilename='data/{0}.rv'.format(kic)
+# except:
+#     while keblat.rv_t is None:
+#         rvfilename = raw_input("No RV data found. Please specify name of RV file, which should "
+#                                    "have column order and units BJD-2454833., RV_A (m/s), RV_A err(m/s), "
+#                                    "RV_B(m/s), RV_B err(m/s).")
+#         rvdata = np.loadtxt(rvfilename)
+#
+# m1, m2, k0 = keblat.rvprep(rvdata[:,0], rvdata[:,1], rvdata[:,3], rvdata[:,2], rvdata[:,4])
+
+
 if keblat.swidth < 0.:
     print "No secondary eclipses detected. Exiting."
     sys.exit()
-
 
 def get_pars2vals(fisopars, partype='lc', crow=False):
     if partype == 'lc':
@@ -278,6 +289,7 @@ class Gloop(object):
         self.swidth = keblat.swidth
         self.pwidth = keblat.pwidth
         self.sep = keblat.sep
+        #self.m1, self.m2, self.k0 = m1, m2, k0
         #keblat = Keblat(preload=False)
 
         self.tolerance=10
@@ -291,29 +303,49 @@ class Gloop(object):
             self.fig, self.ax, self.ax2l, self.ax2r = self.setup_axes()
             #self.points = self.ax.scatter([], [], s=200, color='red', marker='o', picker=self.tolerance)
             #self.lines = self.ax.plot([], [], color='red', linestyle='-', lw=2, alpha=0.5, picker=self.tolerance)
-            print("===================================================="
-                  "============= Entering interactive mode ============"
-                  "====================================================")
-            fitcat = raw_input("What component would you like to fit? Enter 'lc', 'rv', or 'sed': ")
-            if isinstance(fitcat, list):
-                if 'lc' in fitcat:
-                    self.fitlc = True
-                elif 'rv' in fitcat:
-                    self.fitrv = True
-                elif 'sed' in fitcat:
-                    self.fitsed = True
-                else:
-                    print("Certain aspects of your user input not recognized. Try again 'lc', 'rv', or 'sed': ")
-            else:
-                if fitcat == 'lc':
-                    self.fitlc = True
-                elif fitcat == 'rv':
-                    self.fitlc = True
-                elif fitcat == 'sed':
-                    self.fitsed = True
+            self.begin()
 
-            if self.fitlc:
-                self.inter_lc()
+    def begin(self):
+        print("===================================================="
+              "============= Entering interactive mode ============"
+              "====================================================")
+        fitcat = raw_input("What component would you like to fit? Enter 'lc', 'rv', or 'sed': ")
+        if isinstance(fitcat, list):
+            if 'lc' in fitcat:
+                self.fitlc = True
+            elif 'rv' in fitcat:
+                self.fitrv = True
+            elif 'sed' in fitcat:
+                self.fitsed = True
+            else:
+                print("Certain aspects of your user input not recognized. Try again 'lc', 'rv', or 'sed': ")
+        else:
+            if fitcat == 'lc':
+                self.fitlc = True
+            elif fitcat == 'rv':
+                self.fitrv = True
+            elif fitcat == 'sed':
+                self.fitsed = True
+
+        if self.fitlc:
+            self.ax.errorbar(keblat.jd, keblat.flux, keblat.dflux, fmt='k.', ecolor='gray')
+            self.ax.set_title("KIC {0} normalized SAP flux".format(self.kic))
+            self.ax.set_xlim((keblat.jd[0], keblat.jd[-1]))
+            self.fig.canvas.draw()
+
+            self.inter_lc()
+        if self.fitrv:
+            self.ax.errorbar(keblat.rv_t, keblat.rv1_obs, keblat.rv1_err_obs, fmt='b.', ecolor='blue')
+            self.ax.errorbar(keblat.rv_t, keblat.rv2_obs, keblat.rv2_err_obs, fmt='r.', ecolor='red')
+
+            print "Sorry this functionality isn't set up yet."
+            #self.inter_rv()
+        if self.fitlc and self.fitrv:
+            print "Sorry this functionality isn't set up yet."
+
+            #self.inter_lcrv()
+        if self.fitsed:
+            print "Sorry this functionality isn't set up yet."
 
     def connect_mpl(self):
         connect = self.fig.canvas.mpl_connect
@@ -331,50 +363,81 @@ class Gloop(object):
     def pause():
         programPause = raw_input("Press the <ENTER> key to continue...")
 
+    def plot_phase(self, tol=1.2, pltpe=True, pltse=True):
+        pe = (keblat.phase[keblat.clip] >= -tol * keblat.pwidth) * (keblat.phase[keblat.clip] <= tol * keblat.pwidth)
+        se = (keblat.phase[keblat.clip] >= -tol * keblat.swidth + keblat.sep) * (keblat.phase[keblat.clip] <= tol * keblat.swidth + keblat.sep)
+        if pltpe:
+            self.ax2l.plot(keblat.phase[keblat.clip][pe], keblat.flux[keblat.clip][pe], 'k.')
+            self.ax2l.set_ylim((keblat.flux.min(), keblat.flux.max()))
+            self.ax2l.set_xlim((keblat.phase[keblat.clip][pe].min(), keblat.phase[keblat.clip][pe].max()))
+        if pltse:
+            self.ax2r.plot(keblat.phase[keblat.clip][se], keblat.flux[keblat.clip][se], 'k.')
+            self.ax2r.set_ylim((keblat.flux.min(), keblat.flux.max()))
+            self.ax2r.set_xlim((keblat.phase[keblat.clip][se].min(), keblat.phase[keblat.clip][se].max()))
+        return
+
+
+    def inter_rv(self):
+        print("===================================================="
+              "=========== Radial velocity fitting / opt =========="
+              "====================================================")
+        guess_first = raw_input("Make initial fit based on auto. gen guesses? 'y' to continue, "
+                                "'n' to make manual user inputs: ")
+        # while guess_first == 'n':
+        #     self.connect_mpl()
+
+
     def inter_lc(self):
         print("===================================================="
               "============= Light curve fitting / opt ============"
               "====================================================")
-        guess_first = raw_input("Make initial fit based on auto. gen guesses? 'y' to continue, 'n' to make manual user inputs: ")
+        guess_first = raw_input("Make initial fit based on auto. gen guesses? 'y' to continue, "
+                                "'n' to make manual user inputs: ")
         while guess_first == 'n':
+            self.plot_phase()
             self.connect_mpl()
-            print("Estimate the period and time of primary eclipse by selecting 2 - 3 consecutive centers of primary eclipses.")
-            self.pause()
-            self.period = np.median(np.diff(self.x, axis=0))
-            self.tpe = self.x[0][0]
-            print("Period = {0} d, time of primary eclipse = {1}".format(self.period, self.tpe))
-            #self.ax2l.plot((keblat.jd - self.tpe)%self.period / self.period, keblat.flux, 'k.')
-            self.clear_xy()
+            fit_phase = raw_input("Do you want to re-fit for the period, tpe, and tse? (Unless the phased light curves look "
+                                  "terrible, probably shouldn't. Press 'y' to re-fit all, 'tse' to re-fit tse only, "
+                                  "any other key to continue.")
+            if fit_phase == 'y':
+                print("Estimate the period and time of primary eclipse by selecting consecutive centers of primary eclipses.")
+                self.pause()
+                self.period = np.median(np.diff(self.x, axis=0))
+                self.tpe = self.x[0][0]
+                print("Period = {0} d, time of primary eclipse = {1}".format(self.period, self.tpe))
+                #self.ax2l.plot((keblat.jd - self.tpe)%self.period / self.period, keblat.flux, 'k.')
+                self.clear_xy()
+                print("Estimate the time of secondary eclipse by selecting the center of a secondary eclipse.")
+                self.pause()
+                self.sep = (self.x[0][0] - self.tpe) % self.period / self.period
+                print("tse = {0} d, sep = {1} phase".format(self.x[0][0], self.sep))
+                keblat.sep = self.sep
+                self.clear_xy()
+            elif fit_phase == 'tse':
+                print("Estimate the time of secondary eclipse by selecting the center of a secondary eclipse.")
+                self.pause()
+                self.sep = (self.x[0][0] - self.tpe) % self.period / self.period
+                print("tse = {0} d, sep = {1} phase".format(self.x[0][0], self.sep))
+                keblat.sep = self.sep
+                self.clear_xy()
+
             print("Estimate the primary eclipse duration and depth by selecting 'x' edges and 'y' edges")
             self.pause()
-            self.pwidth = np.median(np.diff(self.x, axis=0)[::2]) / 2. / self.period
+            self.pwidth = np.median(np.diff(self.x, axis=0)[::2]) / self.period
             self.pdepth = np.median(abs(np.diff(self.y, axis=0))[::2])
             print("pdep = {0}, pwidth = {1} d = {2} phase".format(self.pdepth, self.pwidth * self.period, self.pwidth))
             keblat.pwidth=self.pwidth
             keblat.updatephase(self.tpe, self.period)
-            pe = (keblat.phase[keblat.clip] >= -1.2 * keblat.pwidth) * (keblat.phase[keblat.clip] <= 1.2 * keblat.pwidth)
-            self.ax2l.plot(keblat.phase[keblat.clip][pe], keblat.flux[keblat.clip][pe], 'k.')
-            self.ax2l.set_ylim((keblat.flux.min(), keblat.flux.max()))
-            self.ax2l.set_xlim((keblat.phase[keblat.clip][pe].min(), keblat.phase[keblat.clip][pe].max()))
-            self.clear_xy()
-            print("Estimate the time of secondary eclipse by selecting the center of a secondary eclipse.")
-            self.pause()
-            self.sep = (self.x[0][0] - self.tpe) % self.period / self.period
-            print("tse = {0} d, sep = {1} phase".format(self.x[0][0], self.sep))
-            keblat.sep = self.sep
+            self.plot_phase(pltpe=True, pltse=False)
             self.clear_xy()
             print("Estimate the secondary eclipse duration and depth by selecting 'x' edges and 'y' edges")
             self.pause()
-            self.swidth = np.median(np.diff(self.x, axis=0)[::2]) / 2. / self.period
+            self.swidth = np.median(np.diff(self.x, axis=0)[::2]) / self.period
             self.sdepth = np.median(abs(np.diff(self.y, axis=0))[::2])
             keblat.swidth=self.swidth
             print("sdep = {0}, swidth = {1} d = {2} phase".format(self.sdepth, self.swidth * self.period, self.swidth))
             self.clear_xy()
-            se = (keblat.phase[keblat.clip] >= -1.2 * keblat.swidth + keblat.sep) * (keblat.phase[keblat.clip] <= 1.2 * keblat.swidth + keblat.sep)
-            self.ax2r.plot(keblat.phase[keblat.clip][se], keblat.flux[keblat.clip][se], 'k.')
-            self.ax2r.set_ylim((keblat.flux.min(), keblat.flux.max()))
-            self.ax2r.set_xlim((keblat.phase[keblat.clip][se].min(), keblat.phase[keblat.clip][se].max()))
-
+            self.plot_phase(pltpe=False, pltse=True)
             self.ecosw = (self.sep * 2 - 1.) / np.pi/4.
             self.esinw = (self.pwidth / self.swidth - 1.) / (self.pwidth / self.swidth + 1.)
             print("esinw = {0}, ecosw = {1}".format(self.esinw, self.ecosw))
@@ -415,7 +478,7 @@ class Gloop(object):
 
             lcchi2 = np.sum(rez(opt_lcpars0, polyorder=2) ** 2) / np.sum(keblat.clip)
             if (lcchi2 < bestlcchi2) or (lc_search_counts < 1):
-                # print "Saving from this run:", lcchi2, bestlcchi2, lc_search_counts
+                print "Saving from this run:", lcchi2, bestlcchi2, lc_search_counts
                 bestlcchi2 = lcchi2 * 1.0
                 opt_lcpars = opt_lcpars0
             lc_search_counts += 1
@@ -478,10 +541,7 @@ class Gloop(object):
         ax = plt.subplot2grid((2,2),(0,0),colspan=2)
         ax2a = plt.subplot2grid((2,2),(1,0))
         ax2b = plt.subplot2grid((2,2),(1,1))
-        ax.errorbar(keblat.jd, keblat.flux, keblat.dflux, fmt='k.', ecolor='gray')
-        ax.set_title("KIC {0} normalized SAP flux".format(self.kic))
-        ax.set_xlim((keblat.jd[0], keblat.jd[-1]))
-        print "Finished setting up plot"
+        # print "Finished setting up plot"
         return fig, ax, ax2a, ax2b
 
     def on_key(self, event):
@@ -524,8 +584,7 @@ class Gloop(object):
         return np.where(base_ids == id(targ))[0]
 
     def on_pick(self, event):
-        #if event.inaxes == self.ax:
-            #print("on pick", event.name, event.mouseevent, event.artist)
+        #print("on pick", event.name, event.mouseevent, event.artist)
         if isinstance(event.artist, plt.Line2D):
             thisline = event.artist
             xdata = list(thisline.get_xdata())
@@ -545,7 +604,7 @@ class Gloop(object):
         #     text = event.artist
         #     print('onpick1 text:', text.get_text())
         self.fig.canvas.draw()
-        #return
+
 
 
     def on_click(self, event):
