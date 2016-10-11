@@ -106,7 +106,7 @@ wavedir = '../../../PHOENIX/PHOENIX-ACES-AGSS-COND-2011/'
 # directory where spectrum file lives:
 specdir = wavedir + 'Z-0.0/'
 # spectrum file you want to run the program on:
-specfile = 'lte05500-2.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits'
+specfile = 'lte07000-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits'
 #specfile = 'lte04800-2.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits'
 # wavelength region that will be fit with a spline:
 wavestart = 4318; waveend = 7200
