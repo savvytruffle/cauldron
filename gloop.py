@@ -524,27 +524,27 @@ class Gloop(object):
         return np.where(base_ids == id(targ))[0]
 
     def on_pick(self, event):
-        if event.inaxes == self.ax:
+        #if event.inaxes == self.ax:
             #print("on pick", event.name, event.mouseevent, event.artist)
-            if isinstance(event.artist, plt.Line2D):
-                thisline = event.artist
-                xdata = list(thisline.get_xdata())
-                ydata = list(thisline.get_ydata())
-                ind = event.ind
-                # print('onpick1 line:', zip(np.take(xdata, ind), np.take(ydata, ind)))
-                # 		if event.mouseevent.button == 3:
-                obind = self.get_obj_ind(self.ax.lines, event.artist)
-                #print('herf', ind, len(self.ax.lines), obind, id(event.artist))
-                # print('onpick1 line:', ind, xdata, ydata, zip(np.take(xdata, ind), np.take(ydata, ind)))
-                self.ax.lines[obind].remove()
-                #print("onpick1 line:", list(xdata), list(ydata), self.x, self.y)
-                if xdata in self.x: self.x.remove(xdata)
-                if ydata in self.y: self.y.remove(ydata)
-                #print('herf', len(self.ax.lines))
-            # elif isinstance(event.artist, plt.Text):
-            #     text = event.artist
-            #     print('onpick1 text:', text.get_text())
-            self.fig.canvas.draw()
+        if isinstance(event.artist, plt.Line2D):
+            thisline = event.artist
+            xdata = list(thisline.get_xdata())
+            ydata = list(thisline.get_ydata())
+            ind = event.ind
+            # print('onpick1 line:', zip(np.take(xdata, ind), np.take(ydata, ind)))
+            # 		if event.mouseevent.button == 3:
+            obind = self.get_obj_ind(self.ax.lines, event.artist)
+            #print('herf', ind, len(self.ax.lines), obind, id(event.artist))
+            # print('onpick1 line:', ind, xdata, ydata, zip(np.take(xdata, ind), np.take(ydata, ind)))
+            self.ax.lines[obind].remove()
+            #print("onpick1 line:", list(xdata), list(ydata), self.x, self.y)
+            if xdata in self.x: self.x.remove(xdata)
+            if ydata in self.y: self.y.remove(ydata)
+            #print('herf', len(self.ax.lines))
+        # elif isinstance(event.artist, plt.Text):
+        #     text = event.artist
+        #     print('onpick1 text:', text.get_text())
+        self.fig.canvas.draw()
         else:
             return
 
