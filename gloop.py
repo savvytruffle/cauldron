@@ -545,8 +545,7 @@ class Gloop(object):
         #     text = event.artist
         #     print('onpick1 text:', text.get_text())
         self.fig.canvas.draw()
-        else:
-            return
+        #return
 
 
     def on_click(self, event):
