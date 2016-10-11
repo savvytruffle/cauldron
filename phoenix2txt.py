@@ -108,16 +108,17 @@ def continuumFlattenSpec(waves, fluxes, win=50, varwin=60, varsig=100, weight=1.
 # spectrum file you want to run the program on:
 #specfile = 'lte07000-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits'
 #specfile = 'lte04800-2.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits'
-specfile = '/Users/revhalzoo/SDSS/A4851217/lte07000-4.50-0.0.Alpha=-0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #A4851217
+specfile = '/Users/revhalzoo/SDSS/A4851217/lte07000-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #A4851217
 #specfile = '/Users/revhalzoo/SDSS/B5285607/lte06400-5.00-0.0.Alpha=-0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #B5285607
 #specfile = '/Users/revhalzoo/SDSS/C6449358/lte06500-4.50-0.0.Alpha=+0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #C6449358
 
 
 # wavelength region that will be fit with a spline:
-wavestart = 4318; waveend = 7200
+#wavestart = 4318; waveend = 7200
+wavestart = 670; waveend = 2470
 #wavestart = 14000; waveend = 18000 
 # wavelength region that will be saved (must be no longer than the above):
-truncstart = 4400; truncend = 7000
+truncstart = 700; truncend = 2500
 #truncstart = 15000; truncend = 17000 
 # spline fitting parameters (final result is VERY SENSITIVE to these!!):
 splinewindow = 100
@@ -128,13 +129,13 @@ splineweight = 0.9
 ## edit values above ##
 #######################
 
-wavefits = '/Users/revhalzoo/SDSS/A4851217/lte07000-4.50-0.0.Alpha=-0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #A4851217
+wavefits = '/Users/revhalzoo/SDSS/A4851217/lte07000-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #A4851217
 #wavefits = '/Users/revhalzoo/SDSS/B5285607/lte06400-5.00-0.0.Alpha=-0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #B5285607
 #wavefits = '/Users/revhalzoo/SDSS/C6449358/lte06500-4.50-0.0.Alpha=+0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #C6449358
 #infits = 'lte05000-3.00+0.5.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits'
 #infits = wavedir + specfile
 #infits = specdir + specfile
-infits = '/Users/revhalzoo/SDSS/A4851217/lte07000-4.50-0.0.Alpha=-0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #A4851217
+infits = '/Users/revhalzoo/SDSS/A4851217/lte07000-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #A4851217
 #infits = '/Users/revhalzoo/SDSS/B5285607/lte06400-5.00-0.0.Alpha=-0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #B5285607
 #infits = '/Users/revhalzoo/SDSS/C6449358/lte06500-4.50-0.0.Alpha=+0.20.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #C6449358
 outtxt = specfile[:-5] + '_' + str(truncstart) + '-' + str(truncend) + '-norm.txt'
