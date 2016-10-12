@@ -124,7 +124,7 @@ truncstart = 15000; truncend = 17000
 splinewindow = 100
 variancewindow = 70 #60
 variancesigma = 200 #150
-splineweight = 0.9
+splineweight = 0.9 #0.9
 #######################
 ## edit values above ##
 #######################
