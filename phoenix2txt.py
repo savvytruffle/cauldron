@@ -115,16 +115,16 @@ specfile = '/Users/revhalzoo/SDSS/A4851217/lte07000-4.50-0.0.PHOENIX-ACES-AGSS-C
 
 # wavelength region that will be fit with a spline:
 #wavestart = 4318; waveend = 7200
-wavestart = 670; waveend = 2470
-#wavestart = 14000; waveend = 18000 
+#wavestart = 670; waveend = 2470
+wavestart = 14000; waveend = 18000 
 # wavelength region that will be saved (must be no longer than the above):
-truncstart = 700; truncend = 2500
-#truncstart = 15000; truncend = 17000 
+#truncstart = 700; truncend = 2500
+truncstart = 15000; truncend = 17000 
 # spline fitting parameters (final result is VERY SENSITIVE to these!!):
 splinewindow = 100
 variancewindow = 70 #60
 variancesigma = 200 #150
-splineweight = 0.9
+splineweight = 0.9 #0.9
 #######################
 ## edit values above ##
 #######################
