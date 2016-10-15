@@ -1,7 +1,9 @@
+import matplotlib
+matplotlib.use('agg')
 from keblat import *
 import matplotlib.pyplot as plt
-import sys
-import itertools
+import sys, itertools
+import emcee
 import lmfit
 if lmfit.__version__[2] != '9':
     print "Version >= 0.9 of lmfit required..."
@@ -334,8 +336,8 @@ def make_lcrv_plots(kic, allpars, prefix, suffix='', savefig=True, polyorder=2):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     rvphase = (keblat.rv_t - keblat.pars['tpe'])%keblat.pars['period']/keblat.pars['period']
-    ax.errorbar(rvphase, keblat.rv1_obs, keblat.rv1_err_obs, fmt='b*')
-    ax.errorbar(rvphase, keblat.rv2_obs, keblat.rv2_err_obs, fmt='r*')
+    ax.errorbar(rvphase[~keblat.bad1], keblat.rv1_obs[~keblat.bad1], keblat.rv1_err_obs[~keblat.bad1], fmt='b*')
+    ax.errorbar(rvphase[~keblat.bad2], keblat.rv2_obs[~keblat.bad2], keblat.rv2_err_obs[~keblat.bad2], fmt='r*')
     rvt = np.linspace(0, 1, 100)*keblat.pars['period']+keblat.pars['tpe']
     rvmod = keblat.rvfit(rvpars, rvt)
     ax.plot(np.linspace(0, 1, 100), rvmod[0], 'b-')
@@ -345,8 +347,8 @@ def make_lcrv_plots(kic, allpars, prefix, suffix='', savefig=True, polyorder=2):
 
     divider = make_axes_locatable(ax)
     ax2 = divider.append_axes("bottom", size=2.0, pad=0, sharex=ax)
-    ax2.errorbar(rvphase, (keblat.rv1_obs-rv_fit[0]), np.sqrt(keblat.rv1_err_obs**2+rvpars[-1]**2), fmt='b.')
-    ax2.errorbar(rvphase, (keblat.rv2_obs-rv_fit[1]), np.sqrt(keblat.rv2_err_obs**2+rvpars[-1]**2), fmt='r.')
+    ax2.errorbar(rvphase[~keblat.bad1], (keblat.rv1_obs-rv_fit[0])[~keblat.bad1], np.sqrt(keblat.rv1_err_obs**2+rvpars[-1]**2)[~keblat.bad1], fmt='b.')
+    ax2.errorbar(rvphase[~keblat.bad2], (keblat.rv2_obs-rv_fit[1])[~keblat.bad2], np.sqrt(keblat.rv2_err_obs**2+rvpars[-1]**2)[~keblat.bad2], fmt='r.')
 
     ax2.set_xlabel('Phase')
     ax2.set_ylabel('Data - Model')
@@ -490,7 +492,7 @@ def get_pars2vals(fisopars, partype='lc', crow=False):
     elif partype == 'rv':
         parnames = ['msum', 'mrat', 'period', 'tpe', 'esinw', 'ecosw', 'inc', 'k0', 'rverr']
     elif partype == 'lcsed':
-        parnames = ['m1', 'm2', 'z0', 'age', 'dist', 'ebv', 'h0', 'isoerr', 'period', 'tpe',
+        parnames = ['m1', 'm2', 'z0', 'age', 'dist', 'ebv', 'h0', 'period', 'tpe',
                          'esinw', 'ecosw', 'b', 'q1', 'q2', 'q3', 'q4', 'lcerr', 'isoerr']
     elif partype == 'lcrv':
         parnames = ['msum', 'mrat', 'rsum', 'rrat', 'period', 'tpe', 'esinw', 'ecosw', 'b', 'frat', 'q1',
@@ -528,11 +530,13 @@ def rez(fit_params, polyorder=0):
 def lnlike_rv(fisopars, residual=True):
     pars = get_pars2vals(fisopars, partype='rv')
     rv1, rv2 = keblat.rvfit(pars, keblat.rv_t)
-    res = np.concatenate(((rv1 - keblat.rv1_obs) / np.sqrt(keblat.rv1_err_obs**2 + pars[-1]**2),
-                          (rv2 - keblat.rv2_obs) / np.sqrt(keblat.rv2_err_obs**2 + pars[-1]**2)))
+    res = np.concatenate(((rv1[~keblat.bad1] - keblat.rv1_obs[~keblat.bad1]) /
+                          np.sqrt(keblat.rv1_err_obs[~keblat.bad1]**2 + pars[-1]**2),
+                          (rv2[~keblat.bad2] - keblat.rv2_obs[~keblat.bad2]) /
+                          np.sqrt(keblat.rv2_err_obs[~keblat.bad2]**2 + pars[-1]**2)))
     if residual:
         if np.any(np.isinf(res)) or np.sum(np.isnan(res)) > 0.05 * len(res):
-            return np.ones(len(keblat.rv_t) * 2) * 1e20
+            return np.ones(np.sum(~keblat.bad1)+np.sum(~keblat.bad2)) * 1e20
         return res
     return np.sum(res**2)
 
@@ -541,7 +545,7 @@ def lnlike_lcrv(fisopars, qua=[1], polyorder=2, residual=True):
     res = keblat.lnlike_lcrv(pars, qua=qua, polyorder=polyorder, residual=residual)
     if residual:
         if np.any(np.isinf(res)) or np.sum(np.isnan(res)) > 0.05 * len(res):
-            return np.ones(len(keblat.rv_t) * 2 + np.sum(keblat.clip)) * 1e20
+            return np.ones(np.sum(~keblat.bad1)+np.sum(~keblat.bad2) + np.sum(keblat.clip)) * 1e20
         return res
     return np.sum(res**2)
 
@@ -564,7 +568,7 @@ def lnlike_lmfit(fisopars, lc_constraints=None, ebv_arr=None, qua=[1], polyorder
         return np.ones(len(keblat.magsobs)+len(keblat.flux[keblat.clip]) + extra)*1e20
     return res
 
-def ew_search_lmfit(ew_trials, pars0, argpars, fit_ecosw=True):
+def ew_search_lmfit(ew_trials, pars0, argpars, fit_ecosw=True, polyorder=0):
     fit_ew = Parameters()
     fit_ew.add('esinw', value=pars0[5], min=-0.9, max=0.9, vary=True)
     fit_ew.add('ecosw', value=pars0[6], min=-0.9, max=0.9, vary=fit_ecosw)
@@ -572,18 +576,21 @@ def ew_search_lmfit(ew_trials, pars0, argpars, fit_ecosw=True):
     for ii in range(len(ew_trials)):
         fit_ew['esinw'].value=ew_trials[ii][0]
         fit_ew['ecosw'].value=ew_trials[ii][1]
-        result = minimize(ew_search, fit_ew, kws={'pars0':pars0, 'argpars':argpars})
+        result = minimize(ew_search, fit_ew, kws={'pars0':pars0, 'argpars':argpars, 'polyorder':polyorder})
         if result.redchi < chisq or ii==0:
             chisq = result.redchi * 1.0
             ew_best = result.params['esinw'].value, result.params['ecosw'].value
             print "Better redchi: ", chisq, result.redchi, ew_best
     return ew_best
 
-def ew_search(ew, pars0=None, argpars=None):
+def ew_search(ew, pars0=None, argpars=None, polyorder=0, retmod=False):
     pars = np.array(pars0).copy()
     #esinw, ecosw = ew
-    pars[5], pars[6] = ew['esinw'].value, ew['ecosw'].value
-    mod, _ = keblat.lcfit(pars, keblat.jd, keblat.quarter, keblat.flux, keblat.fluxerr, keblat.crowd, polyorder=0)
+    try:
+        pars[5], pars[6] = ew['esinw'].value, ew['ecosw'].value
+    except:
+        pars[5], pars[6] = ew[0], ew[1]
+    mod, poly = keblat.lcfit(pars, keblat.jd, keblat.quarter, keblat.flux, keblat.fluxerr, keblat.crowd, polyorder=polyorder)
     # _phasesort = np.argsort(keblat.phase)
     # _phase = keblat.phase[_phasesort]
     # _flux = keblat.flux[_phasesort]
@@ -597,7 +604,9 @@ def ew_search(ew, pars0=None, argpars=None):
     #
     if np.any(np.isinf(mod)):
         return np.ones_like(keblat.jd+1)*1e10
-    return np.append((keblat.flux - mod)/keblat.fluxerr, tse_residuals((pars[5],pars[6]), *argpars))
+    if retmod:
+        return mod, poly
+    return np.append((keblat.flux - mod*poly)/keblat.fluxerr, tse_residuals((pars[5],pars[6]), *argpars))
 
 
 def get_age_trials(mass):
@@ -698,9 +707,9 @@ def opt_lc(lcpars0, jd, phase, flux, dflux, crowd, clip, set_upperb=2., fit_crow
     fit_params.add('esinw', value=esinw, min=-.999, max=0.999, vary=False)
     fit_params.add('ecosw', value=ecosw, min=-.999, max=0.999, vary=False)#ecosw-0.05, max=ecosw+0.05, vary=False)
     fit_params.add('rsum', value=rsum, min=0.1, max=10000., vary=False)
-    fit_params.add('rrat', value=rrat, min=1e-4, max=1., vary=False)
+    fit_params.add('rrat', value=rrat, min=1e-4, max=1e3, vary=False)
     fit_params.add('b', value=b, min=0., max=set_upperb, vary=False)
-    fit_params.add('frat', value=frat, min=1e-6, max=1., vary=False)
+    fit_params.add('frat', value=frat, min=1e-6, max=1e2, vary=False)
     fit_params.add('msum', value=msum, min=0.2, max=24., vary=False)
 
     fit_params.add('period', value=period, min=period-0.005, max=period+0.005, vary=False)
@@ -1080,7 +1089,7 @@ def guess_rrat(sdep, pdep):
             return 0.7
         return val
     else:
-        return sdep/pdep
+        return np.clip(sdep/pdep, 0.1, 0.95)
 
 def check_lcresiduals(x, y, ey):
     degrees = [2, 5, 9, 13]
@@ -1409,34 +1418,43 @@ def make_p0_ball(p_init, ndim, nwalkers, period_scale=1e-7, mass_scale=1e-4, age
     p0[:,12:16] = np.clip(p0[:,12:16], 0., 1.0)
     return p0
 
-check_dir_exists('kics/'+str(kic))
 prefix = 'kics/'+str(kic)+'/'
+check_dir_exists(prefix)
 keblat.start_errf(prefix+'lcfit.err')
 
-# opt_allpars = np.loadtxt(prefix+'allpars.lmfit')
-# make_sedlc_plots(kic, opt_allpars, prefix, suffix='sedlc_opt', savefig=True, polyorder=2)
-# print blah
-# ==================================================================================
-# temporarily comment out the coe below
-# keblat.ilnlike + ilnprob, opt_SED takes in d in pc, isoerr in lniso
-# k_lnlike takes in msum, rsum, ..., lcerr
-# keblat.lnlike + lnprob take in m1, m2, ..., lcerr, isoerr all in "regular" space
-# mix_lnprob takes in d and isoerr in ln space
-# ==================================================================================
+rvdata = np.loadtxt('data/{0}.rv'.format(kic), delimiter=';')
+
+# uncomment the code segment below if want to fit RV
+# //load rv data
+# //make init guess for masses + K offset
+# m1, m2, k0 = keblat.rvprep(rvdata[:,0], rvdata[:,1], rvdata[:,3], rvdata[:,2], rvdata[:,4])
+# //run light-curve opt first
+# //make sure keblat.pars are updated...
+# lcmod, lcpol = keblat.lcfit(opt_lcpars, keblat.jd[keblat.clip].....)
+# //update the bounds to make them stricter
+# keblat.updatebounds('period', 'tpe', 'esinw', 'ecosw')
+# rvpars = [m1+m2, m2/m1, opt_lcpars[3], opt_lcpars[4], opt_lcpars[5], opt_lcpars[6], keblat.pars['inc'], k0, 0]
+# //optimize rvparameters using opt_lc + init rv guesses
+# opt_rvpars = opt_rv(msum=m1+m2, mrat=m2/m1, period=opt_lcpars[3], tpe=opt_lcpars[4], esinw=opt_lcpars[5],
+#                       ecosw=opt_lcpars[6], inc=keblat.pars['inc'], k0=k0, rverr=0)
+# //fix msum from rv fit to lc fit
+# opt_lcpars[0] = opt_rvpars[0]
+# lcpars2 = opt_lc(opt_lcpars, keblat.jd, keblat.phase, keblat.flux, keblat.fluxerr, keblat.crowd, keblat.clip, set_upperb = 2.0, vary_msum=False)
+# //then optimize both simultaneously
+# opt_lcrvpars = opt_lcrv(msum=opt_rvpars[0], mrat=opt_rvpars[1],
+#                         rsum=lcpars2[1], rrat=lcpars2[2], period=lcpars2[3],
+#                         tpe=lcpars2[4], esinw=lcpars2[5], ecosw=lcpars2[6],
+#                         b=lcpars2[7], frat=lcpars2[8], q1=lcpars2[-4],
+#                         q2=lcpars2[-3], q3=lcpars2[-2], q4=lcpars2[-1],
+#                         lcerr=0.0, k0=opt_rvpars[-2], rverr=0.)
+
 q1, q2, q3, q4 = 0.01, 0.01, 0.01, 0.01
 age, h0, dist = 9.2, 119., 850.
-
-
-
-print blah
-
-opt_lcrvpars = opt_lcrv(msum=opt_rvpars[0], mrat=opt_rvpars[1],
-                        rsum=lcpars2[1], rrat=lcpars2[2], period=lcpars2[3],
-                        tpe=lcpars2[4], esinw=lcpars2[5], ecosw=lcpars2[6],
-                        b=lcpars2[7], frat=lcpars2[8], q1=lcpars2[-4],
-                        q2=lcpars2[-3], q3=lcpars2[-2], q4=lcpars2[-1],
-                        lcerr=0.0, k0=opt_rvpars[-2], rverr=0.)
-
+chunks = identify_gaps(keblat.cadnum, retbounds_inds=True)
+chunks = np.delete(chunks, np.where(np.diff(chunks)<2)[0])
+lcchi2_threshold = 3/np.nanmedian(np.array([np.nanmedian(abs(keblat.flux[chunks[ii]:chunks[ii+1]] -
+                                                          np.nanmedian(keblat.flux[chunks[ii]:chunks[ii+1]])))
+                                          for ii in range(len(chunks)-1)]))
 if not os.path.isfile(prefix+'lcpars.lmfit') or clobber_lc:
 
     # make initial guesses for rsum and f2/f1, assuming main sequence equal mass binary
@@ -1447,14 +1465,17 @@ if not os.path.isfile(prefix+'lcpars.lmfit') or clobber_lc:
     # ew = scipy.optimize.fmin(tse_residuals, np.array([1e-3, ecosw]),
     #                          args=(period, tpe, tpe+keblat.sep*period))
     b = flatbottom(keblat.phase[keblat.clip], keblat.flux[keblat.clip], keblat.sep, keblat.swidth)
-    if sdeplist[goodlist][goodlist_ind] < 0.05 and pdeplist[goodlist][goodlist_ind] < 0.05:
-        b = 1.0
+    # if sdeplist[goodlist][goodlist_ind] < 0.02 and pdeplist[goodlist][goodlist_ind] < 0.04:
+    #     b = 1.0
     rrat = guess_rrat(sdeplist[goodlist][goodlist_ind], pdeplist[goodlist][goodlist_ind])
     frat = rrat**(2.5)
-
+    if rsum > 10:
+        msum = 2.0
+    else:
+        msum = rsum
     ew_trials = [[esinw, ecosw], [-esinw, ecosw], [-0.521, ecosw], [-0.332, ecosw], [-0.142, ecosw], [0.521, ecosw], [0.332, ecosw], [0.142, ecosw]]
-    lcpars0 = np.array([rsum, rsum, rrat, period, tpe, esinw, ecosw, 1.0, frat, q1, q2, q3, q4])
-    ew = ew_search_lmfit(ew_trials, lcpars0, (period, tpe, tpe+keblat.sep*period), fit_ecosw=False)
+    lcpars0 = np.array([msum, rsum, rrat, period, tpe, esinw, ecosw, b, frat, q1, q2, q3, q4])
+    ew = ew_search_lmfit(ew_trials, lcpars0, (period, tpe, tpe+keblat.sep*period), fit_ecosw=False, polyorder=1)
 
     b_trials = [0.01, 0.1, 0.4]
     rrat_trials = [0.3, 0.7, 0.95]
@@ -1502,13 +1523,41 @@ if not os.path.isfile(prefix+'lcpars.lmfit') or clobber_lc:
     except Exception, e:
         print str(e)
 
-    print "Saving lmfit lcpars..."
 
-    np.savetxt(prefix+'lcpars.lmfit', opt_lcpars)
+    if bestlcchi2 < lcchi2_threshold:
+        print "Saving lmfit lcpars..."
+        np.savetxt(prefix+'lcpars.lmfit', opt_lcpars)
+    else:
+        print("Bestlcchi2 = {0}, exiting.".format(bestlcchi2))
+        #sys.exit()
 else:
     print "Loading lcpars lmfit"
     opt_lcpars = np.loadtxt(prefix+'lcpars.lmfit')
 
+lcmod, lcpol = keblat.lcfit(opt_lcpars, keblat.jd, keblat.quarter, keblat.flux, keblat.fluxerr, keblat.crowd, polyorder=0)
+#print blah
+m1, m2, k0 = keblat.rvprep(rvdata[:,0], rvdata[:,3]*1e3, rvdata[:,1]*1e3, rvdata[:,4]*1e3, rvdata[:,2]*1e3)
+keblat.updatepars(m1=m1, m2=m2, msum=m1+m2, mrat=m2/m1)
+keblat.updatebounds('period', 'tpe', 'msum', 'mrat')#'esinw', 'ecosw')
+rvpars = [m1+m2, m2/m1, opt_lcpars[3], opt_lcpars[4], opt_lcpars[5], opt_lcpars[6], keblat.pars['inc'], k0, 0]
+# //optimize rvparameters using opt_lc + init rv guesses
+opt_rvpars = opt_rv(msum=m1+m2, mrat=m2/m1, period=opt_lcpars[3], tpe=opt_lcpars[4], esinw=opt_lcpars[5],
+                       ecosw=opt_lcpars[6], inc=keblat.pars['inc'], k0=k0, rverr=0)
+# //fix msum from rv fit to lc fit
+opt_lcpars[0] = opt_rvpars[0]
+lcpars2 = opt_lc(opt_lcpars, keblat.jd, keblat.phase, keblat.flux, keblat.fluxerr, keblat.crowd, keblat.clip, set_upperb = 2.0, vary_msum=False)
+# //then optimize both simultaneously
+opt_lcrvpars = opt_lcrv(msum=opt_rvpars[0], mrat=opt_rvpars[1],
+                        rsum=lcpars2[1], rrat=lcpars2[2], period=lcpars2[3],
+                        tpe=lcpars2[4], esinw=lcpars2[5], ecosw=lcpars2[6],
+                        b=lcpars2[7], frat=lcpars2[8], q1=lcpars2[-4],
+                        q2=lcpars2[-3], q3=lcpars2[-2], q4=lcpars2[-1],
+                        lcerr=0.0, k0=opt_rvpars[-2], rverr=0.)
+
+make_lcrv_plots(kic, opt_lcrvpars, prefix, suffix='lcrv_opt', savefig=True, polyorder=2)
+np.savetxt(prefix+'lcrv.lmfit', opt_lcrvpars)
+
+print blah
 opt_lcpars = np.append(opt_lcpars, np.log(np.median(abs(np.diff(keblat.flux)))))
 if np.isinf(k_lnprior(opt_lcpars)):
     if (np.sqrt(opt_lcpars[5]**2+opt_lcpars[6]**2) > 1.):
@@ -1518,7 +1567,6 @@ if np.isinf(k_lnprior(opt_lcpars)):
         opt_lcpars[4] = tpe
     print "Some stuff seems to be out of bounds... somehow... changing them to mean bound values"
 
-print blah
 ###################################################################################
 ################################## LC ONLY MCMC ###################################
 ###################################################################################
@@ -1551,7 +1599,7 @@ if not success or not os.path.isfile(mcfile) or clobber_lc:
     else:
         if not success:
             print "MCMC file not complete, appending..."
-            niter = niter-mlpars
+            #niter = niter-mlpars
             outf = open(mcfile, "a")
             outf.close()
     start_time = time.time()
@@ -1605,7 +1653,7 @@ print "LC Constraints (rsum/msum^(1/3), rrat, frat) are: ", lc_constraints
 if os.path.isfile(prefix+'isopars.lmfit') and not clobber_sed:
     print "isopars lmfit file already exists, loading..."
     opt_isopars = np.loadtxt(prefix+'isopars.lmfit')
-    fit_isopars = opt_sed(opt_isopars, lc_constraints, ebv_dist, ebv_arr, fit_ebv=True, ret_lcpars=False, prefix=prefix)
+    fit_isopars = opt_sed(opt_isopars, lc_constraints, ebv_dist, ebv_arr, fit_ebv=True, ret_lcpars=False)
 else:
     #ebv_trials = [ebv] + list(np.linspace(0.01, 0.1, 4))
     msum_trials = [opt_lcpars[0]] + [1.0, 1.5, 2.0, 2.5, 4.0]
@@ -1618,7 +1666,7 @@ else:
         ### HERE ###
         for i_age in get_age_trials(m1):
             isopars0 = [m1, m2, keblat.z0, i_age, dist, ebv, h0, np.log(0.05)]
-            fit_isopars0 = opt_sed(isopars0, lc_constraints, ebv_dist, ebv_arr, fit_ebv=True, ret_lcpars=False, prefix=prefix)
+            fit_isopars0 = opt_sed(isopars0, lc_constraints, ebv_dist, ebv_arr, fit_ebv=True, ret_lcpars=False)
             isores = keblat.ilnlike(fit_isopars0, lc_constraints=lc_constraints, residual=True)
             iso_redchi2 = np.sum(isores**2) / len(isores)
             if (iso_counter<1) or (iso_redchi2 < iso_bestchi2):
@@ -1686,7 +1734,7 @@ if not success or not os.path.isfile(mcfile) or clobber_sed:
     else:
         if not success:
             print "MCMC file not complete, appending..."
-            niter = niter-mlpars
+            #niter = niter-mlpars
             outf = open(mcfile, "a")
             outf.close()
     start_time = time.time()
@@ -1719,7 +1767,7 @@ if not success or not os.path.isfile(mcfile) or clobber_sed:
     params, r1, temp1, logg1, mlpars, success = plot_mc(mcfile, header, footer, nwalkers, ndim, niter,
                                                         burnin=niter*3/4, plot=True, posteriors=True,
                                         huber_truths=[None]*(len(isonames)) + list(lc_constraints), isonames=isonames, iso_extras=True)
-print blah
+
 ###################################################################################
 #################################### SEDLC OPT ####################################
 ###################################################################################
@@ -1739,28 +1787,28 @@ if (keblat.z0 <= bounds[1][2]) and (keblat.z0 >= bounds[0][2]):
 else:
     z0 = keblat.zsun
 
-for i_msum, i_mrat in list(itertools.product(msum_trials, mrat_trials)) + [(opt_allpars0[0]+opt_allpars0[1],
-                                                                            opt_allpars0[1]/opt_allpars0[0])]:
-    m1 = i_msum/(1.+i_mrat)
-    m2 = i_msum/(1.+1./i_mrat)
-    ### HERE ###
-    for i_age in get_age_trials(m1):
-        opt_allpars0[:6] = [m1, m2, z0, i_age, dist, ebv]
-        if m1<0.1 or m1>12. or m2<0.1 or m2>12.:
-            continue
-        print "Init allpars: ", opt_all_counter, opt_allpars0[:6]
-        res_huber = least_squares(lnlike_lmfit, opt_allpars0, bounds=bounds,
-                                  method='trf', loss='huber', f_scale=1., xtol=1e-8,
-                                  kwargs={'residual':True, 'qua': np.unique(keblat.quarter)})
-        allres = lnlike_lmfit(res_huber.x, qua=np.unique(keblat.quarter), polyorder=2, residual=True)
-        allpars_chi2 = np.sum(allres**2) / len(allres)
-        print "made it here"
-        if (opt_all_counter < 1) or (allpars_chi2 < allpars_bestchi2):
-            opt_allpars = res_huber.x*1.
-            allpars_bestchi2 = allpars_chi2
-        opt_all_counter+=1
-    if allpars_bestchi2 < 10:
-        break
+# for i_msum, i_mrat in list(itertools.product(msum_trials, mrat_trials)) + [(opt_allpars0[0]+opt_allpars0[1],
+#                                                                             opt_allpars0[1]/opt_allpars0[0])]:
+#     m1 = i_msum/(1.+i_mrat)
+#     m2 = i_msum/(1.+1./i_mrat)
+#     ### HERE ###
+#     for i_age in get_age_trials(m1):
+#         opt_allpars0[:6] = [m1, m2, z0, i_age, dist, ebv]
+#         if m1<0.1 or m1>12. or m2<0.1 or m2>12.:
+#             continue
+#         print "Init allpars: ", opt_all_counter, opt_allpars0[:6]
+#         res_huber = least_squares(lnlike_lmfit, opt_allpars0, bounds=bounds,
+#                                   method='trf', loss='huber', f_scale=1., xtol=1e-8,
+#                                   kwargs={'residual':True, 'qua': np.unique(keblat.quarter)})
+#         allres = lnlike_lmfit(res_huber.x, qua=np.unique(keblat.quarter), polyorder=2, residual=True)
+#         allpars_chi2 = np.sum(allres**2) / len(allres)
+#         print "made it here"
+#         if (opt_all_counter < 1) or (allpars_chi2 < allpars_bestchi2):
+#             opt_allpars = res_huber.x*1.
+#             allpars_bestchi2 = allpars_chi2
+#         opt_all_counter+=1
+#     if allpars_bestchi2 < 10:
+#         break
 
 
 opt_all_counter=0

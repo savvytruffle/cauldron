@@ -37,6 +37,7 @@ class Keblat(object):
         self.rv2_obs = None
         self.rv1_err_obs = None
         self.rv2_err_obs = None
+        self.rv_t = None
         self.exp = None
         self.clip_tol = 1.5
         self.res = []
@@ -57,9 +58,9 @@ class Keblat(object):
                           ('lcerr', [0., 0.01]), ('isoerr', [0., 0.3]),
                                       ('k0', [-1e8, 1e8]), ('rverr', [0., 1e4]),
                                       ('msum', [0.2, 24.]), ('mrat', [0.0085, 1.0]),
-                                      ('rsum', [0.1, 1e6]), ('rrat', [1e-6, 1.0]),
+                                      ('rsum', [0.1, 1e6]), ('rrat', [1e-6, 1e3]),
                                       ('r1', [0.01, 1e6]), ('r2', [0.01, 1e6]),
-                                      ('inc', [0., np.pi/2.]), ('frat', [1e-8, 1.])])
+                                      ('inc', [0., np.pi/2.]), ('frat', [1e-8, 1e2])])
         if preload:
             self.loadiso()
             self.loadsed()
@@ -95,8 +96,8 @@ class Keblat(object):
         for i in args:
             self.parbounds[i] = [self.pars[i]-abs(self.pars[i])*0.02, self.pars[i]+abs(self.pars[i])*0.02]
         if self.rv1_obs is not None and self.rv2_obs is not None:
-            self.parbounds['k0'] = [min(self.rv1_obs.min(), self.rv2_obs.min()),
-                                     max(self.rv1_obs.max(), self.rv2_obs.max())]
+            self.parbounds['k0'] = [min(np.nanmin(self.rv1_obs), np.nanmin(self.rv2_obs)),
+                                     max(np.nanmax(self.rv1_obs), np.nanmax(self.rv2_obs))]
         return
 
     def updatepars(self, **kwargs):
@@ -418,7 +419,7 @@ class Keblat(object):
         glat = self.sed[sedidx, 4]
         zkic = 10**self.sed[sedidx, 7] * self.zsun
         if np.isnan(zkic):
-            zkic = keblat.zsun
+            zkic = self.zsun
         return magsobs, emagsobs, extinction, glat, zkic
         
     def isoprep(self, magsobs, emagsobs, extinction, glat, zkic, exclude=[]):
@@ -841,7 +842,7 @@ class Keblat(object):
         return True
 
     # Computes a template eclipse light curve with Mandel & Agol (2002) algorithm
-    def lctemplate_slow(self, lcpars, period, omega, e, a, inc, bgr, ldcoeffs, 
+    def lctemplate_slow(self, lcpars, period, omega, e, a, inc, bgr, ldcoeffs,
                    rrat, tc, t0, cadence, exp, pe=True):
         """Computes a template Mandel & Agol (2002) eclipse lightcurve with
         correction for long-cadence binning (Kipping 2013)
@@ -861,7 +862,7 @@ class Keblat(object):
         bgr : float
             radius of star being eclipsed in solar radius
         ldcoeffs: float array
-            limb darkening coefficients; tuple if quadratic, 
+            limb darkening coefficients; tuple if quadratic,
             4 elements if quartic non-linear law
         rrat : float
             ratio of radii (eclipsing/eclipsed)
@@ -875,16 +876,16 @@ class Keblat(object):
             number of Kepler exposures to bin (LC = 30, SC = 1)
         pe : boolean
             if True, template for PE
-            
+
         Returns
         -------
         tmean : float array
             array of times for PE (or SE)
         resmean : float array
             array of flux values for PE (or SE)
-        
+
         """
-        
+
         if pe:
             half0 = (self.pwidth*period/2.)*self.clip_tol
         else:
@@ -911,7 +912,7 @@ class Keblat(object):
             # print "Quad case:", ldcoeffs
             res = occultquad(z/(bgr*r2au), ldcoeffs[0], ldcoeffs[1], rrat, len(z))
 
-        bad = (res<-1e-4) | (res-1.>1e-4)        
+        bad = (res<-1e-4) | (res-1.>1e-4)
         if np.sum(bad)>0:
             cz = z[bad]/(bgr*r2au)
             interp_res = np.interp(t[bad], t[~bad], res[~bad])
@@ -921,7 +922,7 @@ class Keblat(object):
             res[bad] = interp_res
         if cadence < 0.02:
             return t, res
-    
+
         tt = t[:, np.newaxis] * np.ones(exp)
         rres = res[:, np.newaxis] * np.ones(exp)
         tt[:, 0] = t
@@ -990,8 +991,12 @@ class Keblat(object):
         r = a*(1.-e**2) / (1.+e*np.cos(maf))
         z = r*np.sqrt(1.-np.sin(omega+maf)**2*np.sin(inc)**2)
         if not np.all(np.isfinite(z)):
-            print maf, e, a, inc, z
-            exit
+            badz = np.isfinite(z)
+            print maf[~badz], e, a, inc, z[~badz], r[~badz]
+            z[~badz] = np.interp(t[~badz], t[badz], z[badz])
+            errfile = open(self.erfname, "a")
+            errfile.write("inf z: {0} {1} {2} {3} {4} {5} {6}\n".format(e, a, inc, t[~badz], maf[~badz], r[~badz], z[~badz]))
+            errfile.close()
         if self.ldtype == 0:
             # print "non-linear case:", ldcoeffs
             res = self.occultnltheta(z/(bgr*r2au), rrat, ldcoeffs)
@@ -1514,9 +1519,11 @@ class Keblat(object):
         self.rv1_err_obs = drv1
         self.rv2_err_obs = drv2
         self.rv_t = t
-        k1 = (self.rv1_obs.max() - self.rv1_obs.min())/2.
-        k2 = (self.rv2_obs.max() - self.rv2_obs.min())/2.
-        k0 = np.median(np.append(self.rv1_obs, self.rv2_obs))
+        self.bad1 = np.isnan(self.rv1_obs)
+        self.bad2 = np.isnan(self.rv2_obs)
+        k1 = (np.nanmax(self.rv1_obs) - np.nanmin(self.rv1_obs))/2.
+        k2 = (np.nanmax(self.rv2_obs) - np.nanmin(self.rv2_obs))/2.
+        k0 = np.nanmedian(np.append(self.rv1_obs, self.rv2_obs))
         m1, m2 = self.rvpars_guess_mass(k1, k2, self.pars['period'],
                                         np.sqrt(self.pars['esinw']**2 + self.pars['ecosw']**2))
         return m1, m2, k0
@@ -1979,7 +1986,7 @@ class Keblat(object):
         #now the light curve fitting part
         lcpars = np.concatenate((np.array([m1+m2, self.r1+self.r2, 
                                            self.r2/self.r1, period, 
-                                           tpe, esinw, ecosw, b, self.frat]), 
+                                           tpe, esinw, ecosw, b, self.frat]),
                                            ldcoeffs))
 
         # conds = [self.quarter == ii for ii in np.array(qua)]
@@ -2046,8 +2053,11 @@ class Keblat(object):
 
         rvpars = [msum, mrat, period, tpe, esinw, ecosw, self.pars['inc'], k0, rverr]
         rv1, rv2 = self.rvfit(rvpars, self.rv_t)
-        rvres = np.concatenate(((rv1 - self.rv1_obs) / np.sqrt(self.rv1_err_obs ** 2 + rverr ** 2),
-                                (rv2 - self.rv2_obs) / np.sqrt(self.rv2_err_obs ** 2 + rverr ** 2)))
+
+        rvres = np.concatenate(((rv1[~self.bad1] - self.rv1_obs[~self.bad1]) /
+                                np.sqrt(self.rv1_err_obs[~self.bad1] ** 2 + rverr ** 2),
+                                (rv2[~self.bad2] - self.rv2_obs[~self.bad2]) /
+                                np.sqrt(self.rv2_err_obs[~self.bad2] ** 2 + rverr ** 2)))
 
         totres = np.concatenate((lcres, rvres))
         self.chi = np.sum(totres ** 2)
@@ -2057,8 +2067,8 @@ class Keblat(object):
         chisq += np.sum(lcres ** 2) + \
                  np.sum(np.log((self.fluxerr[clip] ** 2 + lcerr ** 2)))
         chisq += np.sum(rvres ** 2) + \
-                 np.sum(np.log((self.rv1_err_obs ** 2 + rverr ** 2))) + \
-                 np.sum(np.log((self.rv2_err_obs ** 2 + rverr ** 2)))
+                 np.sum(np.log((self.rv1_err_obs[~bad1] ** 2 + rverr ** 2))) + \
+                 np.sum(np.log((self.rv2_err_obs[~bad2] ** 2 + rverr ** 2)))
 
         lili = -0.5 * chisq
         return lili

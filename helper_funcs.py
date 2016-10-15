@@ -179,8 +179,8 @@ occultquad_c.argtypes = [ndpointer(dtype=ctypes.c_double), ndpointer(dtype=ctype
 			ctypes.c_double, ctypes.c_int]
 
 def rsky(e, P, t0, eps, t):
-	maf = t*0.
-	rsky_c(t, maf, e, P, t0, eps, len(t))
+	maf = np.zeros(len(t))
+	rsky_c(t.copy(), maf, e, P, t0, eps, len(t))
 	return maf
 
 def occultquad(znorm, u1, u2, rrat, Npts):
