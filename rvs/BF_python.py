@@ -196,13 +196,13 @@ bf_ind = svd.getRVAxis(r, 1) + rvstd - bcvstd
 #plt.show()
 
 # OPTION TO PLOT THE SMOOTHED BFs
-plt.axis([rvneg, rvpos, -0.2, float(nspec)/2.5])
+plt.axis([rvneg, rvpos, -0.2, float(nspec)+1])
 plt.xlabel('Radial Velocity (km s$^{-1}$)')
 plt.ylabel('Broadening Function (arbitrary amplitude)')
 yoffset = 0.0
 for i in range(1, nspec):
-    plt.plot(bf_ind, bfsmoothlist[i]+yoffset, color='b')
-    yoffset = yoffset + 0.4
+    plt.plot(bf_ind, bfnormlist[i]+yoffset, color='b')
+    yoffset = yoffset + 1.0
 plt.show()
 
 # FIT THE SMOOTHED BF PEAKS WITH TWO GAUSSIANS
