@@ -4,7 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PyAstronomy import pyasl
 
-#read in wavelengths and fluxes for a list of APOGEE spectra
+# read in wavelengths and fluxes for a list of APOGEE spectra
+# this currently works for apVisit spectra only!!! (not apStar)
 
 wavelist = []
 speclist = []
@@ -15,6 +16,9 @@ speclist = []
 filelist = '/Users/revhalzoo/SDSS/A4851217/A4851217phx.txt'
 f1 = open(filelist)
 infilelist = [] # for use later to make outfilelist
+
+# option to just turn the fits file into a text file without any despiking
+doDespike = False
 
 for line in f1:
     infile = line.rstrip()
@@ -33,29 +37,31 @@ for line in f1:
     speclist.append(spec)
 f1.close()
 
-#do something to 'spec' to cut out spikes, call it newspec
+# do something to 'spec' to cut out spikes, call it newspec
 newwavelist = []
 newspeclist = []
-
 for wave, spec in zip(wavelist, speclist):
-    #newspec = spec # PLACEHOLDER ONLY!!!!!!!
-	r = pyasl.pointDistGESD(spec, maxOLs=1000, alpha=10000)
-	# r[0] is number of outliers found, r[i] is indices of outliers
-	# maxOLs is max number of outliers that may be identified; increase alpha to find more
-	#print(r[0], 'outliers found')
-	newwave, newspec = np.delete(wave, r[1]), np.delete(spec, r[1])
-	# option to plot the result
-	#plt.plot(wave, spec)
-	#plt.plot(newwave, newspec, color='r')
-	#plt.show()
-	newwavelist.append(newwave)
-	newspeclist.append(newspec)
-	
+    if doDespike == True:
+        r = pyasl.pointDistGESD(spec, maxOLs=1000, alpha=5000)
+        # r[0] is number of outliers found, r[i] is indices of outliers
+        # maxOLs is max number of outliers that may be identified; increase alpha to find more
+        #print(r[0], 'outliers found')
+        newwave, newspec = np.delete(wave, r[1]), np.delete(spec, r[1])
+    else:
+        newspec = spec
+        newwave = wave
+    # option to plot the result
+    plt.plot(wave, spec)
+    plt.plot(newwave, newspec, color='r')
+    plt.show()
+    newwavelist.append(newwave)
+    newspeclist.append(newspec)
+    
 # write out a set of two-column text files,
 # each containing one element of wavelist and one element of newspeclist
 for file, wave, newspec in zip(infilelist, wavelist, newspeclist):
     # create outfile based on infile name
-    outfile = file[0:-5]+'_despiked.txt'
+    outfile = file[0:-5]+'_textified.txt'
     #print(outfile)
     f = open(outfile, 'w')
     for wentry, sentry in zip(wave, newspec):
