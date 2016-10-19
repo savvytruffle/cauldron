@@ -269,8 +269,8 @@ def gaussian(x, amp, mu, sig): # i.e., (xarray, amp, rv, width)
 # PLOT THE FINAL SMOOTHED BFS + GAUSSIAN FITS IN INDIVIDUAL PANELS
 # manually adjust this multi-panel plot based on how many spectra you have
 #plt.figure(4)
-windowcols = 4                                # how many window columns there should be
-#windowrows = 6
+windowcols = 3                                # how many columns the plot should have
+#windowrows = 6                                # manually set number of plot rows here, or automatically below
 windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
 xmin = rvneg
 xmax = rvpos
