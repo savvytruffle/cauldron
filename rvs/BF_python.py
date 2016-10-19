@@ -55,11 +55,11 @@ both in days, and the constant RV and BCV of whatever template you are using.
 # YOU NEED TO HAVE THESE INPUT FILES !!!
 # THE OUTPUT FILE WILL BE CREATED FOR YOU
 
-# typical format for RG/EB systems
-#infiles =   '../../RG_spectra/9291629/infiles_arcesBF.txt'
-#bjdinfile = '../../RG_spectra/9291629/bjdinfile_arcesBF.txt'
-#gausspars = '../../RG_spectra/9291629/gaussfit_arcesBF.txt'
-#outfile =   '../../RG_spectra/9291629/rvoutfile_new_arcesBF.txt'
+# EXAMPLE INFILES AND OUTFILES
+#infiles =   'infiles.txt'
+#bjdinfile = 'bjdinfile.txt'
+#gausspars = 'gausspars.txt'
+#outfile =   'rvoutfile.txt'
 
 # joni's POCs
 #infiles =   '/Users/revhalzoo/SDSS/DCA/DChoAinfiles.txt'
@@ -85,93 +85,39 @@ outfile =   '/Users/revhalzoo/SDSS/A4851217/A4851217Outfile.txt'
 #gausspars = '/Users/revhalzoo/SDSS/C6449358/C6449358gausspars.txt'
 #outfile =   '/Users/revhalzoo/SDSS/C6449358/C6449358Outfile.txt'
 
-# (for KIC 8848288, ie TYC 3559)
-#infiles =    '../../KIC_8848288/infiles.txt'
-#bjdinfile =  '../../KIC_8848288/bjdfile.txt'
-#gausspars =  '../../KIC_8848288/gaussfit.txt'
-#outfile =    '../../KIC_8848288/rvs_revisited3_BF.txt'
-#bfoutfile =  '../../KIC_8848288/bfoutfile3.txt'
-
-# (the original infiles)
-#infiles = '../../TelFit/9246715_telfit/infiles_BF_shift.txt'
-#bjdinfile = '../../RG_spectra/9246715/bjds_baryvels.txt'
-#gausspars = '../../RG_spectra/9246715/gaussfit_pars.txt'
-#outfile = '../../RG_spectra/9246715/redo_plot_BFoutput.txt'
-
 # STUFF YOU NEED TO DEFINE CORRECTLY !!!
 isAPOGEE = True        # toggle to use near-IR stuff, or not
 SpecPlot = True         # toggle to plot spectra before BFs, or not
 bjdoffset = 2454833.    # difference between real BJDs and 'bjdfunny' (truncated BJDs)
-amplimits = [0,3,0,3] # limits for gaussian normalized amplitude [min1,max1,min2,max2]
+amplimits = [0,1, 0,1] # limits for gaussian normalized amplitude [min1,max1,min2,max2]
 threshold = 10           # margin for gaussian position (raw RV in km/s)
-widlimits = [0,7, 0,40]  # limits for gaussian width (km/s) [min1,max1,min2,max2]
+widlimits = [0,20, 0,20]  # limits for gaussian width (km/s) [min1,max1,min2,max2]
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
-#period = 171.277697; BJD0 = 2455170.514777 # 9246715
-#period = 207.1082; BJD0 = 2455112.7655 # 7037405
-#period = 63.327106; BJD0 = 2454976.635546 # 8430105
-#period = 120.3903; BJD0 = 2454957.682 # 10001167
-#period = 358.08; BJD0 = 2454962.684595 # 4663623
-#period = 20.686424; BJD0 = 2454966.8914 # 9291629
-#period = 19.38446; BJD0 = 2454970.2139 # 8702921
-#period = 33.65685; BJD0 = 2454960.8989 # 3955867
-#period = 235.300; BJD0 = 2455190.53 #9970396
-#period = 1058.23; BJD0 = 2454751.806288 #8054233
-#period = 197.9182; BJD0 = 2455162.6140 #5786154
-
-# joni's OA
-#period = 40.8778427; BJD0 = 2454955.556300
 period = 2.47028; BJD0 = 2455813.69734 #(A4851217)
 #period = 3.8994011; BJD0 = 2455813.69734 #(B5285607)
 #period = 5.7767904; BJD0 = 2456760.90580 #(C6449358)
 
 # RADIAL VELOCITY AND BCV INFO FOR TEMPLATE (km/s; set both to 0 if using a model !!!)
-#rvstd = -64.422; bcvstd = 10.747 # HD168009 (fullspec26), G1 V star
-#rvstd = -21.619; bcvstd = 16.571 # HD182488 (fullspec28), G9 V star
-#rvstd = -21.123; bcvstd = 12.499 # HD196850 (fullspec32), G1 V star
 rvstd = 0; bcvstd = 0 # model template
 #rvstd = 0; bcvstd = 13.5073 # joni's OA with self-template
 
 # PARAMETERS FOR THE BROADENING FUNCTION (IMPORTANT PAY ATTENTION !!!)
-smoothstd = 1.0 #1.5     # stdev of Gaussian to smooth BFs by (~slit width in pixels)
+smoothstd = 1.5      # stdev of Gaussian to smooth BFs by (~slit width in pixels)
 #w00 = 5400          # starting wavelength for new grid
 #n = 38750           # number of wavelength points for new grid
 #stepV = 1.7         # roughly 3e5 / (max_wavelength / wavelength_step) km/s, rounded down
-#m = 171        
-m = 501              # length of the BF (must be longer if RVs are far from 0)
+m = 201              # length of the BF (must be longer if RVs are far from 0)
 ## good values for APOGEE:
-#w00 = 15145; n = 15000; stepV = 1.5
-#w00 = 15670; n = 2000; stepV = 1.5
+w00 = 15145; n = 15000; stepV = 1.5 # all of APOGEE
+#w00 = 15670; n = 2000; stepV = 1.5 # a little piece of APOGEE
 ## good values for ARCES & TRES together:
 #w00 = 5400; n = 38750; stepV = 1.7
-## good values for 8848288 (HET low & high res):
-#w00 = 4408; n = 55000; stepV = 1.5
+## good values HET, low & high res together:
 #w00 = 4485; n = 53000; stepV = 1.5
-w00 = 15145; n = 15000; stepV = 1.5 # POKE POKE
 
-# STUFF TO MAKE PLOTS LOOK NICE
-#rvneg = -69; rvpos = 69; ymin = -0.05; ymax = 0.45 # 9246715
-#rvneg = -89; rvpos = 39; ymin = -0.05; ymax = 0.30 # 7037405
-#rvneg = -69; rvpos = 69; ymin = -0.05; ymax = 0.35 # 8430105
-#rvneg = -170; rvpos = 5; ymin = -0.05; ymax = 0.15 # 10001167
-#rvneg = -69; rvpos = 69; ymin = -0.05; ymax = 0.45 # 4663623
-#rvneg = -109; rvpos = 79; ymin = -0.05; ymax = 0.45 # 9291629
-#rvneg = -95; rvpos = 130; ymin = -0.05; ymax = 0.20 # 8702921
-#rvneg = -99; rvpos = 99; ymin = -0.05; ymax = 0.30 # 3955867
-#rvneg = -69; rvpos = 49; ymin = -0.05; ymax = 0.30 # 9970396
-#rvneg = -70; rvpos = 70; ymin = -0.05; ymax = 0.20 # 8054233
-#rvneg = -59; rvpos = 59; ymin = -0.05; ymax = 0.30 # 5786154
-#rvneg = -64; rvpos = 24; ymin = -0.05; ymax = 1.05 #ymin = -0.15; ymax = 0.50 # (8848288)
-
-rvneg = -60; rvpos = 59; ymin = -0.15; ymax = 0.55 # test for joni OA
-
-# some previously set values for posterity ...
-# ARCES ARCTURUS OBSERVATION
-#rvstd = 20.71053 # this is the TOTAL RV OFFSET FROM REST of the ARCES Arcturus observation
-#bcvstd = 0 # this goes with the above rvstd
-#rvstd = -5.19 # from SIMBAD, for Arcturus ... WRONG(ish)
-#bcvstd = -0.155355148339 # APOGEE Arcturus bcv
-#bcvstd = 18.4574 # ARCES Arcturus bcv
+# LIMITS TO MAKE PLOTS LOOK NICE
+rvneg = -79; rvpos = 79; ymin = -0.15; ymax = 1.05 # good starting values
 ##########
 
 print('Welcome to the Broadening Function party!')
@@ -191,8 +137,7 @@ nspec = specdata[0]; filenamelist = specdata[1]
 datetimelist = specdata[2]; wavelist = specdata[3]; speclist = specdata[4]
 
 # INTERPOLATE THE TEMPLATE AND OBJECT SPECTRA ONTO THE NEW LOG-WAVELENGTH GRID
-# OPTION TO PLOT THIS (commented out for now)
-##plt.figure(1)
+# OPTION TO PLOT THIS
 newspeclist = []
 yoffset = 1
 if SpecPlot == True:
@@ -251,7 +196,6 @@ bf_ind = svd.getRVAxis(r, 1) + rvstd - bcvstd
 #plt.show()
 
 # OPTION TO PLOT THE SMOOTHED BFs
-##plt.figure(3)
 plt.axis([rvneg, rvpos, -0.2, float(nspec)/2.5])
 plt.xlabel('Radial Velocity (km s$^{-1}$)')
 plt.ylabel('Broadening Function (arbitrary amplitude)')
@@ -263,7 +207,6 @@ plt.show()
 
 # FIT THE SMOOTHED BF PEAKS WITH TWO GAUSSIANS
 # you have to have pretty decent guesses in the gausspars file for this to work.
-#bffitlist = bff.gaussparty(gausspars, nspec, filenamelist, bfsmoothlist, bf_ind, threshold)
 bffitlist = bff.gaussparty(gausspars, nspec, filenamelist, bfnormlist, bf_ind, amplimits, threshold, widlimits)
 rvraw1 = []; rvraw2 = []; rvraw1_err = []; rvraw2_err = []
 rvraw1.append(0), rvraw2.append(0), rvraw1_err.append(0), rvraw2_err.append(0)
@@ -331,7 +274,6 @@ windowcols = 4                                # how many window columns there sh
 windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
 xmin = rvneg
 xmax = rvpos
-#gaussxs = np.arange(-200, 200, 0.1)
 fig = plt.figure(1, figsize=(15,10))
 fig.text(0.5, 0.04, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size=26)
 fig.text(0.07, 0.5, 'Broadening Function', ha='center', va='center', size=26, rotation='vertical')
