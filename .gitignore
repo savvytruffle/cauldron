@@ -2,3 +2,4 @@ src/
 kics/
 *.so
 *.pyc
+*.DS_Store*

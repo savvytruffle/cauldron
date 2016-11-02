@@ -1,0 +1,7 @@
+/Users/revhalzoo/SDSS/A4851217/apStar-r5-2M18413657-0334237_templateA.nspec
+/Users/revhalzoo/SDSS/A4851217/apVisit-r5-5214-55813-166_despiked.nspec
+/Users/revhalzoo/SDSS/A4851217/apVisit-r5-5214-55849-171_despiked.nspec
+/Users/revhalzoo/SDSS/A4851217/apVisit-r5-5214-55866-178_despiked.nspec
+/Users/revhalzoo/SDSS/A4851217/apVisit-r5-5215-55823-263_despiked.nspec
+/Users/revhalzoo/SDSS/A4851217/apVisit-r5-5215-55840-263_despiked.nspec
+/Users/revhalzoo/SDSS/A4851217/apVisit-r5-5215-55851-176_despiked.nspec
