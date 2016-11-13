@@ -68,10 +68,10 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   '/Users/revhalzoo/SDSS/DCA/DChoAOutfile.txt'
 
 #A4851217
-infiles =   '/Users/revhalzoo/SDSS/A4851217/A4851217infiles.txt'
-bjdinfile = '/Users/revhalzoo/SDSS/A4851217/A4851217bjdinfile.txt'
-gausspars = '/Users/revhalzoo/SDSS/A4851217/A4851217gausspars.txt'
-outfile =   '/Users/revhalzoo/SDSS/A4851217/A4851217Outfile.txt'
+infiles =   '/Users/halzoo/SDSS/A4851217/A4851217infiles.txt'
+bjdinfile = '/Users/halzoo/SDSS/A4851217/A4851217bjdinfile.txt'
+gausspars = '/Users/halzoo/SDSS/A4851217/A4851217gausspars.txt'
+outfile =   '/Users/halzoo/SDSS/A4851217/A4851217Outfile.txt'
 
 #B5285607
 #infiles =   '/Users/revhalzoo/SDSS/B5285607/B5285607infiles.txt'
