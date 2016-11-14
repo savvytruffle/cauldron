@@ -10,42 +10,62 @@ from apogee.modelspec import ferre
 
 
 
-###Read in spectra:::[0],[1] is the combined spectra:::[2][n] are each visit
-mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[3]
+###Read in spectra:::[0],[1] is the combined spectra:::[2]-[n] are each visit###
 
-###Read in error
-mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[3]
+#mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[2]
+mystar = apread.apStar(4263, '2M19432016+3957081', ext=1, header=False)[3]#KIC4851217
+#mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[2]	#KIC5285607
+#mystar = apread.apStar(4464, '2M19353513+4149543', ext=1, header=False)[2]	#KIC6449358
+#mystar = apread.apStar(4263, '2M19355993+3813561', ext=1, header=False)[2]	#KIC3127817Overlap
+#mystar = apread.apStar(4263, '2M19373173+4027078', ext=1, header=False)[2]	#KIC5284133
 
-###Reshape the arrays!
+###Read in error###
+
+#mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[2]
+mystarerr = apread.apStar(4263, '2M19432016+3957081', ext=2, header=False)[3]#KIC4851217
+#mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[2]	#KIC5285607
+#mystarerr = apread.apStar(4464, '2M19353513+4149543', ext=2, header=False)[2]	#KIC6449358
+#mystarerr = apread.apStar(4263, '2M19355993+3813561', ext=2, header=False)[2]	#KIC3127817Overlap
+#mystarerr = apread.apStar(4263, '2M19373173+4027078', ext=2, header=False)[2]	#KIC5284133
+
+###Reshape the arrays!###
 mystar = np.reshape(mystar, (1, len(mystar)))
 mystarerr = np.reshape(mystarerr, (1, len(mystarerr)))
 
-###Define Flux and Wavelength
+###Define Flux and Wavelength###
 fluxdata = mystar[0]
 wavedata = apStarWavegrid()
 
-###Show Flux and Wavelength
+###Show Flux and Wavelength###
 #print(fluxdata)
 #print(wavedata)
 
 ###Normalizing to continuum
 fitcontinuum = continuum.fit(mystar, mystarerr, type='aspcap')
-###is aspcap does not work well, it is customizable yo
+fitcontinuumentry = fitcontinuum[0] 
+#			is aspcap does not work well, it is customizable yo 			#
 
 
-###Divide by continuum (done in plot because dividing by zero isnan)
-#fluxnorm = fluxdata/fitcontinuum[0]
+###Divide by continuum (done in plot because dividing by zero is nan - trying to fix)
 
-###Read in Model Spec A4851217
+fluxnorm = [fluxdataentry/fitcontinuumentry if fitcontinuumentry != 0 else 0 for 
+	fluxdataentry, fitcontinuumentry in zip(fluxdata, fitcontinuum[0])]
+
+
+###Read in Model Spec 
 ####::::These numbers are not true values, don't believe in the lies::::####
-modelspec = ferre.interpolate(4812., 2.5, 0.1, 0., 0., 0.)
+
+#modelspec = ferre.interpolate(4812., 4.5, 0.1, 0., 0., 0.)#KIC4851217
+modelspec = ferre.interpolate(6000., 2.5, 0.1, 0., 0., 0.)#KIC5285607
+#modelspec = ferre.interpolate(6438., 4.6, 0.1, 0., 0., 0.)#KIC6449358
+#modelspec = ferre.interpolate(6510., 4.8, 0.1, 0., 0., 0.)#KIC3127817
 #							 (Teff.,logg,metals,alphafe,nfe,cfe.)
 
 ###When in doubt, print it out
 #for item in modelspec: 
 #	print(item)
 
-plt.plot(wavedata, fluxdata/fitcontinuum[0])
+plt.plot(wavedata, fluxnorm)
 plt.plot(wavedata, modelspec, color='r')
 plt.show()
 #data = apread.rcsample()
@@ -53,14 +73,14 @@ plt.show()
 #data = data[indx]
 
 
-###Print data to txt files 
-apstar = file.open('obsspec1.txt', 'w')
-templatedata = file.open('modelspec.txt', 'w')
-for wave, flux in zip(wavedata, fluxnorm): # need to make fluxnorm without any zero division problems!
-    print(wave, flux, file=apstar)
+###Print data to txt files###
+realstar = open('obsspec1.txt', 'w') 
+templatedata = open('modelspec.txt', 'w')
+for wave, flux in zip(wavedata, fluxnorm): 
+    print(wave, flux, file=realstar)
 for wave, flux in zip(wavedata, modelspec):
     print(wave, flux, file=templatedata)
-apstar.close()
+realstar.close()
 templatedata.close()
 
 ###Overlay model spectrum 
