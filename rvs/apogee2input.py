@@ -7,14 +7,31 @@ from apogee.spec import continuum
 import matplotlib.pyplot as plt
 import apogee as apg
 from apogee.modelspec import ferre
+'''
+This program uses jobovy/apogee to make text files for APOGEE visit spectra and a model spectrum.
+The model spectrum should have stellar parameters similar to the target star for use with BF_python.
+All the final spectra are continuum normalized.
+'''
 
+## TODO: define useful variables upfront here so they're easy to change in one place.
+##       To include filenames, PlateID, APOGEEID, desired Teff/logg/FeH of model, etc.
 
+# to get you started...
+KIC = 5285607
+visit = 7
+modelfileout = 'data/'+str(KIC)+'/modeltest.txt'
+specfileout = 'data/'+str(KIC)+'/obsspecnorm'+str(visit)+'.txt'
+
+## TODO: BEGIN LOOP OVER VISIT
+# visits = [2, 3, 4, 5, 6, 7]
+# for visit in visits:
+# ... etc.
 
 ###Read in spectra:::[0],[1] is the combined spectra:::[2]-[n] are each visit###
 
 #mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[2]
 #mystar = apread.apStar(4263, '2M19432016+3957081', ext=1, header=False)[7]#KIC4851217
-mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[7]	#KIC5285607
+mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[visit]	#KIC5285607
 #mystar = apread.apStar(4464, '2M19353513+4149543', ext=1, header=False)[2]	#KIC6449358
 #mystar = apread.apStar(4263, '2M19355993+3813561', ext=1, header=False)[2]	#KIC3127817Overlap
 #mystar = apread.apStar(4263, '2M19373173+4027078', ext=1, header=False)[2]	#KIC5284133
@@ -23,22 +40,23 @@ mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[7]	#KIC5
 
 #mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[2]
 #mystarerr = apread.apStar(4263, '2M19432016+3957081', ext=2, header=False)[7]#KIC4851217
-mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[7]	#KIC5285607
+mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[visit]	#KIC5285607
 #mystarerr = apread.apStar(4464, '2M19353513+4149543', ext=2, header=False)[2]	#KIC6449358
 #mystarerr = apread.apStar(4263, '2M19355993+3813561', ext=2, header=False)[2]	#KIC3127817Overlap
 #mystarerr = apread.apStar(4263, '2M19373173+4027078', ext=2, header=False)[2]	#KIC5284133
 
-###Reshape the arrays!###
+###Reshape the arrays following the example in jobovy/apogee README
 mystar = np.reshape(mystar, (1, len(mystar)))
 mystarerr = np.reshape(mystarerr, (1, len(mystarerr)))
 
-###Define Flux and Wavelength###
+###Define Flux and Wavelength
 fluxdata = mystar[0]
 wavedata = apStarWavegrid()
 
-###Show Flux and Wavelength###
-print(fluxdata)
-#for item in fluxdata: print(item)
+###Option to print Flux and Wavelength
+#print(fluxdata)
+#for item in fluxdata:
+#    print(item)
 #print(wavedata)
 
 ###Normalizing to continuum
