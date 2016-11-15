@@ -59,16 +59,31 @@ wavedata = apStarWavegrid()
 #    print(item)
 #print(wavedata)
 
-###Normalizing to continuum
+###Fit the continuum
 fitcontinuum = continuum.fit(mystar, mystarerr, type='aspcap')
 fitcontinuumentry = fitcontinuum[0] 
-#			is aspcap does not work well, it is customizable yo 			#
+#			if aspcap does not work well, it is customizable yo
 
-
-###Divide by continuum (done in plot because dividing by zero is nan - trying to fix)
-
-fluxnorm = [fluxdataentry/fitcontinuumentry if fitcontinuumentry != 0 else 0 for 
+###Divide by the continuum (without dividing by zero)
+fluxnorm = [fluxdataentry/fitcontinuumentry if fitcontinuumentry != 0 else np.nan for 
 	fluxdataentry, fitcontinuumentry in zip(fluxdata, fitcontinuum[0])]
+
+### fluxnorm is great, but it's still spikey.
+threshold = 1.03 # value above which to cut off spikes
+fluxnorm = [flux if flux < threshold else 1.0 for flux in fluxnorm]
+
+# Meredith had an idea but it didn't turn out to be useful, I don't think
+#range = np.nanmax(fluxnorm) - np.nanmin(fluxnorm)
+#fluxnorm = [(flux-np.nanmin(fluxnorm))/range for flux in fluxnorm]
+
+###Print visit spectra to txt files
+realstar = open(specfileout, 'w') 
+for wave, flux in zip(wavedata, fluxnorm): 
+	if flux > 0 and flux != np.nan: # only print positive fluxes that aren't nan
+		print(wave, flux, file=realstar)
+realstar.close()
+
+## TODO: END LOOP OVER VISIT
 
 
 ###Read in Model Spec 
