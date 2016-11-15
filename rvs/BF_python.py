@@ -91,7 +91,7 @@ SpecPlot = True         # toggle to plot spectra before BFs, or not
 bjdoffset = 2454833.    # difference between real BJDs and 'bjdfunny' (truncated BJDs)
 amplimits = [0,1.2, 0,1.2] # limits for gaussian normalized amplitude [min1,max1,min2,max2]
 threshold = 10             # margin for gaussian position (raw RV in km/s)
-widlimits = [0,20, 0,20]   # limits for gaussian width (km/s) [min1,max1,min2,max2]
+widlimits = [0,5, 0,5]   # limits for gaussian width (km/s) [min1,max1,min2,max2]
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734 #(A4851217)
@@ -103,13 +103,13 @@ rvstd = 0; bcvstd = 0 # model template
 #rvstd = 0; bcvstd = 13.5073 # joni's OA with self-template
 
 # PARAMETERS FOR THE BROADENING FUNCTION (IMPORTANT PAY ATTENTION !!!)
-smoothstd = 1.5      # stdev of Gaussian to smooth BFs by (~slit width in pixels)
+smoothstd = 1.0      # stdev of Gaussian to smooth BFs by (~slit width in pixels)
 #w00 = 5400          # starting wavelength for new grid
 #n = 38750           # number of wavelength points for new grid
 #stepV = 1.7         # roughly 3e5 / (max_wavelength / wavelength_step) km/s, rounded down
-m = 201              # length of the BF (must be longer if RVs are far from 0)
+m = 101              # length of the BF (must be longer if RVs are far from 0)
 ## good values for APOGEE:
-w00 = 15170; n = 19800; stepV = 1.5 # all of APOGEE
+w00 = 15170; n = 32000; stepV = 1.0 # all of APOGEE
 #w00 = 15670; n = 2000; stepV = 1.5 # a little piece of APOGEE
 ## good values for ARCES & TRES together:
 #w00 = 5400; n = 38750; stepV = 1.7
@@ -117,7 +117,7 @@ w00 = 15170; n = 19800; stepV = 1.5 # all of APOGEE
 #w00 = 4485; n = 53000; stepV = 1.5
 
 # LIMITS TO MAKE PLOTS LOOK NICE
-rvneg = -79; rvpos = 79; ymin = -0.15; ymax = 1.05 # good starting values
+rvneg = -29; rvpos = 29; ymin = -0.15; ymax = 1.05 # good starting values
 ##########
 
 print('Welcome to the Broadening Function party!')
