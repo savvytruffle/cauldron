@@ -147,7 +147,7 @@ for i in range (0, nspec):
     newspec = np.interp(w1, wavelist[i], speclist[i])
     newspeclist.append(newspec)
     if SpecPlot == True:
-        plt.plot(w1, newspec+yoffset, label=datetimelist[i].iso[0:10], color='b')
+        plt.plot(w1, newspec+yoffset, label=datetimelist[i].iso[0:10], color='b')#, ls='None', marker='.')
     yoffset = yoffset + 1
 if SpecPlot == True:
     ##plt.legend()
