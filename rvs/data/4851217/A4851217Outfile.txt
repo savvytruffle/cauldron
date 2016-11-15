@@ -6,7 +6,7 @@
 # Template spectrum (line 0 of infiles):  data/4851217/modelspec.txt
 # RV of template, BCV of template (km/s): 0, 0
 #
-# List of all input spectra (infiles): data/4851217/A4851217infiles_despiked.txt
+# List of all input spectra (infiles): data/4851217/A4851217infiles.txt
 # Target BJD and BCV info (bjdinfile): data/4851217/A4851217bjdinfile.txt
 # Gaussian fit guesses (gausspars):    data/4851217/A4851217gausspars.txt
 #

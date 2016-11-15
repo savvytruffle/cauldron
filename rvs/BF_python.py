@@ -68,7 +68,7 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   '/Users/revhalzoo/SDSS/DCA/DChoAOutfile.txt'
 
 #A4851217
-infiles =   'data/4851217/A4851217infiles_despiked.txt' #testing with despiked infiles
+infiles =   'data/4851217/A4851217infiles.txt' #_despiked.txt' #option for despiked infiles
 bjdinfile = 'data/4851217/A4851217bjdinfile.txt'
 gausspars = 'data/4851217/A4851217gausspars.txt'
 outfile =   'data/4851217/A4851217Outfile.txt'
