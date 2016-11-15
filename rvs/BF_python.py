@@ -89,9 +89,9 @@ outfile =   'data/4851217/A4851217Outfile.txt'
 isAPOGEE = True        # toggle to use near-IR stuff, or not
 SpecPlot = True         # toggle to plot spectra before BFs, or not
 bjdoffset = 2454833.    # difference between real BJDs and 'bjdfunny' (truncated BJDs)
-amplimits = [0,1, 0,1] # limits for gaussian normalized amplitude [min1,max1,min2,max2]
-threshold = 10           # margin for gaussian position (raw RV in km/s)
-widlimits = [0,20, 0,20]  # limits for gaussian width (km/s) [min1,max1,min2,max2]
+amplimits = [0,1.2, 0,1.2] # limits for gaussian normalized amplitude [min1,max1,min2,max2]
+threshold = 10             # margin for gaussian position (raw RV in km/s)
+widlimits = [0,20, 0,20]   # limits for gaussian width (km/s) [min1,max1,min2,max2]
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
 period = 2.47028; BJD0 = 2455813.69734 #(A4851217)
