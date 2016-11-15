@@ -74,10 +74,10 @@ gausspars = 'data/4851217/A4851217gausspars.txt'
 outfile =   'data/4851217/A4851217Outfile.txt'
 
 #B5285607
-#infiles =   '/Users/revhalzoo/SDSS/B5285607/B5285607infiles.txt'
-#bjdinfile = '/Users/revhalzoo/SDSS/B5285607/B5285607bjdinfile.txt'
-#gausspars = '/Users/revhalzoo/SDSS/B5285607/B5285607gausspars.txt'
-#outfile =   '/Users/revhalzoo/SDSS/B5285607/B5285607Outfile.txt'
+#infiles =   'data/5285607/5285607infiles.txt'
+#bjdinfile = 'data/5285607/5285607bjdinfile.txt'
+#gausspars = 'data/5285607/5285607gausspars.txt'
+#outfile =   'data/5285607/5285607Outfile.txt'
 
 #C6449358
 #infiles =   '/Users/revhalzoo/SDSS/C6449358/C6449358infiles.txt'

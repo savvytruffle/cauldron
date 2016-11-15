@@ -1,0 +1,7 @@
+data/5285607/modelspec.txt
+data/5285607/obsspec1.txt
+data/5285607/obsspec2.txt
+data/5285607/obsspec3.txt
+data/5285607/obsspec4.txt
+data/5285607/obsspec5.txt
+data/5285607/obsspec6.txt

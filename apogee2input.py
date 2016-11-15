@@ -13,8 +13,8 @@ from apogee.modelspec import ferre
 ###Read in spectra:::[0],[1] is the combined spectra:::[2]-[n] are each visit###
 
 #mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[2]
-mystar = apread.apStar(4263, '2M19432016+3957081', ext=1, header=False)[7]#KIC4851217
-#mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[2]	#KIC5285607
+#mystar = apread.apStar(4263, '2M19432016+3957081', ext=1, header=False)[7]#KIC4851217
+mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[7]	#KIC5285607
 #mystar = apread.apStar(4464, '2M19353513+4149543', ext=1, header=False)[2]	#KIC6449358
 #mystar = apread.apStar(4263, '2M19355993+3813561', ext=1, header=False)[2]	#KIC3127817Overlap
 #mystar = apread.apStar(4263, '2M19373173+4027078', ext=1, header=False)[2]	#KIC5284133
@@ -22,8 +22,8 @@ mystar = apread.apStar(4263, '2M19432016+3957081', ext=1, header=False)[7]#KIC48
 ###Read in error###
 
 #mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[2]
-mystarerr = apread.apStar(4263, '2M19432016+3957081', ext=2, header=False)[7]#KIC4851217
-#mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[2]	#KIC5285607
+#mystarerr = apread.apStar(4263, '2M19432016+3957081', ext=2, header=False)[7]#KIC4851217
+mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[7]	#KIC5285607
 #mystarerr = apread.apStar(4464, '2M19353513+4149543', ext=2, header=False)[2]	#KIC6449358
 #mystarerr = apread.apStar(4263, '2M19355993+3813561', ext=2, header=False)[2]	#KIC3127817Overlap
 #mystarerr = apread.apStar(4263, '2M19373173+4027078', ext=2, header=False)[2]	#KIC5284133
@@ -57,8 +57,8 @@ fluxnorm = [fluxdataentry/fitcontinuumentry if fitcontinuumentry != 0 else 0 for
 ####::::These numbers are not true values, don't believe in the lies::::####
 
 #modelspec = ferre.interpolate(4812., 4.5, 0.1, 0., 0., 0.)#KIC4851217
-#modelspec = ferre.interpolate(6000., 5., 0.1, 0., 0., 0., lib='F')#KIC5285607
-modelspec = ferre.interpolate(6438., 4.6, 0.1, 0., 0., 0., lib='F')#KIC6449358
+#modelspec = ferre.interpolate(6000., 5., 0.1, 0., 0., 0., lib='F')
+modelspec = ferre.interpolate(6438., 4.6, 0.1, 0., 0., 0., lib='F')#KIC5285607
 #modelspec = ferre.interpolate(6510., 4.8, 0.1, 0., 0., 0.)#KIC3127817
 #							 (Teff.,logg,metals,alphafe,nfe,cfe.)
 
