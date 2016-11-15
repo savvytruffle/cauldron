@@ -99,25 +99,20 @@ modelspec = ferre.interpolate(7000., 4.9, -1.0, 0., 0., 0., lib='F')#KIC5285607
 #for item in modelspec: 
 #	print(item)
 
+###Plot the model on top of a visit spectrum
 plt.plot(wavedata, fluxnorm)
 plt.plot(wavedata, modelspec, color='r')
 plt.show()
-#data = apread.rcsample()
-#indx = data['SNR'] > 200.
-#data = data[indx]
 
-
-###Print data to txt files###
-realstar = open('data/spectest6.txt', 'w') 
-templatedata = open('data/modeltest.txt', 'w')
-for wave, flux in zip(wavedata, fluxnorm): 
-	if flux > 0 and flux != np.nan: # only print positive fluxes that aren't nan
-		print(wave, flux, file=realstar)
+###Print the model spectrum to a txt file
+templatedata = open(modelfileout, 'w')
 for wave, flux in zip(wavedata, modelspec):
     if flux > 0 and flux != np.nan: # only print positive fluxes that aren't nan
         print(wave, flux, file=templatedata)
-realstar.close()
 templatedata.close()
+
+
+# Old stuff is below
 
 ###Overlay model spectrum 
 #print('4263','2M19390532+4027346')
@@ -128,28 +123,8 @@ templatedata.close()
 #plt.plot(xdummy, mystar[0])
 #plt.show()
 
-
 #print(mystar)
 #splot.waveregions(mystar[0], labelLines=False, apStar=True)
-
-#Non Continuum Normalized
-#splot.waveregions(data[3512]['LOCATION_ID'],data[3512]['APOGEE_ID'],ext=1,
-#                  apStar=True,labelID=data[3512]['APOGEE_ID'],
-#                  labelTeff=data[3512]['TEFF'],
-#                  labellogg=data[3512]['LOGG'],
-#                  labelmetals=data[3512]['METALS'],
-#                  labelafe=data[3512]['ALPHAFE'])
-
-#Plot a whole detector 
-#splot.detector(data[3512]['LOCATION_ID'],data[3512]['APOGEE_ID'],
-#               'blue',ext=1,labelLines=False,
-#               labelID=data[3512]['APOGEE_ID'],
-#               labelTeff=data[3512]['TEFF'],
-#               labellogg=data[3512]['LOGG'],
-#               labelmetals=data[3512]['METALS'],
-#               labelafe=data[3512]['ALPHAFE'])
-
-
 
 #spec is the apogee spectra
 #spec, hdr= apread.apStar(4102,'2M21353892+4229507',ext=1)
@@ -159,7 +134,3 @@ templatedata.close()
 #						(Teff.,logg,metals,alphafe,nfe,cfe.)
 #apogee.spec.plot.waveregions(spec)
 #apogee.spec.plot.waveregions(mspec)
- 
-#print(mspec[0])
-#print(mspec[1])
-#plt.show()
