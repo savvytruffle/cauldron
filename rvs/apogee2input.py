@@ -86,14 +86,14 @@ realstar.close()
 ## TODO: END LOOP OVER VISIT
 
 
-###Read in Model Spec 
-####::::These numbers are not true values, don't believe in the lies::::####
+###Create an appropriate model spectrum by interpolating with FERRE 
+## don't forget to set Teff, logg, Fe/H and specify cooler (GK) or hotter (F) library
 
 #modelspec = ferre.interpolate(4812., 4.5, 0.1, 0., 0., 0.)#KIC4851217
 #modelspec = ferre.interpolate(6000., 5., 0.1, 0., 0., 0., lib='F')
-modelspec = ferre.interpolate(6438., 4.6, 0.1, 0., 0., 0., lib='F')#KIC5285607
+modelspec = ferre.interpolate(7000., 4.9, -1.0, 0., 0., 0., lib='F')#KIC5285607
 #modelspec = ferre.interpolate(6510., 4.8, 0.1, 0., 0., 0.)#KIC3127817
-#							 (Teff.,logg,metals,alphafe,nfe,cfe.)
+#							 (Teff., logg, metals, alphafe, nfe, cfe)
 
 ###When in doubt, print it out
 #for item in modelspec: 
