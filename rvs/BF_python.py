@@ -109,7 +109,7 @@ smoothstd = 1.5      # stdev of Gaussian to smooth BFs by (~slit width in pixels
 #stepV = 1.7         # roughly 3e5 / (max_wavelength / wavelength_step) km/s, rounded down
 m = 201              # length of the BF (must be longer if RVs are far from 0)
 ## good values for APOGEE:
-w00 = 15145; n = 15000; stepV = 1.5 # all of APOGEE
+w00 = 15170; n = 19800; stepV = 1.5 # all of APOGEE
 #w00 = 15670; n = 2000; stepV = 1.5 # a little piece of APOGEE
 ## good values for ARCES & TRES together:
 #w00 = 5400; n = 38750; stepV = 1.7
