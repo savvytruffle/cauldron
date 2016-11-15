@@ -1,0 +1,7 @@
+data/5285607/modeltest.txt
+data/5285607/spectest1.txt
+data/5285607/spectest2.txt
+data/5285607/spectest3.txt
+data/5285607/spectest4.txt
+data/5285607/spectest5.txt
+data/5285607/spectest6.txt

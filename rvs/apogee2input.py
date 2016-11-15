@@ -75,7 +75,7 @@ plt.show()
 
 
 ###Print data to txt files###
-realstar = open('data/spectest.txt', 'w') 
+realstar = open('data/spectest6.txt', 'w') 
 templatedata = open('data/modeltest.txt', 'w')
 for wave, flux in zip(wavedata, fluxnorm): 
 	if flux > 0 and flux != np.nan: # only print positive fluxes that aren't nan

@@ -68,16 +68,16 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   '/Users/revhalzoo/SDSS/DCA/DChoAOutfile.txt'
 
 #A4851217
-infiles =   'data/4851217/A4851217infiles.txt' #_despiked.txt' #option for despiked infiles
-bjdinfile = 'data/4851217/A4851217bjdinfile.txt'
-gausspars = 'data/4851217/A4851217gausspars.txt'
-outfile =   'data/4851217/A4851217Outfile.txt'
+#infiles =   'data/4851217/A4851217infiles.txt' #_despiked.txt' #option for despiked infiles
+#bjdinfile = 'data/4851217/A4851217bjdinfile.txt'
+#gausspars = 'data/4851217/A4851217gausspars.txt'
+#outfile =   'data/4851217/A4851217Outfile.txt'
 
 #B5285607
-#infiles =   'data/5285607/5285607infiles.txt'
-#bjdinfile = 'data/5285607/5285607bjdinfile.txt'
-#gausspars = 'data/5285607/5285607gausspars.txt'
-#outfile =   'data/5285607/5285607Outfile.txt'
+infiles =   'data/5285607/5285607infiles.txt'
+bjdinfile = 'data/5285607/5285607bjdinfile.txt'
+gausspars = 'data/5285607/5285607gausspars.txt'
+outfile =   'data/5285607/5285607Outfile.txt'
 
 #C6449358
 #infiles =   '/Users/revhalzoo/SDSS/C6449358/C6449358infiles.txt'
@@ -94,8 +94,8 @@ threshold = 10             # margin for gaussian position (raw RV in km/s)
 widlimits = [0,20, 0,20]   # limits for gaussian width (km/s) [min1,max1,min2,max2]
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
-period = 2.47028; BJD0 = 2455813.69734 #(A4851217)
-#period = 3.8994011; BJD0 = 2455813.69734 #(B5285607)
+#period = 2.47028; BJD0 = 2455813.69734 #(A4851217)
+period = 3.8994011; BJD0 = 2455813.69734 #(B5285607)
 #period = 5.7767904; BJD0 = 2456760.90580 #(C6449358)
 
 # RADIAL VELOCITY AND BCV INFO FOR TEMPLATE (km/s; set both to 0 if using a model !!!)
