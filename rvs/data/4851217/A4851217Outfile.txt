@@ -1,0 +1,24 @@
+# RVs calculated with BF_python.py
+#
+# Porb = 2.47028 days, BJD0 = 2455813.69734 days
+# Wavelength axis = [15170.0 - 16749.745738172445] Angstroms
+#
+# Template spectrum (line 0 of infiles):  data/4851217/modelspec.txt
+# RV of template, BCV of template (km/s): 0, 0
+#
+# List of all input spectra (infiles): data/4851217/A4851217infiles_despiked.txt
+# Target BJD and BCV info (bjdinfile): data/4851217/A4851217bjdinfile.txt
+# Gaussian fit guesses (gausspars):    data/4851217/A4851217gausspars.txt
+#
+# BF parameters: w00 = 15170; n = 19800; stepV = 1.5
+# BF parameters: smoothstd = 1.5; m = 201
+# gaussfit: amplimits = [0, 1.2, 0, 1.2]; threshold = 10, widlimits = [0, 20, 0, 20]
+#
+# time, phase, adjusted_time, RV1 [km/s], error1 [km/s], RV2 [km/s], error2 [km/s]
+#
+2455813.697340000 0.000000000 980.697340000 -18.71556 0.00000 21.28444 0.00000
+2455849.577420000 0.524701653 1016.577420000 -24.24351 0.00000 15.75649 0.00000
+2455866.569340000 0.403241738 1033.569340000 -25.22953 0.00000 14.77047 0.00000
+2455840.659790000 0.914734362 1007.659790000 -23.38981 0.00000 16.61019 0.00000
+2455823.724460000 0.059102612 990.724460000 -20.77457 0.00000 19.22543 0.00000
+2455851.647910000 0.362861700 1018.647910000 -24.55291 0.00000 15.44708 0.00000

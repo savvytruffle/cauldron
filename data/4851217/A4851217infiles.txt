@@ -1,7 +1,0 @@
-/Users/halzoo/cauldron/data/4851217/modelspec.txt
-/Users/halzoo/cauldron/data/4851217/obsspec1.txt 
-/Users/halzoo/cauldron/data/4851217/obsspec2.txt 
-/Users/halzoo/cauldron/data/4851217/obsspec3.txt 
-/Users/halzoo/cauldron/data/4851217/obsspec4.txt 
-/Users/halzoo/cauldron/data/4851217/obsspec5.txt 
-/Users/halzoo/cauldron/data/4851217/obsspec6.txt 
