@@ -31,8 +31,8 @@ specfileout = 'data/'+str(KIC)+'/obsspecnorm'+str(visit)+'.txt'
 
 #mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[2]
 #mystar = apread.apStar(4263, '2M19432016+3957081', ext=1, header=False)[7]#KIC4851217
-mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[visit]	#KIC5285607
-#mystar = apread.apStar(4464, '2M19353513+4149543', ext=1, header=False)[2]	#KIC6449358
+#mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[visit]	#KIC5285607
+mystar = apread.apStar(4464, '2M19353513+4149543', ext=1, header=False)[2]	#KIC6449358
 #mystar = apread.apStar(4263, '2M19355993+3813561', ext=1, header=False)[2]	#KIC3127817Overlap
 #mystar = apread.apStar(4263, '2M19373173+4027078', ext=1, header=False)[2]	#KIC5284133
 
@@ -40,8 +40,8 @@ mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[visit]	#
 
 #mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[2]
 #mystarerr = apread.apStar(4263, '2M19432016+3957081', ext=2, header=False)[7]#KIC4851217
-mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[visit]	#KIC5285607
-#mystarerr = apread.apStar(4464, '2M19353513+4149543', ext=2, header=False)[2]	#KIC6449358
+#mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[visit]	#KIC5285607
+mystarerr = apread.apStar(4464, '2M19353513+4149543', ext=2, header=False)[2]	#KIC6449358
 #mystarerr = apread.apStar(4263, '2M19355993+3813561', ext=2, header=False)[2]	#KIC3127817Overlap
 #mystarerr = apread.apStar(4263, '2M19373173+4027078', ext=2, header=False)[2]	#KIC5284133
 
@@ -84,6 +84,15 @@ for wave, flux in zip(wavedata, fluxnorm):
 realstar.close()
 
 ## TODO: END LOOP OVER VISIT
+###Joni tries to do the thing (LOOP)
+#spectraoutfiles = ['specV1.txt','specV2.txt','specV3.txt','specV4.txt','specV5.txt','specV6.txt',
+#	'specV7.txt','specV8.txt','specV9.txt','specV10.txt','specV11.txt','specV12.txt','specV13.txt',
+#	'specV14.txt','specV15.txt','specV16.txt','specV17.txt','specV18.txt','specV19.txt','specV20.txt',
+#	'specV21.txt','specV22.txt','specV23.txt']
+#	for outfiles in spectraoutfiles:
+#		spectradata = open(spectraoutfile, 'w')
+#		print(wave, flux, file=spectradata)
+#		spectradata.close()
 
 
 ###Create an appropriate model spectrum by interpolating with FERRE 
@@ -91,8 +100,8 @@ realstar.close()
 
 #modelspec = ferre.interpolate(4812., 4.5, 0.1, 0., 0., 0.)#KIC4851217
 #modelspec = ferre.interpolate(6000., 5., 0.1, 0., 0., 0., lib='F')
-modelspec = ferre.interpolate(7000., 4.9, -1.0, 0., 0., 0., lib='F')#KIC5285607
-#modelspec = ferre.interpolate(6510., 4.8, 0.1, 0., 0., 0.)#KIC3127817
+#modelspec = ferre.interpolate(7000., 4.9, -1.0, 0., 0., 0., lib='F')#KIC5285607
+modelspec = ferre.interpolate(6510., 4.6, 0.2, 0., 0., 0., lib='F')#KIC6449358
 #							 (Teff., logg, metals, alphafe, nfe, cfe)
 
 ###When in doubt, print it out
