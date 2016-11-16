@@ -16,38 +16,42 @@ All the final spectra are continuum normalized.
 ## TODO: define useful variables upfront here so they're easy to change in one place.
 ##       To include filenames, PlateID, APOGEEID, desired Teff/logg/FeH of model, etc.
 
-# to get you started...
-KIC = 6449358
-visit = 27
-modelfileout = 'data/'+str(KIC)+'/modeltest.txt'
-specfileout = 'data/'+str(KIC)+'/obsspecnorm'+str(visit)+'.txt'
+#KIC = 6449358
+#visit = 3
+#modelfileout = 'data/'+str(KIC)+'/modeltest.txt'
+#specfileout = 'data/'+str(KIC)+'/obsspecnorm'+str(visit)+'.txt'
 
 ### TODO: BEGIN LOOP OVER VISIT
-visits = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27]
+visits = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
 for visit in visits:
+
+	KIC = 6449358
+	visit = 26	#2-26 is being interprited as 2 minus 26... how do I do a list to python knows to go from 2 to 3 to 4 etc
+	modelfileout = 'data/'+str(KIC)+'/modeltest.txt'
+	specfileout = 'data/'+str(KIC)+'/obsspecnorm'+str(visit)+'.txt'
 # ... etc.
 
 ###Read in spectra:::[0],[1] is the combined spectra:::[2]-[n] are each visit###
 
-#mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[2]
-#mystar = apread.apStar(4263, '2M19432016+3957081', ext=1, header=False)[7]#KIC4851217
-#mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[visit]	#KIC5285607
-	mystar = apread.apStar(4464, '2M19353513+4149543', ext=1, header=False)[visit]	
-#mystar = apread.apStar(4263, '2M19355993+3813561', ext=1, header=False)[2]	#KIC3127817Overlap
-#mystar = apread.apStar(4263, '2M19373173+4027078', ext=1, header=False)[2]	#KIC5284133
+	#mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[2]
+	#mystar = apread.apStar(4263, '2M19432016+3957081', ext=1, header=False)[7]#KIC4851217
+	#mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[visit]	#KIC5285607
+	mystar = apread.apStar(4464, '2M19353513+4149543', ext=1, header=False)[visit]#KIC6449358
+	#mystar = apread.apStar(4263, '2M19355993+3813561', ext=1, header=False)[2]	#KIC3127817Overlap
+	#mystar = apread.apStar(4263, '2M19373173+4027078', ext=1, header=False)[2]	#KIC5284133
 
 ###Read in error###
 
-#mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[2]
-#mystarerr = apread.apStar(4263, '2M19432016+3957081', ext=2, header=False)[7]#KIC4851217
-#mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[visit]	#KIC5285607
+	#mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[2]	
+	#mystarerr = apread.apStar(4263, '2M19432016+3957081', ext=2, header=False)[7]#KIC4851217
+	#mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[visit]	#KIC5285607
 	mystarerr = apread.apStar(4464, '2M19353513+4149543', ext=2, header=False)[visit]
-#mystarerr = apread.apStar(4263, '2M19355993+3813561', ext=2, header=False)[2]	#KIC3127817Overlap
-#mystarerr = apread.apStar(4263, '2M19373173+4027078', ext=2, header=False)[2]	#KIC5284133
+	#mystarerr = apread.apStar(4263, '2M19355993+3813561', ext=2, header=False)[2]	#KIC3127817Overlap
+	#mystarerr = apread.apStar(4263, '2M19373173+4027078', ext=2, header=False)[2]	#KIC5284133
 
 ###Reshape the arrays following the example in jobovy/apogee README
-mystar = np.reshape(mystar, (1, len(mystar)))
-mystarerr = np.reshape(mystarerr, (1, len(mystarerr)))
+	mystar = np.reshape(mystar, (1, len(mystar)))
+	mystarerr = np.reshape(mystarerr, (1, len(mystarerr)))
 
 ###Define Flux and Wavelength
 fluxdata = mystar[0]
