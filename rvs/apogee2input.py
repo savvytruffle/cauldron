@@ -29,7 +29,7 @@ modelfileout = 'data/'+str(KIC)+'/modeltest.txt'
 #(4464, '2M19353513+4149543', ext=1, header=False)[visit] #KIC6449358 (25 Visits):::
 #(4263, '2M19373173+4027078', ext=1, header=False)[visit] #KIC5284133 (6 Visits):::
 #(4464, '2M19282456+4215080', ext=1, header=False)[visit] #KIC6778289 (25 Visits):::
-#(4464, '2M19321788+4216489', ext=1, header=False)[Visit] #KIC6781535 (25 Visits)
+#(4464, '2M19321788+4216489', ext=1, header=False)[Visit] #KIC6781535 (25 Visits):::
 
 
 visits = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
