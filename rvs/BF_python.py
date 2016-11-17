@@ -68,16 +68,16 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   '/Users/revhalzoo/SDSS/DCA/DChoAOutfile.txt'
 
 #A4851217
-infiles =   '/Users/revhalzoo/SDSS/A4851217/A4851217infiles.txt'
-bjdinfile = '/Users/revhalzoo/SDSS/A4851217/A4851217bjdinfile.txt'
-gausspars = '/Users/revhalzoo/SDSS/A4851217/A4851217gausspars.txt'
-outfile =   '/Users/revhalzoo/SDSS/A4851217/A4851217Outfile.txt'
+#infiles =   'data/4851217/A4851217infiles.txt' #_despiked.txt' #option for despiked infiles
+#bjdinfile = 'data/4851217/A4851217bjdinfile.txt'
+#gausspars = 'data/4851217/A4851217gausspars.txt'
+#outfile =   'data/4851217/A4851217Outfile.txt'
 
 #B5285607
-#infiles =   '/Users/revhalzoo/SDSS/B5285607/B5285607infiles.txt'
-#bjdinfile = '/Users/revhalzoo/SDSS/B5285607/B5285607bjdinfile.txt'
-#gausspars = '/Users/revhalzoo/SDSS/B5285607/B5285607gausspars.txt'
-#outfile =   '/Users/revhalzoo/SDSS/B5285607/B5285607Outfile.txt'
+infiles =   'data/5285607/5285607infiles.txt'
+bjdinfile = 'data/5285607/5285607bjdinfile.txt'
+gausspars = 'data/5285607/5285607gausspars.txt'
+outfile =   'data/5285607/5285607Outfile.txt'
 
 #C6449358
 #infiles =   '/Users/revhalzoo/SDSS/C6449358/C6449358infiles.txt'
@@ -89,13 +89,13 @@ outfile =   '/Users/revhalzoo/SDSS/A4851217/A4851217Outfile.txt'
 isAPOGEE = True        # toggle to use near-IR stuff, or not
 SpecPlot = True         # toggle to plot spectra before BFs, or not
 bjdoffset = 2454833.    # difference between real BJDs and 'bjdfunny' (truncated BJDs)
-amplimits = [0,1, 0,1] # limits for gaussian normalized amplitude [min1,max1,min2,max2]
-threshold = 10           # margin for gaussian position (raw RV in km/s)
-widlimits = [0,20, 0,20]  # limits for gaussian width (km/s) [min1,max1,min2,max2]
+amplimits = [0,1.2, 0,1.2] # limits for gaussian normalized amplitude [min1,max1,min2,max2]
+threshold = 10             # margin for gaussian position (raw RV in km/s)
+widlimits = [0,5, 0,5]   # limits for gaussian width (km/s) [min1,max1,min2,max2]
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
-period = 2.47028; BJD0 = 2455813.69734 #(A4851217)
-#period = 3.8994011; BJD0 = 2455813.69734 #(B5285607)
+#period = 2.47028; BJD0 = 2455813.69734 #(A4851217)
+period = 3.8994011; BJD0 = 2455813.69734 #(B5285607)
 #period = 5.7767904; BJD0 = 2456760.90580 #(C6449358)
 
 # RADIAL VELOCITY AND BCV INFO FOR TEMPLATE (km/s; set both to 0 if using a model !!!)
@@ -103,13 +103,13 @@ rvstd = 0; bcvstd = 0 # model template
 #rvstd = 0; bcvstd = 13.5073 # joni's OA with self-template
 
 # PARAMETERS FOR THE BROADENING FUNCTION (IMPORTANT PAY ATTENTION !!!)
-smoothstd = 1.5      # stdev of Gaussian to smooth BFs by (~slit width in pixels)
+smoothstd = 1.0      # stdev of Gaussian to smooth BFs by (~slit width in pixels)
 #w00 = 5400          # starting wavelength for new grid
 #n = 38750           # number of wavelength points for new grid
 #stepV = 1.7         # roughly 3e5 / (max_wavelength / wavelength_step) km/s, rounded down
-m = 201              # length of the BF (must be longer if RVs are far from 0)
+m = 101              # length of the BF (must be longer if RVs are far from 0)
 ## good values for APOGEE:
-w00 = 15145; n = 15000; stepV = 1.5 # all of APOGEE
+w00 = 15170; n = 32000; stepV = 1.0 # all of APOGEE
 #w00 = 15670; n = 2000; stepV = 1.5 # a little piece of APOGEE
 ## good values for ARCES & TRES together:
 #w00 = 5400; n = 38750; stepV = 1.7
@@ -117,7 +117,7 @@ w00 = 15145; n = 15000; stepV = 1.5 # all of APOGEE
 #w00 = 4485; n = 53000; stepV = 1.5
 
 # LIMITS TO MAKE PLOTS LOOK NICE
-rvneg = -79; rvpos = 79; ymin = -0.15; ymax = 1.05 # good starting values
+rvneg = -29; rvpos = 29; ymin = -0.15; ymax = 1.05 # good starting values
 ##########
 
 print('Welcome to the Broadening Function party!')
@@ -147,7 +147,7 @@ for i in range (0, nspec):
     newspec = np.interp(w1, wavelist[i], speclist[i])
     newspeclist.append(newspec)
     if SpecPlot == True:
-        plt.plot(w1, newspec+yoffset, label=datetimelist[i].iso[0:10], color='b')
+        plt.plot(w1, newspec+yoffset, label=datetimelist[i].iso[0:10], color='b')#, ls='None', marker='.')
     yoffset = yoffset + 1
 if SpecPlot == True:
     ##plt.legend()
