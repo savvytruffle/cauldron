@@ -3,17 +3,8 @@
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 EXT = linux
-GCC_FLAGS1_gsl = -I$(GSL_PATH)/include -fPIC -Wl,-Bsymbolic-functions -c -O3
-GCC_FLAGS2_gsl = -L$(GSL_PATH)/lib -lgsl -lgslcblas -lm -shared -O3 -Wl,-Bsymbolic-functions,-soname,helpers_linux.so
-GCC_FLAGS1 = -fPIC -Wl,-Bsymbolic-functions -c -O3
-GCC_FLAGS2 = -lm -shared -O3 -Wl,-Bsymbolic-functions,-soname,gravitation_linux.so
-endif
-ifeq ($(UNAME_S),Darwin)
-EXT = mac
-GCC_FLAGS1_gsl = -I$(GSL_PATH)/include -fPIC -c
-GCC_FLAGS2_gsl = -L$(GSL_PATH)/lib -lgsl -lgslcblas -shared -Wl,-install_name,helpers_mac.so
-GCC_FLAGS1 = -fPIC -c
-GCC_FLAGS2 = -lm -shared -Wl,-install_name,gravitation_mac.so
+GCC_FLAGS1_gsl = -I/astro/users/aleezah/Documents/cauldron/src/include -fPIC -Wl,-Bsymbolic-functions -c -O3
+GCC_FLAGS2_gsl = -L/astro/users/aleezah/Documents/cauldron/src/lib -lgsl -lgslcblas -lm -shared -O3 -Wl,-Bsymbolic-functions,-soname,helpers_linux.so
 endif
 
 GCC = gcc
