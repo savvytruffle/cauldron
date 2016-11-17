@@ -13,82 +13,76 @@ The model spectrum should have stellar parameters similar to the target star for
 All the final spectra are continuum normalized.
 '''
 
-## TODO: define useful variables upfront here so they're easy to change in one place.
-##       To include filenames, PlateID, APOGEEID, desired Teff/logg/FeH of model, etc.
+## define useful variables upfront here so they're easy to change in one place.
 
-#KIC = 6449358
+KIC = 6449358
+plate = 4464
+ID = '2M19353513+4149543'
 #visit = 3
-#modelfileout = 'data/'+str(KIC)+'/modeltest.txt'
+modelfileout = 'data/'+str(KIC)+'/modeltest.txt'
 #specfileout = 'data/'+str(KIC)+'/obsspecnorm'+str(visit)+'.txt'
 
-### TODO: BEGIN LOOP OVER VISIT
+# reference for other stars
+#(4263, '2M19432016+3957081', ext=1, header=False)[visit] #KIC4851217
+#(4263, '2M19390532+4027346', ext=1, header=False)[visit] #KIC5285607
+#(4263, '2M19355993+3813561', ext=1, header=False)[visit] #KIC3127817Overlap
+#(4263, '2M19373173+4027078', ext=1, header=False)[visit] #KIC5284133
+
+
 visits = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+
+### BEGIN LOOP OVER VISITS
 for visit in visits:
 
-	KIC = 6449358
-	visit = 26	#2-26 is being interprited as 2 minus 26... how do I do a list to python knows to go from 2 to 3 to 4 etc
-	modelfileout = 'data/'+str(KIC)+'/modeltest.txt'
-	specfileout = 'data/'+str(KIC)+'/obsspecnorm'+str(visit)+'.txt'
-# ... etc.
+    # Define outfile for visit spectrum
+    specfileout = 'data/'+str(KIC)+'/obsspecnorm'+str(visit)+'.txt'
 
-###Read in spectra:::[0],[1] is the combined spectra:::[2]-[n] are each visit###
+    # Read in spectra:::[0],[1] is the combined spectra:::[2]-[n] are each visit###
+    mystar = apread.apStar(plate, ID, ext=1, header=False)[visit]#KIC6449358
 
-	#mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[2]
-	#mystar = apread.apStar(4263, '2M19432016+3957081', ext=1, header=False)[7]#KIC4851217
-	#mystar = apread.apStar(4263, '2M19390532+4027346', ext=1, header=False)[visit]	#KIC5285607
-	mystar = apread.apStar(4464, '2M19353513+4149543', ext=1, header=False)[visit]#KIC6449358
-	#mystar = apread.apStar(4263, '2M19355993+3813561', ext=1, header=False)[2]	#KIC3127817Overlap
-	#mystar = apread.apStar(4263, '2M19373173+4027078', ext=1, header=False)[2]	#KIC5284133
+    # Read in error###
+    mystarerr = apread.apStar(plate, ID, ext=2, header=False)[visit]
 
-###Read in error###
+    # Reshape the arrays following the example in jobovy/apogee README
+    mystar = np.reshape(mystar, (1, len(mystar)))
+    mystarerr = np.reshape(mystarerr, (1, len(mystarerr)))
 
-	#mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[2]	
-	#mystarerr = apread.apStar(4263, '2M19432016+3957081', ext=2, header=False)[7]#KIC4851217
-	#mystarerr = apread.apStar(4263, '2M19390532+4027346', ext=2, header=False)[visit]	#KIC5285607
-	mystarerr = apread.apStar(4464, '2M19353513+4149543', ext=2, header=False)[visit]
-	#mystarerr = apread.apStar(4263, '2M19355993+3813561', ext=2, header=False)[2]	#KIC3127817Overlap
-	#mystarerr = apread.apStar(4263, '2M19373173+4027078', ext=2, header=False)[2]	#KIC5284133
+    ###Define Flux and Wavelength
+    fluxdata = mystar[0]
+    wavedata = apStarWavegrid()
 
-###Reshape the arrays following the example in jobovy/apogee README
-	mystar = np.reshape(mystar, (1, len(mystar)))
-	mystarerr = np.reshape(mystarerr, (1, len(mystarerr)))
+    ###Option to print Flux and Wavelength
+    #print(fluxdata)
+    #for item in fluxdata:
+    #    print(item)
+    #print(wavedata)
 
-###Define Flux and Wavelength
-fluxdata = mystar[0]
-wavedata = apStarWavegrid()
+    ###Fit the continuum
+    fitcontinuum = continuum.fit(mystar, mystarerr, type='aspcap')
+    fitcontinuumentry = fitcontinuum[0] 
+    #            if aspcap does not work well, it is customizable yo
 
-###Option to print Flux and Wavelength
-#print(fluxdata)
-#for item in fluxdata:
-#    print(item)
-#print(wavedata)
+    ###Divide by the continuum (without dividing by zero)
+    fluxnorm = [fluxdataentry/fitcontinuumentry if fitcontinuumentry != 0 else np.nan for 
+        fluxdataentry, fitcontinuumentry in zip(fluxdata, fitcontinuum[0])]
 
-###Fit the continuum
-fitcontinuum = continuum.fit(mystar, mystarerr, type='aspcap')
-fitcontinuumentry = fitcontinuum[0] 
-#			if aspcap does not work well, it is customizable yo
+    ### fluxnorm is great, but it's still spikey.
+    threshold = 1.03 # value above which to cut off spikes
+    fluxnorm = [flux if flux < threshold else 1.0 for flux in fluxnorm]
 
-###Divide by the continuum (without dividing by zero)
-fluxnorm = [fluxdataentry/fitcontinuumentry if fitcontinuumentry != 0 else np.nan for 
-	fluxdataentry, fitcontinuumentry in zip(fluxdata, fitcontinuum[0])]
+    # Meredith had an idea but it didn't turn out to be useful, I don't think
+    #range = np.nanmax(fluxnorm) - np.nanmin(fluxnorm)
+    #fluxnorm = [(flux-np.nanmin(fluxnorm))/range for flux in fluxnorm]
 
-### fluxnorm is great, but it's still spikey.
-threshold = 1.03 # value above which to cut off spikes
-fluxnorm = [flux if flux < threshold else 1.0 for flux in fluxnorm]
+    ###Print visit spectra to txt files
+    realstar = open(specfileout, 'w') 
+    for wave, flux in zip(wavedata, fluxnorm): 
+        if flux > 0 and flux != np.nan: # only print positive fluxes that aren't nan
+            print(wave, flux, file=realstar)
+    realstar.close()
 
-# Meredith had an idea but it didn't turn out to be useful, I don't think
-#range = np.nanmax(fluxnorm) - np.nanmin(fluxnorm)
-#fluxnorm = [(flux-np.nanmin(fluxnorm))/range for flux in fluxnorm]
+## END LOOP OVER VISIT
 
-###Print visit spectra to txt files
-realstar = open(specfileout, 'w') 
-for wave, flux in zip(wavedata, fluxnorm): 
-	if flux > 0 and flux != np.nan: # only print positive fluxes that aren't nan
-		print(wave, flux, file=realstar)
-realstar.close()
-
-## TODO: END LOOP OVER VISIT
-###Joni tries to do the thing (LOOP)
 
 ###Create an appropriate model spectrum by interpolating with FERRE 
 ## don't forget to set Teff, logg, Fe/H and specify cooler (GK) or hotter (F) library
@@ -97,13 +91,13 @@ realstar.close()
 #modelspec = ferre.interpolate(6000., 5., 0.1, 0., 0., 0., lib='F')
 #modelspec = ferre.interpolate(7000., 4.9, -1.0, 0., 0., 0., lib='F')#KIC5285607
 modelspec = ferre.interpolate(6510., 4.6, 0.2, 0., 0., 0., lib='F')#KIC6449358
-#							 (Teff., logg, metals, alphafe, nfe, cfe)
+#                             (Teff., logg, metals, alphafe, nfe, cfe)
 
 ###When in doubt, print it out
 #for item in modelspec: 
-#	print(item)
+#    print(item)
 
-###Plot the model on top of a visit spectrum
+###Plot the model on top of the last visit spectrum
 plt.plot(wavedata, fluxnorm)
 plt.plot(wavedata, modelspec, color='r')
 plt.show()
@@ -132,9 +126,9 @@ templatedata.close()
 
 #spec is the apogee spectra
 #spec, hdr= apread.apStar(4102,'2M21353892+4229507',ext=1)
-#						(Plate,2massID,ext=1)
+#                        (Plate,2massID,ext=1)
 #mspec is the model spectra interpolated by ferre 
 #mspec= ferre.interpolate(4750.,2.5,-0.1,0.1,0.,0.)
-#						(Teff.,logg,metals,alphafe,nfe,cfe.)
+#                        (Teff.,logg,metals,alphafe,nfe,cfe.)
 #apogee.spec.plot.waveregions(spec)
 #apogee.spec.plot.waveregions(mspec)
