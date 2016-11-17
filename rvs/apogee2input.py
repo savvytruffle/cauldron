@@ -15,18 +15,21 @@ All the final spectra are continuum normalized.
 
 ## define useful variables upfront here so they're easy to change in one place.
 
-KIC = 6449358
+KIC = 6781535
 plate = 4464
-ID = '2M19353513+4149543'
+ID = '2M19321788+4216489'
 #visit = 3
 modelfileout = 'data/'+str(KIC)+'/modeltest.txt'
 #specfileout = 'data/'+str(KIC)+'/obsspecnorm'+str(visit)+'.txt'
 
 # reference for other stars
-#(4263, '2M19432016+3957081', ext=1, header=False)[visit] #KIC4851217
-#(4263, '2M19390532+4027346', ext=1, header=False)[visit] #KIC5285607
-#(4263, '2M19355993+3813561', ext=1, header=False)[visit] #KIC3127817Overlap
-#(4263, '2M19373173+4027078', ext=1, header=False)[visit] #KIC5284133
+#(4263, '2M19432016+3957081', ext=1, header=False)[visit] #KIC4851217 (6 Visits):::
+#(4263, '2M19390532+4027346', ext=1, header=False)[visit] #KIC5285607 (6 Visits):::
+#(4263, '2M19355993+3813561', ext=1, header=False)[visit] #KIC3127817 (6 Visits):::
+#(4464, '2M19353513+4149543', ext=1, header=False)[visit] #KIC6449358 (25 Visits):::
+#(4263, '2M19373173+4027078', ext=1, header=False)[visit] #KIC5284133 (6 Visits):::
+#(4464, '2M19282456+4215080', ext=1, header=False)[visit] #KIC6778289 (25 Visits):::
+#(4464, '2M19321788+4216489', ext=1, header=False)[Visit] #KIC6781535 (25 Visits)
 
 
 visits = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
