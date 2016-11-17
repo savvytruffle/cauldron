@@ -27,5 +27,5 @@ all:
 	echo "Generating shared library for helper funcs..."
 	gcc ${GCC_FLAGS2_gsl} -o helpers_${EXT}.so helpers.o -lc
 	rm helpers.o
-	echo "Install successful."
-	
+	echo "Install helpers code successful."
+
