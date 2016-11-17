@@ -6,6 +6,13 @@
 #include <gsl/gsl_multifit.h>
 #include <stdbool.h>
 
+
+
+#define NMAX 20
+#define NDIM 3
+#define G 19.94
+#define RMIN 0.01
+
 #define moddiff(a,b) ((a>b) ? (a-b) : (b-a))
 #define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
 #define TWOPI 6.28318531
@@ -1515,6 +1522,75 @@ int poly_lc(double *polvals, double *t, double *f, double *ef, double *model,
   return 0;
 }
 
+int poly_lc_ooe(double *polvals, double *t, double *f, double *ef, double *model,
+            long *jumps, int porder, int njumps) {
+  int i, j, k, npts, porder_orig;
+  double *tt0, *fmod, *efmod, *coeffs;
+  double t0mean;
+
+  for (i=0; i < njumps-1; i++) {
+      npts = jumps[i+1]-jumps[i];
+//      ooe = 0;
+      tt0 = malloc(npts*sizeof(double));
+
+      for (j=0;j<npts;j++) {
+        tt0[j] = t[jumps[i]+j];
+//        if (model[jumps[i]+j]>=1.) {
+//          ooe+=1;
+//        }
+      }
+
+//      if (ooe<porder+1) {
+//        /*printf("%.5f, %.5f\n", model[jumps[i]], model[jumps[i+1]-1]);*/
+//        free(tt0);
+//        /*printf("Npts out of eclipse = %i", ooe);*/
+//      }
+//      else {
+      porder_orig=porder;
+      if ((model[jumps[i]]<1.) || (model[jumps[i+1]-1]<1.)) {porder=1;}
+      coeffs = malloc((porder+1)*sizeof(double));
+
+      t0mean = mean(tt0, npts);
+
+//      tt = malloc(ooe*sizeof(double));
+      fmod = malloc(npts*sizeof(double));
+      efmod = malloc(npts*sizeof(double));
+
+//        k=0;
+      for (j=0; j<npts; j++) {
+        tt0[j] = tt0[j] - t0mean;
+//          if (model[jumps[i]+j]>=1.) {
+//        tt[j] = t[jumps[i]+j];
+        fmod[j] = f[jumps[i]+j] / model[jumps[i]+j];
+        efmod[j] = ef[jumps[i]+j] / model[jumps[i]+j];
+        if (model[jumps[i]+j]>=1.){
+          efmod[j] *= 3.;
+        }
+//            k+=1;
+//          }
+      }
+
+//        tmean = mean(tt, ooe);
+//        for (k=0;k<ooe;k++) {
+//          tt[k] = tt[k] - tmean;
+//        }
+
+
+      polynomialfit_w(npts, porder+1, tt0, fmod, efmod, coeffs);
+
+      for (j=0;j<npts;j++) {
+        polvals[jumps[i]+j] = poly_eval(coeffs, porder+1, tt0[j]);
+      }
+      porder=porder_orig;
+      free(tt0);
+//        free(tt);
+      free(fmod);
+      free(efmod);
+      free(coeffs);
+//      }
+    }
+  return 0;
+}
 
 double getE(double M, double e)
 {
@@ -1543,110 +1619,315 @@ int rsky(double *t, double *f, double e, double P, double t0, double eps, int Np
     return 0;
 }
 
-// double kep_getE(double M, double e) {
-//   double E = M;
-//   double eps = 1.0e-7;
-//   while(fabs(E-e*sin(E) - M) > eps)
-//   {
-//     E = E - (E - e*sin(E) - M)/(1.0 - e*cos(E));
-//   }
-//   return E;
-// }
-// 
-// double kep_getf(double e, double P, double t0, double eps, double t) {
-//   double f, E, M;
-//   double n = TWOPI/P;
-//   if(e > eps) {
-//     M = n*(t-t0);
-//     E = kep_getE(M, e);
-//     f = 2.0*atan((sqrt((1.+e)/(1.-e)))*tan(E/2.0));
-//   }
-//   else {
-//     f = (t-t0)/P - (int)((t-t0)/P)*TWOPI;
-//   }
-//   return f;
-// }
-// 
-// int kep_getfarray(double *farray, double *t, double e, double P, double t0, double eps, int sz) {
-//   int i;
-//   for (i=0;i<sz;i++) {
-//     farray[i] = kep_getf(e, P, t0, eps, t[i]);
-//   }
-//   return 0;
-// }
-// 
-// double get_x1(double f, double e, double omega, double a, double m1, double m2, int is_primary) {
-//   double r, x1;
-//   r = a*(1.0 - e*e)/(1.0+e*cos(f));
-//   x1 = -r*cos(f + omega + PI*is_primary)*m2/(m1+m2);
-//   return x1;
-// }
-// 
-// int approx_cbp_dur(double *exp_dur, double *alpha, double *tgrid, double *modt0, double p_binary,
-//                     double p_planet, double Rp, double a_binary, double e, double omega, double t0, double m1, double m2, 
-//                     double R1, int N_tgrid, int N_modt0, int is_primary) {
-//   int i, j, kk, start_ind, end_ind;
-//   double a_p, maf, x1, sep, n_p, mafop, xp;
-//   a_p = pow((p_planet/365.242), 2./3.) * pow(m1+m2, 1./3.); 
-//   /*printf("%10.6f %10.6f %10.6f %10.6f %10.6f", a_p, R1, Rp, a_binary, t0);*/
-//   n_p = TWOPI/p_planet;
-//   /* loop through grid in time corresponding to positions in binary phase */
-//   for (i=0;i<N_tgrid;i++) {
-//     kk=0;
-//     for (j=0;j<N_modt0;j++) {
-//       maf = kep_getf(e, p_binary, t0, 1e-8, modt0[j]+tgrid[i]);
-//       x1 = get_x1(maf, e, omega, a_binary, m1, m2, is_primary);
-//       mafop = PI/2. + alpha[i] + n_p*modt0[j];
-//       xp = -a_p * cos(mafop);
-//       sep = fabs(x1-xp)/R1;
-//       if (sep<=(1.0 + Rp/R1) && mafop<=PI) {
-//         if (kk==0) {
-//           start_ind = j;
-//         }
-//         end_ind = j;
-//         kk=kk+1;
-//       }
-//     }
-//     exp_dur[i] = modt0[end_ind] - modt0[start_ind];
-//   }
-//   return 0;
-// }
-// 
-// int CubicSpline(double *x, double *y, int n, double *y2) {
-//   int i, k;
-//   double p, qn, sig, un, *u;
-//   u = malloc((n-1)*sizeof(double));
-//   y2[0] = u[0] = 0.0;
-//   for (i=1; i<n-1; i++) {
-//     sig = (x[i]-x[i-1]) / (x[i+1]-x[i-1]);
-//     p = sig * y2[i-1] + 2.0;
-//     y2[i] = (sig - 1.0) / p;
-//     u[i] = (y[i+1] - y[i]) / (x[i+1] - x[i]) - (y[i]-y[i-1])/(x[i]-x[i-1]);
-//     u[i] = (6.0*u[i]/(x[i+1]-x[i-1]) - sig * u[i-1])/p;
-//   }
-//   qn = un = 0.0;
-//   y2[n-1] = (un - qn * u[n-2]) / (qn * y2[n-2]+1.0);
-//   for (k=n-2;k>=0;k--) {
-//     y2[k] = y2[k] * y2[k+1] + u[k];
-//   }
-//   free(u);
-//   return 0;
-// }
-// 
-// double CubicSplineInterp(double *xa, double *ya, double *y2a, int n, double x) {
-//   int klo, khi, k;
-//   double h, b, a;
-//   klo = 0;
-//   khi = n-1;
-//   while (khi - klo > 1) {
-//     k=(khi+klo) >> 1;
-//     if (xa[k] > x) {khi = k;}
-//     else {klo = k;}
-//   }
-//   h = xa[khi] - xa[klo];
-//   if (h == 0.0) {printf("Bad xa input to routine CubicSplineInterp");}
-//   a = (xa[khi] - x) / h;
-//   b = (x-xa[klo])/h;
-//   return a * ya[klo] + b*ya[khi] + ((a*a*a-a) * y2a[klo] + (b*b*b*-b) * y2a[khi])*(h*h) / 6.0;
-// }
+
+/* ================================================== */
+/* ============ runge kutta nbody int. ============== */
+/* =========  computational class @ Wes  ============ */
+/* ============ not currently used ================== */
+
+void center_of_mass(int N, double mass[NMAX], double r[NMAX][NDIM], 
+		    double rcm[NDIM]) 
+{
+  int i, k;
+  double mtot;
+	
+  mtot = 0;
+  for (k=0; k<NDIM; k++) {
+    rcm[k] = 0;
+  }
+
+  for (i=0; i<N; i++) {
+    mtot += mass[i];
+    for (k=0; k<NDIM; k++) {
+      rcm[k] += mass[i]*r[i][k];
+    }
+  }
+
+  for (k=0; k<NDIM; k++)
+    rcm[k] /= mtot;
+
+}
+
+
+/*
+Kinetic energy.  This functions receives N, the mass[NMAX], and
+v[NMAX][NDIM] and must return the kinetic energy of the system.
+Recall that kinetic energy is defined by
+
+KE = 1/2 * m * v (dot) v
+*/
+
+double kinetic_energy(int N, double mass[NMAX], double v[NMAX][NDIM])
+{
+  int i, k;
+  double ke;
+
+  ke = 0;
+  for (i=0; i<N; i++) {
+    for (k=0; k<NDIM; k++) {
+      ke += mass[i]*v[i][k]*v[i][k];
+    }
+  }
+
+  ke *= 0.5;
+
+  return ke;
+}
+
+/*
+Potential energy.  This functions receives the variables N,
+mass[NMAX], and r[NMAX][NDIM] and must return the potential energy of
+the system.  In the expression for the potential energy the
+gravitational interaction must be cut-off below a definite minimum
+value of the separation RMIN=0.1 in order to avoid singularities if
+two of the objects accidentally come too close.  Thus, define
+rij=sqrt((x(1,i)-x(1,j))**2+(x(2,i)-x(2,j))**2) if the sqrt is >=
+RMIN, rij=RMIN otherwise, then the potential energy is given by the
+sum over all i from 1 to n and all j from 1 to i-1 of
+
+-G * m(i)*m(j) / rij .
+*/
+
+double potential(int N, double mass[NMAX], double r[NMAX][NDIM])
+{
+  int i, j, k;
+  double pe, rij, r2;
+
+  pe = 0;
+
+  for (i=0; i<N-1; i++) {
+    for (j=i+1; j<N; j++) {
+
+      r2 = 0;
+      for (k=0; k<NDIM; k++) {
+	r2 += (r[i][k]-r[j][k])*(r[i][k]-r[j][k]);
+      }
+      rij = sqrt(r2);
+      if (rij < RMIN)
+	rij = RMIN;
+      pe -= G*mass[i]*mass[j]/rij;
+    }
+  }
+
+  return pe;
+}
+ 
+/*
+Second-order Runge-Kutta integration algorithm. This subroutine
+receives the variables N, mass[NMAX], r[NMAX][NDIM], v[NMAX][NDIM],
+the number of steps nsteps and the value of the time step dt.  This
+subroutine must implement nsteps steps of the Runge-Kutta method.
+Recall that in the second-order Runge-Kutta method, coordinates and
+velocities are first evolved to the mid-point of the interval, i.e.,
+their values after dt/2 are calculated, and subsequently these values,
+equated to the central derivatives, are used to evolve the variables
+from the beginning to the end of the interval of duration dt.
+
+Your routine will integrate Newton's equations of motion, namely
+
+   dr[i][k]/dt = v[i][k]       dv[i][k]/dt = f[i][k]/m
+
+Using the potential energy given above, the force on object i due to
+object j is given by:
+
+f[i][k] = - G * mass[i]*mass[j] * (r[i][k]-r[j][k]) / rij^3 
+
+where rij is the scalar magnitude of the separation of i and j.  If rij
+>= RMIN, we use the above expression; if rij < RMIN, we set f[i][k] = 0,
+to be consistant with our definition of the energy.  The acceleration of
+i is simply f[i][k]/mass[i].
+
+It is convenient and speeds things up to recognize that the the force on
+i due to j, denoted fij = -fji --- better known as Newton's third law.
+In other words, once you know the force on i due to j, you get the force
+on j due to i, so there is no reason to repea the calculation.  However,
+you may find it easier in your coding not to take advantage of this
+fact.
+
+Depending on your approach, you will need a temporary array for the
+positions, velocoties, or accelerations of the objects.  You can
+declare such a multidimensional array by something like
+'double r_temp[NMAX][NDIM]' --- note the use of NMAX!
+
+Please notice: this subroutine, like the ones that follow, must implement
+exactly the specified method of integration, with all the approximations
+it entails, because the testing program may check, by taking dt large,
+that the error is as expected.
+ 
+*/
+
+void move_runge_kutta(int N, double mass[NMAX], double r[NMAX][NDIM], 
+		      double v[NMAX][NDIM], int nsteps, double dt)
+{
+  int i, j, k, n;
+  double a[NDIM], rij[NDIM], r1, r3;
+  double deltav[NMAX][NDIM], rmid[NMAX][NDIM], vmid[NMAX][NDIM];
+
+  for (n=0; n<nsteps; n++) {	
+
+    for (i=0; i<N; i++) {
+      for (k=0; k<NDIM; k++) {
+	deltav[i][k] = 0;
+      }
+    }
+
+    /* double loops over objects to get accelarations and the resulting
+       change of velocity */
+    for (i=0; i<N-1; i++) {
+      for (j=i+1; j<N; j++) {
+
+	/* calculate separation of i & j */
+	r1 = 0;
+	for (k=0; k<NDIM; k++) {
+	  rij[k] = r[i][k] - r[j][k];
+	  r1 += rij[k]*rij[k];
+	}
+	r1 = sqrt(r1);
+
+	/* no force if they are very close */
+	if (r1 < RMIN) {
+	  for (k=0; k<NDIM; k++) {
+	    a[k] = 0;
+	  }
+	}
+	else {
+	  r3 = pow(r1, 3.0);
+	  for (k=0; k<NDIM; k++) {
+	    a[k] = -G *rij[k] / r3;
+	  }
+	}
+
+	/* change in velocity from the acceleration, making use of
+	   Newton's 3rd law */
+	for (k=0; k<NDIM; k++) {
+	  deltav[i][k] += mass[j]*a[k]*dt;
+	  deltav[j][k] -= mass[i]*a[k]*dt;
+	}
+      }
+    }
+    /* update the positions and velocities to the midpoint*/
+    for (i=0; i<N; i++) {
+      for (k=0; k<NDIM; k++) {
+	rmid[i][k] = r[i][k] + 0.5*v[i][k]*dt;
+	vmid[i][k] = v[i][k] + 0.5*deltav[i][k];
+      }
+    }
+
+    for (i=0; i<N; i++) {
+      for (k=0; k<NDIM; k++) {
+	deltav[i][k] = 0;
+      }
+    }
+
+    /* double loops over objects to get accelarations and the resulting
+       change of velocity */
+    for (i=0; i<N-1; i++) {
+      for (j=i+1; j<N; j++) {
+
+	/* calculate separation of i & j */
+	r1 = 0;
+	for (k=0; k<NDIM; k++) {
+	  rij[k] = rmid[i][k] - rmid[j][k];
+	  r1 += rij[k]*rij[k];
+	}
+	r1 = sqrt(r1);
+
+	/* no force if they are very close */
+	if (r1 < RMIN) {
+	  for (k=0; k<NDIM; k++) {
+	    a[k] = 0;
+	  }
+	}
+	else {
+	  r3 = pow(r1, 3.0);
+	  for (k=0; k<NDIM; k++) {
+	    a[k] = -G *rij[k] / r3;
+	  }
+	}
+
+	/* change in velocity from the acceleration, making use of
+	   Newton's 3rd law */
+	for (k=0; k<NDIM; k++) {
+	  deltav[i][k] += mass[j]*a[k]*dt;
+	  deltav[j][k] -= mass[i]*a[k]*dt;
+	}
+      }
+    }
+    /* finally update the positions and velocities */
+    for (i=0; i<N; i++) {
+      for (k=0; k<NDIM; k++) {
+	r[i][k] += vmid[i][k]*dt;
+	v[i][k] += deltav[i][k];
+      }
+    }
+
+  }
+}
+
+
+int nbody_rk(double *r_arr, double *v_arr, double *mass, double dt, int N, int Nsteps, int downsample) {
+  int i, k, t1, Nps, t1ps;
+  double KE, PE;
+  double r[NMAX][NDIM], v[NMAX][NDIM];
+  double rcm[NDIM], vcm[NDIM];
+  Nps = Nsteps/downsample;
+  printf("\nRescaling positions and velocities so that the\n");
+  printf("center of mass is fixed at the origin\n");
+  for (i=0;i<N;i++) {
+    for (k=0;k<NDIM;k++) {
+      r[i][k] = r_arr[i*NDIM*Nps + k*Nps];
+      v[i][k] = v_arr[i*NDIM*Nps + k*Nps];
+    }
+  }
+  center_of_mass(N, mass, r, rcm);
+  center_of_mass(N, mass, v, vcm);
+  for (i=0;i<N;i++) {
+    for (k=0;k<NDIM;k++) {
+      printf("%d %lf %lf", k, rcm[k], vcm[k]);
+      r[i][k] -= rcm[k];
+      v[i][k] -= vcm[k];
+    }
+  }
+  printf("\nINITIAL CONDITIONS:\n");
+  center_of_mass(N, mass, r, rcm);
+  center_of_mass(N, mass, v, vcm);
+
+  printf("\tCOM position: %lf %lf %lf \n", rcm[0], rcm[1], rcm[2]);
+  printf("\tCOM velocity: %lf %lf %lf \n", vcm[0], vcm[1], vcm[2]);
+
+  KE = kinetic_energy(N, mass, v);
+  PE = potential(N, mass, r);
+  printf("\tEnergies:\n\tKinetic: %lf\n\tPotential: %lf\n\tTotal: %lf\n",
+	 KE, PE, KE+PE); 
+  t1ps=0;
+  for (t1=0; t1<Nsteps; t1++) {
+    if (t1%downsample==0) {
+      for (i=0; i<N; i++) {
+        for (k=0;k<NDIM;k++) {
+          r_arr[i*NDIM*Nps + k*Nps + t1ps] = r[i][k];
+          v_arr[i*NDIM*Nps + k*Nps + t1ps] = v[i][k];
+        }
+      }
+      t1ps+=1;
+    }
+    move_runge_kutta(N, mass, r, v, 1, dt);
+  }
+
+  printf("\nFINAL STATE:\n");
+  center_of_mass(N, mass, r, rcm);
+  center_of_mass(N, mass, v, vcm);
+
+  printf("\tCOM position: %lf %lf %lf\n", rcm[0], rcm[1], rcm[2]);
+  printf("\tCOM velocity: %lf %lf %lf\n", vcm[0], vcm[1], vcm[2]);
+  /*  printf("\tAngular momentum: %lf\n", angular_mom(N, mass, r, v));*/
+  KE = kinetic_energy(N, mass, v);
+  PE = potential(N, mass, r);
+  printf("\tEnergies:\n\tKinetic: %lf\n\tPotential: %lf\n\tTotal: %lf\n",
+	 KE, PE, KE+PE);
+
+  /*free(rcm);
+  free(vcm);*/
+  return 0;
+}
+
 

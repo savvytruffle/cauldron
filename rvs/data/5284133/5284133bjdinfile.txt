@@ -1,0 +1,7 @@
+data/5284133/modeltest.txt  0   0
+data/5284133/obsspecnorm2.txt   2455813.69734   -8.861586
+data/5284133/obsspecnorm3.txt   2455823.72446   -10.819622
+data/5284133/obsspecnorm4.txt   2455840.65979   -13.264076
+data/5284133/obsspecnorm5.txt   2455849.57742   -14.032345
+data/5284133/obsspecnorm6.txt   2455851.64791   -14.319631
+data/5284133/obsspecnorm7.txt   2455866.56934   -14.864396

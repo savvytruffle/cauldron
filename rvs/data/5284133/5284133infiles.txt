@@ -1,0 +1,7 @@
+data/5284133/modeltest.txt
+data/5284133/obsspecnorm2.txt
+data/5284133/obsspecnorm3.txt
+data/5284133/obsspecnorm4.txt
+data/5284133/obsspecnorm5.txt
+data/5284133/obsspecnorm6.txt
+data/5284133/obsspecnorm7.txt
