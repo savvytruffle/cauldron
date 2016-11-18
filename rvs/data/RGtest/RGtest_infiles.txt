@@ -23,3 +23,4 @@ data/RGtest/obsspecnorm22.txt
 data/RGtest/obsspecnorm23.txt
 data/RGtest/obsspecnorm24.txt
 data/RGtest/obsspecnorm25.txt
+data/RGtest/obsspecnorm26.txt
