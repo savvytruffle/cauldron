@@ -61,7 +61,7 @@ for visit in visits:
 
     # fluxnorm is great, but it's still spikey - fix that
     threshold = 1.03 # value above which to cut off spikes
-    fluxnorm = [flux if flux < threshold else 1.0 for flux in fluxnorm]
+    fluxnorm = [flux if (flux < threshold or flux == np.nan) else 1.0 for flux in fluxnorm]
 
     # Print visit spectra to txt files
     realstar = open(specfileout, 'w') 
