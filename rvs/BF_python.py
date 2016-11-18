@@ -139,7 +139,7 @@ datetimelist = specdata[2]; wavelist = specdata[3]; speclist = specdata[4]
 # INTERPOLATE THE TEMPLATE AND OBJECT SPECTRA ONTO THE NEW LOG-WAVELENGTH GRID
 # OPTION TO PLOT THIS
 newspeclist = []
-yoffset = 1
+yoffset = 0
 if SpecPlot == True:
     plt.axis([w1[0], w1[-1], 0, nspec+3])
     plt.xlabel(r'Wavelength ({\AA})')
@@ -147,7 +147,10 @@ for i in range (0, nspec):
     newspec = np.interp(w1, wavelist[i], speclist[i])
     newspeclist.append(newspec)
     if SpecPlot == True:
-        plt.plot(w1, newspec+yoffset, label=datetimelist[i].iso[0:10], color='b')#, ls='None', marker='.')
+        if i == 0: # plot template in red
+            plt.plot(w1, newspec+yoffset, label=datetimelist[i].iso[0:10], color='r', marker='.')
+        else: # plot the rest in blue
+            plt.plot(w1, newspec+yoffset, label=datetimelist[i].iso[0:10], color='b', marker='.')
     yoffset = yoffset + 1
 if SpecPlot == True:
     ##plt.legend()
@@ -201,7 +204,8 @@ plt.xlabel('Radial Velocity (km s$^{-1}$)')
 plt.ylabel('Broadening Function (arbitrary amplitude)')
 yoffset = 0.0
 for i in range(1, nspec):
-    plt.plot(bf_ind, bfnormlist[i]+yoffset, color='b')
+    plt.plot(bf_ind, bfnormlist[i]+yoffset, color='b', marker='.')
+    plt.axhline(y=yoffset, color='0.75', ls=':')
     yoffset = yoffset + 1.0
 plt.show()
 
