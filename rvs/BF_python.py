@@ -74,16 +74,16 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   'data/4851217/A4851217Outfile.txt'
 
 #B5285607
-#infiles =   'data/5285607/5285607infiles.txt'
-#bjdinfile = 'data/5285607/5285607bjdinfile.txt'
-#gausspars = 'data/5285607/5285607gausspars.txt'
-#outfile =   'data/5285607/5285607Outfile.txt'
+infiles =   'data/5285607/5285607infiles.txt'
+bjdinfile = 'data/5285607/5285607bjdinfile.txt'
+gausspars = 'data/5285607/5285607gausspars.txt'
+outfile =   'data/5285607/5285607Outfile.txt'
 
 #C6449358
-infiles =   'data/6449358/C6449358infiles.txt'
-bjdinfile = 'data/6449358/C6449358bjdinfile.txt'
-gausspars = 'data/6449358/C6449358gausspars.txt'
-outfile =   'data/6449358/C6449358Outfile.txt'
+#infiles =   'data/6449358/C6449358infiles.txt'
+#bjdinfile = 'data/6449358/C6449358bjdinfile.txt'
+#gausspars = 'data/6449358/C6449358gausspars.txt'
+#outfile =   'data/6449358/C6449358Outfile.txt'
 
 # STUFF YOU NEED TO DEFINE CORRECTLY !!!
 isAPOGEE = True        # toggle to use near-IR stuff, or not
@@ -109,7 +109,7 @@ smoothstd = 1.0      # stdev of Gaussian to smooth BFs by (~slit width in pixels
 #stepV = 1.7         # roughly 3e5 / (max_wavelength / wavelength_step) km/s, rounded down
 m = 101              # length of the BF (must be longer if RVs are far from 0)
 ## good values for APOGEE:
-w00 = 15170; n = 32000; stepV = 1.0 # all of APOGEE
+w00 = 15170; n = 32000; stepV = 4.0 # all of APOGEE
 #w00 = 15670; n = 2000; stepV = 1.5 # a little piece of APOGEE
 ## good values for ARCES & TRES together:
 #w00 = 5400; n = 38750; stepV = 1.7
