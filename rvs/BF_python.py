@@ -107,10 +107,10 @@ smoothstd = 1.0      # stdev of Gaussian to smooth BFs by (~slit width in pixels
 #w00 = 5400          # starting wavelength for new grid
 #n = 38750           # number of wavelength points for new grid
 #stepV = 1.7         # roughly 3e5 / (max_wavelength / wavelength_step) km/s, rounded down
-m = 101              # length of the BF (must be longer if RVs are far from 0)
+m = 251              # length of the BF (must be longer if RVs are far from 0)
 ## good values for APOGEE:
-w00 = 15170; n = 32000; stepV = 1.0 # all of APOGEE
-#w00 = 15670; n = 2000; stepV = 1.5 # a little piece of APOGEE
+#w00 = 15170; n = 32000; stepV = 1.0 # all of APOGEE **TOO HIGH RES??**
+w00 = 15170; n = 2000; stepV = 4.0 # a little piece of APOGEE (lower res)
 ## good values for ARCES & TRES together:
 #w00 = 5400; n = 38750; stepV = 1.7
 ## good values HET, low & high res together:
