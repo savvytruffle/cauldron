@@ -45,17 +45,17 @@ weird_format_wave = apread.apVisit(7439, 56763, 207, ext=4, header=True)[0]
 cont = continuum.fitApvisit(spec, specerr, wave) #define continuum
 specnorm = spec/cont #normalization is the spectra divided by the continuum
 
-realstar = open(specfileout, 'w') 
-for wave, flux in zip(wavedata, fluxnorm): 
-	if flux > 0 and flux != np.nan: # only print positive fluxes that aren't nan
-		print(wave, flux, file=realstar)
-realstar.close()
-
 plt.plot(wave, spec)
 plt.plot(wave, cont, lw=2, color='r')
 plt.show()
 plt.plot(wave, specnorm)
 plt.show()
+
+realstar = open(specfileout, 'w') 
+for wave, flux in zip(wave, specnorm): 
+#	if flux > 0 and flux != np.nan: # only print positive fluxes that aren't nan
+	print(wave, specnorm, file=realstar)
+realstar.close()
 
 '''
 visits = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
