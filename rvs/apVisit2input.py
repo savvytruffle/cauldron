@@ -7,6 +7,7 @@ from apogee.spec import continuum
 import matplotlib.pyplot as plt
 import apogee as apg
 from apogee.modelspec import ferre
+import csv
 '''
 This program uses jobovy/apogee to make text files for APOGEE visit spectra and a model spectrum.
 The model spectrum should have stellar parameters similar to the target star for use with BF_python.
@@ -32,7 +33,6 @@ specfileout = 'data/'+str(KIC)+'/obsspecnormTEST'+'.txt'
 #(4464, '2M19282456+4215080', ext=1, header=False)[visit] #KIC6778289 (25 Visits):::
 #(4464, '2M19321788+4216489', ext=1, header=False)[Visit] #KIC6781535 (25 Visits):::
 
-import apogee.tools.read as apread
 # the three arguments are location ID, MJD, and fiber ID, defining them here is neater!
 spec = apread.apVisit(7439, 56763, 207, ext=1, header=False)
 specerr = apread.apVisit(7439, 56763, 207, ext=2, header=False)
@@ -41,6 +41,16 @@ header = apread.apVisit(7439, 56763, 207, ext=1, header=True)[1]
 
 weird_format_spec = apread.apVisit(7439, 56763, 207, ext=1, header=True)[0]
 weird_format_wave = apread.apVisit(7439, 56763, 207, ext=4, header=True)[0]
+
+#Read the (KICnumber)Visitlist.txt and normalize each spectra in it (hopefully)
+#2MassID,PlateID,MJD,Fiber,RA,Dec,ReductionVersion,SN,RV 
+Visitlist = csv.reader(open{'data/'+str(KIC)+'/4851217Visitlist'+'.txt','r',delimeter=','))
+header = reader.next()
+column = col(*reader)
+for row in Visitlist
+	locID = column[2]
+	MJD = column[3]
+	fiberID = column[4]
 
 cont = continuum.fitApvisit(spec, specerr, wave) #define continuum
 specnorm = spec/cont #normalization is the spectra divided by the continuum
