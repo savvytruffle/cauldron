@@ -35,13 +35,12 @@ specfileout = 'data/'+str(KIC)+'/obsspecnormTEST'+'.txt'
 
 #Read the (KICnumber)Visitlist.txt and normalize each spectra in it (hopefully)
 #2MassID,PlateID,MJD,Fiber,RA,Dec,ReductionVersion,SN,RV 
-Visitlist = csv.reader(open{'data/'+str(KIC)+'/4851217Visitlist'+'.txt','r',delimeter=','))
+Visitlist = csv.reader(open('data/'+str(KIC)+'/4851217Visitlist'+'.txt','r',delimeter=','))
 header = reader.next()
 column = col(*reader)
-for row in Visitlist
-	locID = column[2]
-	MJD = column[3]
-	fiberID = column[4]
+locID = column[2]
+MJD = column[3]
+fiberID = column[4]
 	
 # the three arguments are location ID, MJD, and fiber ID, defining them here is neater!
 spec = apread.apVisit(locID, MJD, fiberID, ext=1, header=False)
