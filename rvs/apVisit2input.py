@@ -14,11 +14,22 @@ The model spectrum should have stellar parameters similar to the target star for
 All the final spectra are continuum normalized.
 '''
 
+#Read the (KICnumber)Visitlist.txt and normalize each spectra in it (hopefully)
+#2MassID,PlateID,MJD,Fiber,RA,Dec,ReductionVersion,SN,RV 
+Visitlist = csv.reader(open('data/'+str(KIC)+'/4851217Visitlist'+'.txt','r')delimeter=',')
+header = reader.next()
+column = col(*reader)
+ApogeeID = column[1]
+locID = column[2]
+MJD = column[3]
+fiberID = column[4]
+
 ## define useful variables upfront here so they're easy to change in one place.
 
-KIC = 6781535
-plate = 4464
-ID = '2M19321788+4216489'
+KIC = 4851217
+ID = ApogeeID
+plate = locID
+
 #visit = 3
 #modelfileout = 'data/'+str(KIC)+'/modeltest.txt'
 #specfileout = 'data/'+str(KIC)+'/obsspecnorm'+str(visit)+'.txt' #For da loop
