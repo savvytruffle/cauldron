@@ -13,22 +13,21 @@ This program uses jobovy/apogee to make text files for APOGEE visit spectra and 
 The model spectrum should have stellar parameters similar to the target star for use with BF_python.
 All the final spectra are continuum normalized.
 '''
+## define useful variables upfront here so they're easy to change in one place.
+
+KIC = 4851217
+#ID = ApogeeID
+#plate = locID
 
 #Read the (KICnumber)Visitlist.txt and normalize each spectra in it (hopefully)
 #2MassID,PlateID,MJD,Fiber,RA,Dec,ReductionVersion,SN,RV 
-Visitlist = csv.reader(open('data/'+str(KIC)+'/4851217Visitlist'+'.txt','r')delimeter=',')
+Visitlist = csv.reader(open('data/'+str(KIC)+'/4851217Visitlist'+'.txt','r'),delimeter=',')
 header = reader.next()
 column = col(*reader)
 ApogeeID = column[1]
 locID = column[2]
 MJD = column[3]
 fiberID = column[4]
-
-## define useful variables upfront here so they're easy to change in one place.
-
-KIC = 4851217
-ID = ApogeeID
-plate = locID
 
 #visit = 3
 #modelfileout = 'data/'+str(KIC)+'/modeltest.txt'
@@ -44,14 +43,6 @@ specfileout = 'data/'+str(KIC)+'/obsspecnormTEST'+'.txt'
 #(4464, '2M19282456+4215080', ext=1, header=False)[visit] #KIC6778289 (25 Visits):::
 #(4464, '2M19321788+4216489', ext=1, header=False)[Visit] #KIC6781535 (25 Visits):::
 
-#Read the (KICnumber)Visitlist.txt and normalize each spectra in it (hopefully)
-#2MassID,PlateID,MJD,Fiber,RA,Dec,ReductionVersion,SN,RV 
-Visitlist = csv.reader(open('data/'+str(KIC)+'/4851217Visitlist'+'.txt','r',delimeter=','))
-header = reader.next()
-column = col(*reader)
-locID = column[2]
-MJD = column[3]
-fiberID = column[4]
 	
 # the three arguments are location ID, MJD, and fiber ID, defining them here is neater!
 spec = apread.apVisit(locID, MJD, fiberID, ext=1, header=False)
