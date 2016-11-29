@@ -21,13 +21,19 @@ KIC = 4851217
 
 #Read the (KICnumber)Visitlist.txt and normalize each spectra in it (hopefully)
 #2MassID,PlateID,MJD,Fiber,RA,Dec,ReductionVersion,SN,RV 
-Visitlist = csv.reader(open('data/'+str(KIC)+'/4851217Visitlist'+'.txt','r'))
-header = reader.next()
-column = col(*reader)
-ApogeeID = column[1]
-locID = column[2]
-MJD = column[3]
-fiberID = column[4]
+visitlist = csv.reader(open('data/'+str(KIC)+'/4851217Visitlist'+'.txt','r'))
+#reader = csv.reader(f, delimeter=',')
+
+apogeeID, locID, mjd, fiberID = np.loadtxt('data/'+str(KIC)+'/4851217Visitlist'+'.txt', 
+	usecols=(1, 2, 3, 4), unpack=True, delimiter=',')
+	
+###
+#header = visitlist.next()
+#column = col(*reader)
+#apogeeID = column[1]
+#locID = column[2]
+#mjd = column[3]
+#fiberID = column[4]
 
 #visit = 3
 #modelfileout = 'data/'+str(KIC)+'/modeltest.txt'
@@ -45,10 +51,10 @@ specfileout = 'data/'+str(KIC)+'/obsspecnormTEST'+'.txt'
 
 	
 # the three arguments are location ID, MJD, and fiber ID, defining them here is neater!
-spec = apread.apVisit(locID, MJD, fiberID, ext=1, header=False)
-specerr = apread.apVisit(locID, MJD, fiberID, ext=2, header=False)
-wave = apread.apVisit(locID, MJD, fiberID, ext=4, header=False)
-header = apread.apVisit(locID, MJD, fiberID, ext=1, header=True)[1]
+spec = apread.apVisit(locID, mjd, fiberID, ext=1, header=False)
+specerr = apread.apVisit(locID, mjd, fiberID, ext=2, header=False)
+wave = apread.apVisit(locID, mjd, fiberID, ext=4, header=False)
+header = apread.apVisit(locID, mjd, fiberID, ext=1, header=True)[1]
 #spec = apread.apVisit(7439, 56763, 207, ext=1, header=False)
 #specerr = apread.apVisit(7439, 56763, 207, ext=2, header=False)
 #wave = apread.apVisit(7439, 56763, 207, ext=4, header=False)
