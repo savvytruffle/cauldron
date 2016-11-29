@@ -22,7 +22,6 @@ KIC = 4851217
 #Read the (KICnumber)Visitlist.txt and normalize each spectra in it (hopefully)
 #2MassID,PlateID,MJD,Fiber,RA,Dec,ReductionVersion,SN,RV 
 Visitlist = csv.reader(open('data/'+str(KIC)+'/4851217Visitlist'+'.txt','r'))
-reader = csv.reader(f, delimiter='\t')
 header = reader.next()
 column = col(*reader)
 ApogeeID = column[1]
