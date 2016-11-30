@@ -19,7 +19,7 @@ KIC = 4851217
 #ApogeeID = '2M19432016+3957081'
 #plate = locID
 
-locID, mjd, fiberID = np.loadtxt('data/'+str(KIC)+'/4851217Visitlist'+'.txt', 
+locIDs, mjds, fiberIDs = np.loadtxt('data/'+str(KIC)+'/4851217Visitlist'+'.txt', 
     usecols=(2, 3, 4), unpack=True, delimiter=',')
 
 for locID, mjd, fiberID in zip(locIDs, mjds, fiberIDs):
@@ -29,43 +29,45 @@ for locID, mjd, fiberID in zip(locIDs, mjds, fiberIDs):
 
 
 
-#Read the (KICnumber)Visitlist.txt and normalize each spectra in it (hopefully)
-#2MassID,PlateID,MJD,Fiber,RA,Dec,ReductionVersion,SN,RV 
-#visitlist = csv.reader(open('data/'+str(KIC)+'/4851217Visitlist'+'.txt','r'))
-#reader = csv.reader(f, delimeter=',')
-	
-###
-#header = visitlist.next()
-#column = col(*reader)
-#apogeeID = column[1]
-#locID = column[2]
-#mjd = column[3]
-#fiberID = column[4]
+    #Read the (KICnumber)Visitlist.txt and normalize each spectra in it (hopefully)
+    #2MassID,PlateID,MJD,Fiber,RA,Dec,ReductionVersion,SN,RV 
+    #visitlist = csv.reader(open('data/'+str(KIC)+'/4851217Visitlist'+'.txt','r'))
+    #reader = csv.reader(f, delimeter=',')
+    
+    #header = visitlist.next()
+    #column = col(*reader)
+    #apogeeID = column[1]
+    #locID = column[2]
+    #mjd = column[3]
+    #fiberID = column[4]
 
-#visit = 3
-#modelfileout = 'data/'+str(KIC)+'/modeltest.txt'
-#specfileout = 'data/'+str(KIC)+'/obsspecnorm'+str(visit)+'.txt' #For da loop
+    #visit = 3
+    #modelfileout = 'data/'+str(KIC)+'/modeltest.txt'
+    #specfileout = 'data/'+str(KIC)+'/obsspecnorm'+str(visit)+'.txt' #For da loop
     specfileout = 'data/'+str(KIC)+'/obsspecnormTEST'+'.txt'
 
-# reference for other stars
-#(4263, '2M19432016+3957081', ext=1, header=False)[visit] #KIC4851217 (6 Visits):::
-#(4263, '2M19390532+4027346', ext=1, header=False)[visit] #KIC5285607 (6 Visits):::
-#(4263, '2M19355993+3813561', ext=1, header=False)[visit] #KIC3127817 (6 Visits):::
-#(4464, '2M19353513+4149543', ext=1, header=False)[visit] #KIC6449358 (25 Visits):::
-#(4263, '2M19373173+4027078', ext=1, header=False)[visit] #KIC5284133 (6 Visits):::
-#(4464, '2M19282456+4215080', ext=1, header=False)[visit] #KIC6778289 (25 Visits):::
-#(4464, '2M19321788+4216489', ext=1, header=False)[Visit] #KIC6781535 (25 Visits):::
+    # reference for other stars
+    #(4263, '2M19432016+3957081', ext=1, header=False)[visit] #KIC4851217 (6 Visits):::
+    #(4263, '2M19390532+4027346', ext=1, header=False)[visit] #KIC5285607 (6 Visits):::
+    #(4263, '2M19355993+3813561', ext=1, header=False)[visit] #KIC3127817 (6 Visits):::
+    #(4464, '2M19353513+4149543', ext=1, header=False)[visit] #KIC6449358 (25 Visits):::
+    #(4263, '2M19373173+4027078', ext=1, header=False)[visit] #KIC5284133 (6 Visits):::
+    #(4464, '2M19282456+4215080', ext=1, header=False)[visit] #KIC6778289 (25 Visits):::
+    #(4464, '2M19321788+4216489', ext=1, header=False)[Visit] #KIC6781535 (25 Visits):::
 
-	
-# the three arguments are location ID, MJD, and fiber ID, defining them here is neater!
+    # the three arguments are location ID, MJD, and fiber ID, defining them here is neater!
+    
+    #Print all the things!#
+    print(locID,mjd,fiberID)
+    
     spec = apread.apVisit(locID, mjd, fiberID, ext=1, header=False)
     specerr = apread.apVisit(locID, mjd, fiberID, ext=2, header=False)
     wave = apread.apVisit(locID, mjd, fiberID, ext=4, header=False)
     header = apread.apVisit(locID, mjd, fiberID, ext=1, header=True)[1]
-#spec = apread.apVisit(7439, 56763, 207, ext=1, header=False)
-#specerr = apread.apVisit(7439, 56763, 207, ext=2, header=False)
-#wave = apread.apVisit(7439, 56763, 207, ext=4, header=False)
-#header = apread.apVisit(7439, 56763, 207, ext=1, header=True)[1]
+    #spec = apread.apVisit(7439, 56763, 207, ext=1, header=False)
+    #specerr = apread.apVisit(7439, 56763, 207, ext=2, header=False)
+    #wave = apread.apVisit(7439, 56763, 207, ext=4, header=False)
+    #header = apread.apVisit(7439, 56763, 207, ext=1, header=True)[1]
 
     weird_format_spec = apread.apVisit(7439, 56763, 207, ext=1, header=True)[0]
     weird_format_wave = apread.apVisit(7439, 56763, 207, ext=4, header=True)[0]
