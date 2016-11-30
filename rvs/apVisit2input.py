@@ -16,16 +16,23 @@ All the final spectra are continuum normalized.
 ## define useful variables upfront here so they're easy to change in one place.
 
 KIC = 4851217
-#ID = ApogeeID
+#ApogeeID = '2M19432016+3957081'
 #plate = locID
+
+locID, mjd, fiberID = np.loadtxt('data/'+str(KIC)+'/4851217Visitlist'+'.txt', 
+    usecols=(2, 3, 4), unpack=True, delimiter=',')
+
+for locID, mjd, fiberID in zip(locIDs, mjds, fiberIDs):
+
+    locID, mjd, fiberID = np.loadtxt('data/'+str(KIC)+'/4851217Visitlist'+'.txt', 
+    usecols=(2, 3, 4), unpack=True, delimiter=',')
+
+
 
 #Read the (KICnumber)Visitlist.txt and normalize each spectra in it (hopefully)
 #2MassID,PlateID,MJD,Fiber,RA,Dec,ReductionVersion,SN,RV 
-visitlist = csv.reader(open('data/'+str(KIC)+'/4851217Visitlist'+'.txt','r'))
+#visitlist = csv.reader(open('data/'+str(KIC)+'/4851217Visitlist'+'.txt','r'))
 #reader = csv.reader(f, delimeter=',')
-
-apogeeID, locID, mjd, fiberID = np.loadtxt('data/'+str(KIC)+'/4851217Visitlist'+'.txt', 
-	usecols=(1, 2, 3, 4), unpack=True, delimiter=',')
 	
 ###
 #header = visitlist.next()
@@ -38,7 +45,7 @@ apogeeID, locID, mjd, fiberID = np.loadtxt('data/'+str(KIC)+'/4851217Visitlist'+
 #visit = 3
 #modelfileout = 'data/'+str(KIC)+'/modeltest.txt'
 #specfileout = 'data/'+str(KIC)+'/obsspecnorm'+str(visit)+'.txt' #For da loop
-specfileout = 'data/'+str(KIC)+'/obsspecnormTEST'+'.txt'
+    specfileout = 'data/'+str(KIC)+'/obsspecnormTEST'+'.txt'
 
 # reference for other stars
 #(4263, '2M19432016+3957081', ext=1, header=False)[visit] #KIC4851217 (6 Visits):::
@@ -51,21 +58,29 @@ specfileout = 'data/'+str(KIC)+'/obsspecnormTEST'+'.txt'
 
 	
 # the three arguments are location ID, MJD, and fiber ID, defining them here is neater!
-spec = apread.apVisit(locID, mjd, fiberID, ext=1, header=False)
-specerr = apread.apVisit(locID, mjd, fiberID, ext=2, header=False)
-wave = apread.apVisit(locID, mjd, fiberID, ext=4, header=False)
-header = apread.apVisit(locID, mjd, fiberID, ext=1, header=True)[1]
+    spec = apread.apVisit(locID, mjd, fiberID, ext=1, header=False)
+    specerr = apread.apVisit(locID, mjd, fiberID, ext=2, header=False)
+    wave = apread.apVisit(locID, mjd, fiberID, ext=4, header=False)
+    header = apread.apVisit(locID, mjd, fiberID, ext=1, header=True)[1]
 #spec = apread.apVisit(7439, 56763, 207, ext=1, header=False)
 #specerr = apread.apVisit(7439, 56763, 207, ext=2, header=False)
 #wave = apread.apVisit(7439, 56763, 207, ext=4, header=False)
 #header = apread.apVisit(7439, 56763, 207, ext=1, header=True)[1]
 
-weird_format_spec = apread.apVisit(7439, 56763, 207, ext=1, header=True)[0]
-weird_format_wave = apread.apVisit(7439, 56763, 207, ext=4, header=True)[0]
+    weird_format_spec = apread.apVisit(7439, 56763, 207, ext=1, header=True)[0]
+    weird_format_wave = apread.apVisit(7439, 56763, 207, ext=4, header=True)[0]
 
 
-cont = continuum.fitApvisit(spec, specerr, wave) #define continuum
-specnorm = spec/cont #normalization is the spectra divided by the continuum
+    cont = continuum.fitApvisit(spec, specerr, wave) #define continuum
+    specnorm = spec/cont #normalization is the spectra divided by the continuum
+    
+    realstar = open(specfileout, 'w') 
+    for wave, flux in zip(wavedata, fluxnorm): 
+        if flux > 0 and flux != np.nan: # only print positive fluxes that aren't nan
+            print(wave, flux, file=realstar)
+    realstar.close()
+
+#End of the loop through Visitlist.txt
 
 plt.plot(wave, spec)
 plt.plot(wave, cont, lw=2, color='r')
@@ -73,11 +88,11 @@ plt.show()
 plt.plot(wave, specnorm)
 plt.show()
 
-realstar = open(specfileout, 'w') 
-for wave, flux in zip(wave, specnorm): 
+#realstar = open(specfileout, 'w') 
+#for wave, flux in zip(wave, specnorm): 
 #	if flux > 0 and flux != np.nan: # only print positive fluxes that aren't nan
-	print(wave, specnorm, file=realstar)
-realstar.close()
+#	print(wave, specnorm, file=realstar)
+#realstar.close()
 
 '''
 visits = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
