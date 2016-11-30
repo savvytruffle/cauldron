@@ -24,11 +24,6 @@ locIDs, mjds, fiberIDs = np.loadtxt('data/'+str(KIC)+'/4851217Visitlist'+'.txt',
 
 for locID, mjd, fiberID in zip(locIDs, mjds, fiberIDs):
 
-    locID, mjd, fiberID = np.loadtxt('data/'+str(KIC)+'/4851217Visitlist'+'.txt', 
-    usecols=(2, 3, 4), unpack=True, delimiter=',')
-
-
-
     #Read the (KICnumber)Visitlist.txt and normalize each spectra in it (hopefully)
     #2MassID,PlateID,MJD,Fiber,RA,Dec,ReductionVersion,SN,RV 
     #visitlist = csv.reader(open('data/'+str(KIC)+'/4851217Visitlist'+'.txt','r'))
