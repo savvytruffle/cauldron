@@ -22,6 +22,8 @@ KIC = 4851217
 locIDs, mjds, fiberIDs = np.loadtxt('data/'+str(KIC)+'/4851217Visitlist'+'.txt', 
     usecols=(2, 3, 4), unpack=True, delimiter=',')
 
+#Integers not floats python!
+#for int(locID), int(mjd), int(fiberID) in zip(locIDs, mjds, fiberIDs):
 for locID, mjd, fiberID in zip(locIDs, mjds, fiberIDs):
 
     #Read the (KICnumber)Visitlist.txt and normalize each spectra in it (hopefully)
