@@ -47,7 +47,7 @@ for locID, mjd, fiberID in zip(locIDs, mjds, fiberIDs):
 
     # Save visit spectrum to text file    
     realstar = open(specfileout, 'w')
-    for wave, flux in zip(waves, fluxes): 
+    for wave, flux in zip(waves, specnorm): 
         print(wave, flux, file=realstar)
     realstar.close()
     print('Visit spectrum saved to {0}'.format(specfileout))
