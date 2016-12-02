@@ -1,7 +1,0 @@
-/Users/halzoo/cauldron/data/4851217/modelspec.txt  0   0
-/Users/halzoo/cauldron/data/4851217/obsspec1.txt   2455813.69734   -8.715557
-/Users/halzoo/cauldron/data/4851217/obsspec2.txt   2455849.57742   -14.24351
-/Users/halzoo/cauldron/data/4851217/obsspec3.txt   2455866.56934   -15.229528
-/Users/halzoo/cauldron/data/4851217/obsspec4.txt   2455840.65979   -13.389812
-/Users/halzoo/cauldron/data/4851217/obsspec5.txt   2455823.72446   -10.774575
-/Users/halzoo/cauldron/data/4851217/obsspec6.txt   2455851.64791   -14.552915
