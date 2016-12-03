@@ -49,7 +49,7 @@ def fitPhoenix(spec, specerr, wave, deg=4, niter=10, usigma=3., lsigma=0.1, cont
 #######################
 # full path to where PHOENIX wavelength file lives:
 ##Joni hoping not to screw things up
-wavedir = 'data/PHOENIX'
+wavedir = 'data/PHOENIX/'
 #wavedir = '../../../PHOENIX/PHOENIX-ACES-AGSS-COND-2011/'
 # full path to where PHOENIX spectra live:
 specdir = 'data/PHOENIX/Z-0.0/'

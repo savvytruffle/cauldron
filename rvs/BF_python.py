@@ -95,8 +95,8 @@ widlimits = [0,5, 0,5]   # limits for gaussian width (km/s) [min1,max1,min2,max2
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734 #(A4851217)
-#period = 3.8994011; BJD0 = 2455813.69734 #(B5285607)
-period = 5.7767904; BJD0 = 2456760.90580 #(C6449358)
+period = 3.8994011; BJD0 = 2455813.69734 #(B5285607)
+#period = 5.7767904; BJD0 = 2456760.90580 #(C6449358)
 
 # RADIAL VELOCITY AND BCV INFO FOR TEMPLATE (km/s; set both to 0 if using a model !!!)
 rvstd = 0; bcvstd = 0 # model template
