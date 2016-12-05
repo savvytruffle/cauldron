@@ -53,8 +53,9 @@ wavedir = 'data/PHOENIX/'
 specdir = 'data/PHOENIX/Z-0.0/'
 # spectrum filename:
 #specfile = 'lte05500-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #example
-specfile = 'lte06400-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #5285607
-specfile = 'lte06500-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #6449358
+#specfile = 'lte06400-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #5285607
+#specfile = 'lte06500-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #6449358
+specfile = 'lte05700-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #6781535
 #######################
 ## edit values above ##
 #######################
