@@ -167,6 +167,13 @@ poly_lc.argtypes = [ndpointer(dtype=ctypes.c_double), ndpointer(dtype=ctypes.c_d
                     ndpointer(dtype=ctypes.c_double), ndpointer(dtype=ctypes.c_long),
                     ctypes.c_int, ctypes.c_int]
 
+poly_lc_ooe = lib.poly_lc_ooe
+poly_lc_ooe.restype = ctypes.c_int
+poly_lc_ooe.argtypes = [ndpointer(dtype=ctypes.c_double), ndpointer(dtype=ctypes.c_double),
+                    ndpointer(dtype=ctypes.c_double), ndpointer(dtype=ctypes.c_double),
+                    ndpointer(dtype=ctypes.c_double), ndpointer(dtype=ctypes.c_long),
+                    ctypes.c_int, ctypes.c_int]
+
 rsky_c = lib.rsky
 rsky_c.restype = ctypes.c_int
 rsky_c.argtypes = [ndpointer(dtype=ctypes.c_double), ndpointer(dtype=ctypes.c_double), ctypes.c_double, 
@@ -179,8 +186,8 @@ occultquad_c.argtypes = [ndpointer(dtype=ctypes.c_double), ndpointer(dtype=ctype
 			ctypes.c_double, ctypes.c_int]
 
 def rsky(e, P, t0, eps, t):
-	maf = t*0.
-	rsky_c(t, maf, e, P, t0, eps, len(t))
+	maf = np.zeros(len(t))
+	rsky_c(t.copy(), maf, e, P, t0, eps, len(t))
 	return maf
 
 def occultquad(znorm, u1, u2, rrat, Npts):
@@ -237,10 +244,13 @@ def times_of_transits_pub(kic):
 
     return result
 
-def poly_lc_cwrapper(t, f, ef, model, chunks, porder=2):
+def poly_lc_cwrapper(t, f, ef, model, chunks, porder=2, ooe=True):
     totpol = np.ones(len(t), dtype=np.float64)
     f, ef = f.astype(np.float64), ef.astype(np.float64)
-    poly_lc(totpol, t, f, ef, model, chunks, porder, len(chunks))
+    if ooe:
+        poly_lc(totpol, t, f, ef, model, chunks, porder, len(chunks))
+    else:
+        poly_lc_ooe(totpol, t, f, ef, model, chunks, porder, len(chunks))
     return totpol
 
 def poly_lc_python(jd, flux, dflux, totmod, chunk, porder=2):

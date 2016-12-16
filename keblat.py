@@ -5,12 +5,34 @@ import numpy as np
 #from scipy import interpolate 
 #from ext_func.occultquad import occultquad
 #from ext_func.rsky import rsky
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import os.path
+import time
 from collections import OrderedDict
-from helper_funcs import poly_lc_cwrapper, rsky, occultquad
+try:
+    from helper_funcs import poly_lc_cwrapper, rsky, occultquad
+except:
+    print('Exception in from helper_funcs import poly_lc_cwrapper, rsky, occultquad')
+    import datetime, os
+    print('Timestamp: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
+    print('Current dir: {0}'.format(os.getcwd()))
+    print('helper_funcs.py exists? {0}'.format(os.path.isfile('helper_funcs.py')))
+    print('helpers_linux.so exists? {0}'.format(os.path.isfile('helpers_linux.so')))
+    # print(os.uname())
+    try:
+        from helper_funcs import poly_lc_cwrapper, rsky, occultquad
+        print("worked here")
+        # print(os.uname())
+    except:
+        time.sleep(30)
+        # print(os.uname())
+        print("just slept for 30")
+        from helper_funcs import poly_lc_cwrapper, rsky, occultquad
+        print("worked after sleep")
+
 #from nbody import occultquad, rsky
 from scipy.optimize import minimize as sp_minimize
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 #############################################
 ################ constants ##################
@@ -18,6 +40,14 @@ from scipy.optimize import minimize as sp_minimize
 TWOPI = 2.0*np.pi
 d2y = 365.242 #days in a year
 r2au = 0.0046491 #solar radii to AU
+parnames_dict = {'lc': ['msum', 'rsum', 'rrat', 'period', 'tpe', 'esinw', 'ecosw', 'b', 'frat', 'q1',
+                        'q2', 'q3', 'q4'],
+                 'sed': ['m1', 'm2', 'z0', 'age', 'dist', 'ebv', 'h0', 'isoerr'],
+                 'rv': ['msum', 'mrat', 'period', 'tpe', 'esinw', 'ecosw', 'inc', 'k0', 'rverr'],
+                 'lcsed': ['m1', 'm2', 'z0', 'age', 'dist', 'ebv', 'h0', 'period', 'tpe','esinw',
+                           'ecosw', 'b', 'q1', 'q2', 'q3', 'q4', 'lcerr', 'isoerr'],
+                 'lcrv': ['msum', 'mrat', 'rsum', 'rrat', 'period', 'tpe', 'esinw', 'ecosw', 'b', 'frat',
+                          'q1', 'q2', 'q3', 'q4', 'lcerr', 'k0', 'rverr']}
 #############################################
 
 class Keblat(object):
@@ -27,6 +57,7 @@ class Keblat(object):
     def __init__(self, vkeb=False, preload=True):
         self.iso = None
         self.sed = None
+        self.kic = None
         self.jd = None
         self.flux = None
         self.dflux = None
@@ -37,6 +68,7 @@ class Keblat(object):
         self.rv2_obs = None
         self.rv1_err_obs = None
         self.rv2_err_obs = None
+        self.rv_t = None
         self.exp = None
         self.clip_tol = 1.5
         self.res = []
@@ -50,18 +82,18 @@ class Keblat(object):
         self.parbounds = OrderedDict([('m1', [.1, 12.]), ('m2', [.1, 12.]), 
                           ('z0', [0.001, 0.06]), ('age', [6., 10.1]),
                           ('dist', [10., 15000.]), ('ebv', [0., 1.]),
-                          ('h0', [119-1., 119+1.]), ('period', [5., 1000.]),
+                          ('h0', [119-1., 119+1.]), ('period', [0.05, 1000.]),
                           ('tpe', [0., 1e8]), ('esinw', [-.99, .99]),
-                          ('ecosw', [-.99, .99]), ('b', [0., 3.]), ('q1', [0., 1.]),
+                          ('ecosw', [-.99, .99]), ('b', [0., 7.]), ('q1', [0., 1.]),
                           ('q2', [0., 1.]), ('q3', [0., 1.]), ('q4', [0., 1.]), 
                           ('lcerr', [0., 0.01]), ('isoerr', [0., 0.3]),
                                       ('k0', [-1e8, 1e8]), ('rverr', [0., 1e4]),
                                       ('msum', [0.2, 24.]), ('mrat', [0.0085, 1.0]),
-                                      ('rsum', [0.1, 1e6]), ('rrat', [1e-6, 1.0]),
+                                      ('rsum', [0.1, 1e6]), ('rrat', [1e-6, 1e3]),
                                       ('r1', [0.01, 1e6]), ('r2', [0.01, 1e6]),
-                                      ('inc', [0., np.pi/2.]), ('frat', [1e-8, 1.])])
+                                      ('inc', [0., np.pi/2.]), ('frat', [1e-8, 1e2])])
         if preload:
-            self.loadiso()
+            self.loadiso2()
             self.loadsed()
             self.loadvkeb()
         if vkeb:
@@ -79,7 +111,7 @@ class Keblat(object):
         self.armstrongT2 = None
         self.armstrongdT2 = None
 
-    def updatebounds(self, *args):
+    def updatebounds(self, *args, **kwargs):
         """Forces boundaries of specified arg parameters s.t. they are constrainted to 2% of parameter value
 
         Parameters
@@ -92,11 +124,12 @@ class Keblat(object):
         keblat.updatebounds('period', 'tpe', 'esinw', 'ecosw')
 
         """
+        partol = kwargs.pop('partol', 0.02)
         for i in args:
-            self.parbounds[i] = [self.pars[i]-abs(self.pars[i])*0.02, self.pars[i]+abs(self.pars[i])*0.02]
+            self.parbounds[i] = [self.pars[i]-abs(self.pars[i])*partol, self.pars[i]+abs(self.pars[i])*partol]
         if self.rv1_obs is not None and self.rv2_obs is not None:
-            self.parbounds['k0'] = [min(self.rv1_obs.min(), self.rv2_obs.min()),
-                                     max(self.rv1_obs.max(), self.rv2_obs.max())]
+            self.parbounds['k0'] = [min(np.nanmin(self.rv1_obs), np.nanmin(self.rv2_obs)),
+                                     max(np.nanmax(self.rv1_obs), np.nanmax(self.rv2_obs))]
         return
 
     def updatepars(self, **kwargs):
@@ -312,9 +345,9 @@ class Keblat(object):
                         'rmag': 9, 'imag': 10, 'zmag': 11, 'Umag': 12,  
                         'Bmag': 13, 'Vmag': 14, 'Jmag': 15, 'Hmag': 16, 
                         'Kmag': 17, 'w1': 18, 'w2': 19, 'mkep':20}
-        fmt = ['%.3f', '%.2f', '%.4f', '%.4f', '%.4f', '%.3f', '%.3f', '%.3f', 
-               '%.3f', '%.3f', '%.3f', '%.3f', '%.3f', '%.3f', '%.3f', '%.3f', 
-               '%.3f', '%.3f', '%.3f', '%.3f',  '%.3f']
+#        fmt = ['%.3f', '%.2f', '%.4f', '%.4f', '%.4f', '%.3f', '%.3f', '%.3f', 
+#               '%.3f', '%.3f', '%.3f', '%.3f', '%.3f', '%.3f', '%.3f', '%.3f', 
+#               '%.3f', '%.3f', '%.3f', '%.3f',  '%.3f']
         isodatafile = isodir + 'isodata_final.dat'
         if os.path.isfile(isodatafile):
             iso = np.loadtxt(isodatafile, delimiter=',')
@@ -330,6 +363,8 @@ class Keblat(object):
 
         if ipnames is None:
             self.ipname = np.array(['mkep', 'logl', 'logte', 'logg'])
+        else:
+            self.ipname = ipnames
         self.ipinds = np.array([self.isodict[ii] for ii in self.ipname]).astype(int)
 
         return True
@@ -418,7 +453,7 @@ class Keblat(object):
         glat = self.sed[sedidx, 4]
         zkic = 10**self.sed[sedidx, 7] * self.zsun
         if np.isnan(zkic):
-            zkic = keblat.zsun
+            zkic = self.zsun
         return magsobs, emagsobs, extinction, glat, zkic
         
     def isoprep(self, magsobs, emagsobs, extinction, glat, zkic, exclude=[]):
@@ -463,12 +498,13 @@ class Keblat(object):
                                0.189, 0.146, 0.723, 0.460, 0.310])
 
         # according to Everett Howell 2012, typical limits for U, B, V
+        self.exclude = exclude
         if magsobs[0] > 18.7:
-            exclude += ['Umag']
+            self.exclude += ['Umag']
         if magsobs[1] > 19.3:
-            exclude += ['Bmag']
+            self.exclude += ['Bmag']
         if magsobs[2] > 19.1:
-            exclude += ['Vmag']
+            self.exclude += ['Vmag']
         nodata = (magsobs == -99.999)
 
         # if np.any(magsobs[3:7] > abs(magsobs[0])+0.2):
@@ -481,16 +517,16 @@ class Keblat(object):
         if np.in1d(grizset, fullmagnames[suspect]).sum() > 0:
             suspect = suspect | ((abs(magsobs-np.median(magsobs[~nodata]))>2.) * (np.in1d(fullmagnames, grizset)))
         if np.sum(suspect)>0:
-            exclude = exclude + list(fullmagnames[suspect])
-        print "Excluding ", exclude
+            self.exclude = self.exclude + list(fullmagnames[suspect])
+        print "Excluding ", self.exclude
 
-        exclude = np.unique(exclude)
+        self.exclude = np.unique(self.exclude)
 #        for ii in range(len(exclude)):
 #            nodata = nodata | (fullmagnames == exclude[ii])
         # artificially inflate bad data points
-        outlier_mask = np.array([(fullmagnames == ii) for ii in exclude])
+        outlier_mask = np.array([(fullmagnames == ii) for ii in self.exclude])
         if len(outlier_mask)>0:
-            emagsobs[np.sum(outlier_mask, axis=0).astype(bool)] = 2.5
+            emagsobs[np.sum(outlier_mask, axis=0).astype(bool)] = 4.0
 
         obsinds = np.arange(len(fullmagnames))[~nodata]
         self.ipname = np.concatenate((fullmagnames[~nodata], 
@@ -713,6 +749,7 @@ class Keblat(object):
         >>> keblat.loadlc(kic, keblat.vkeb[goodv, [1, 2, 5, 6, 7]])
         True
         """
+        self.kic = kic
         (self.period, self.tpe, self.pwidth, self.swidth, self.sep) = properties
 
         if self.tpe > 50000.:
@@ -723,7 +760,10 @@ class Keblat(object):
             self.jd = user_specified[0, :]
             self.flux, self.dflux = user_specified[1, :], user_specified[2, :]
             self.quarter, self.crowd = user_specified[3, :], user_specified[4, :]
-            self.quality = self.jd*0.
+            try:
+                self.quality = user_specified[5, :]
+            except:
+                self.quality = self.jd*0.
             self.cadnum = None
         else:
             try:
@@ -769,23 +809,31 @@ class Keblat(object):
         self.cadence = 0.0006811
         self.exp = 1
 
-        self.fluxerr = np.ones(len(self.flux)) * np.nanmedian(abs(np.diff(self.flux)))
-        self.fluxerr[(self.quality>16)] = 10.*np.nanmedian(abs(np.diff(self.flux)))
+        self.fluxerr_tol = np.nanmedian(abs(np.diff(self.flux)))
+        self.fluxerr = self.dflux.copy()
+        self.updateErrors()
         if lc:
             self.cadence = 0.0204305556
             self.exp = 30
         print "LC data for KIC {0} loaded.".format(kic)
         return True
-        
+
+    def updateErrors(self, qtol=8, etol=10.):
+        self.dflux = self.fluxerr.copy()
+        self.dflux[(self.quality>qtol)] = etol*self.fluxerr_tol
+
     def updatephase(self, tpe, period, clip_tol=1.5):
         self.tpe = tpe
         self.period = period
         self.phase = ((self.jd-self.tpe) % self.period)/self.period
         self.phase[self.phase<-np.clip(self.pwidth*2., 0., 0.2)]+=1.
+        self.phase[self.phase>1.-np.clip(self.pwidth*2., 0., 0.2)] -= 1.
         self.phase[self.phase>np.clip(self.sep+self.swidth*2., self.sep, 1.0)]-=1.
         self.clip_tol = clip_tol
-        self.clip = (abs(self.phase)<self.clip_tol*self.pwidth) | \
-                    (abs(self.phase-self.sep)<self.clip_tol*self.swidth)
+        self.clip = ((abs(self.phase)<self.clip_tol*self.pwidth) | \
+                     (abs(self.phase-1.0)<self.clip_tol*self.pwidth) | \
+                    (abs(self.phase-self.sep)<self.clip_tol*self.swidth))
+        #self.clip = self.clip * (self.quality < 0)
         return True
         
     def loadvkeb(self, 
@@ -819,9 +867,9 @@ class Keblat(object):
         ecosw = (self.vkeb[:, -1]*2. - 1.) * np.pi/4.
         esinw = ((self.vkeb[:, -3] / self.vkeb[:, -2]) - 1.) / ((self.vkeb[:, -3] / self.vkeb[:, -2]) + 1.)
 
-        switched = (self.vkeb[:, -3]<self.vkeb[:, -2])
-        esinw[switched] = ((self.vkeb[:, -2][switched] / self.vkeb[:, -3][switched]) - 1.) / \
-                          ((self.vkeb[:, -2][switched] / self.vkeb[:, -3][switched]) + 1.)
+#        switched = (self.vkeb[:, -3]<self.vkeb[:, -2])
+#        esinw[switched] = ((self.vkeb[:, -2][switched] / self.vkeb[:, -3][switched]) - 1.) / \
+#                          ((self.vkeb[:, -2][switched] / self.vkeb[:, -3][switched]) + 1.)
 
 
         self.vkeb[:, 2][self.vkeb[:,2]>50000] -= 54833.0
@@ -841,7 +889,7 @@ class Keblat(object):
         return True
 
     # Computes a template eclipse light curve with Mandel & Agol (2002) algorithm
-    def lctemplate_slow(self, lcpars, period, omega, e, a, inc, bgr, ldcoeffs, 
+    def lctemplate_slow(self, lcpars, period, omega, e, a, inc, bgr, ldcoeffs,
                    rrat, tc, t0, cadence, exp, pe=True):
         """Computes a template Mandel & Agol (2002) eclipse lightcurve with
         correction for long-cadence binning (Kipping 2013)
@@ -861,7 +909,7 @@ class Keblat(object):
         bgr : float
             radius of star being eclipsed in solar radius
         ldcoeffs: float array
-            limb darkening coefficients; tuple if quadratic, 
+            limb darkening coefficients; tuple if quadratic,
             4 elements if quartic non-linear law
         rrat : float
             ratio of radii (eclipsing/eclipsed)
@@ -875,16 +923,16 @@ class Keblat(object):
             number of Kepler exposures to bin (LC = 30, SC = 1)
         pe : boolean
             if True, template for PE
-            
+
         Returns
         -------
         tmean : float array
             array of times for PE (or SE)
         resmean : float array
             array of flux values for PE (or SE)
-        
+
         """
-        
+
         if pe:
             half0 = (self.pwidth*period/2.)*self.clip_tol
         else:
@@ -911,7 +959,7 @@ class Keblat(object):
             # print "Quad case:", ldcoeffs
             res = occultquad(z/(bgr*r2au), ldcoeffs[0], ldcoeffs[1], rrat, len(z))
 
-        bad = (res<-1e-4) | (res-1.>1e-4)        
+        bad = (res<-1e-4) | (res-1.>1e-4)
         if np.sum(bad)>0:
             cz = z[bad]/(bgr*r2au)
             interp_res = np.interp(t[bad], t[~bad], res[~bad])
@@ -921,7 +969,7 @@ class Keblat(object):
             res[bad] = interp_res
         if cadence < 0.02:
             return t, res
-    
+
         tt = t[:, np.newaxis] * np.ones(exp)
         rres = res[:, np.newaxis] * np.ones(exp)
         tt[:, 0] = t
@@ -990,8 +1038,12 @@ class Keblat(object):
         r = a*(1.-e**2) / (1.+e*np.cos(maf))
         z = r*np.sqrt(1.-np.sin(omega+maf)**2*np.sin(inc)**2)
         if not np.all(np.isfinite(z)):
-            print maf, e, a, inc, z
-            exit
+            badz = np.isfinite(z)
+            print maf[~badz], e, a, inc, z[~badz], r[~badz]
+            z[~badz] = np.interp(t[~badz], t[badz], z[badz])
+            errfile = open(self.erfname, "a")
+            errfile.write("inf z: {0} {1} {2} {3} {4} {5} {6}\n".format(e, a, inc, t[~badz], maf[~badz], r[~badz], z[~badz]))
+            errfile.close()
         if self.ldtype == 0:
             # print "non-linear case:", ldcoeffs
             res = self.occultnltheta(z/(bgr*r2au), rrat, ldcoeffs)
@@ -1154,7 +1206,7 @@ class Keblat(object):
                 #use this version for full lightcurve treatment...
                 r = a*(1.-e**2) / (1.+e*np.cos(maf))
                 zcomp = np.sin(omega+maf) * np.sin(inc) 
-                z = r*np.sqrt(1.-zcomp**2)
+                #z = r*np.sqrt(1.-zcomp**2)
                 pe = ((r*zcomp>0.))# & (z <= 1.05*(r1+r2)*r2au))
                 se = ((r*zcomp<0.))# & (z <= 1.05*(r1+r2)*r2au))
                 model = np.ones(npts)
@@ -1240,7 +1292,7 @@ class Keblat(object):
             maf = rsky(e, period, t0, 1e-8, jd)
             r = a*(1.-e**2) / (1.+e*np.cos(maf))
             zcomp = np.sin(omega+maf) * np.sin(inc) 
-            z = r*np.sqrt(1.-zcomp**2)
+            #z = r*np.sqrt(1.-zcomp**2)
             pe = ((r*zcomp>0.)) #& (z <= 1.05*(r1+r2)*r2au))
             se = ((r*zcomp<0.)) #& (z <= 1.05*(r1+r2)*r2au))
             tt = jd % period
@@ -1389,7 +1441,7 @@ class Keblat(object):
                 #use this version for full lightcurve treatment...
                 r = a*(1.-e**2) / (1.+e*np.cos(maf))
                 zcomp = np.sin(omega+maf) * np.sin(inc) 
-                z = r*np.sqrt(1.-zcomp**2)
+                #z = r*np.sqrt(1.-zcomp**2)
                 pe = ((r*zcomp>0.))# & (z <= 1.05*(r1+r2)*r2au))
                 se = ((r*zcomp<0.))# & (z <= 1.05*(r1+r2)*r2au))
                 model = np.ones(npts)
@@ -1472,7 +1524,7 @@ class Keblat(object):
             maf = rsky(e, period, t0, 1e-8, jd)
             r = a*(1.-e**2) / (1.+e*np.cos(maf))
             zcomp = np.sin(omega+maf) * np.sin(inc) 
-            z = r*np.sqrt(1.-zcomp**2)
+            #z = r*np.sqrt(1.-zcomp**2)
             pe = ((r*zcomp>0.)) #& (z <= 1.05*(r1+r2)*r2au))
             se = ((r*zcomp<0.)) #& (z <= 1.05*(r1+r2)*r2au))
             tt = jd % period
@@ -1514,9 +1566,11 @@ class Keblat(object):
         self.rv1_err_obs = drv1
         self.rv2_err_obs = drv2
         self.rv_t = t
-        k1 = (self.rv1_obs.max() - self.rv1_obs.min())/2.
-        k2 = (self.rv2_obs.max() - self.rv2_obs.min())/2.
-        k0 = np.median(np.append(self.rv1_obs, self.rv2_obs))
+        self.bad1 = np.isnan(self.rv1_obs)
+        self.bad2 = np.isnan(self.rv2_obs)
+        k1 = (np.nanmax(self.rv1_obs) - np.nanmin(self.rv1_obs))/2.
+        k2 = (np.nanmax(self.rv2_obs) - np.nanmin(self.rv2_obs))/2.
+        k0 = np.nanmedian(np.append(self.rv1_obs, self.rv2_obs))
         m1, m2 = self.rvpars_guess_mass(k1, k2, self.pars['period'],
                                         np.sqrt(self.pars['esinw']**2 + self.pars['ecosw']**2))
         return m1, m2, k0
@@ -1587,7 +1641,7 @@ class Keblat(object):
 
 
     def lcfit(self, lcpars, jd, quarter, flux, dflux, crowd,
-              polyorder=2):
+              polyorder=2, ooe=True):
         """Computes light curve model
         
         Parameters
@@ -1712,8 +1766,11 @@ class Keblat(object):
             totmod[se] = np.interp(tt[se], tempt2, tempres2)
             totmod[se] = (totmod[se] - 1.) * crowd[se] + 1.
 
-        if polyorder>0:    
-            chunk = np.array(np.where(np.diff(jd) > self.pwidth*period))[0]
+        if polyorder>0:
+            if (self.sep-self.clip_tol*(self.pwidth+self.swidth) < self.pwidth):
+                chunk = np.array(np.where(np.diff(jd) > np.median(np.diff(jd))*4.))[0]
+            else:
+                chunk = np.array(np.where(np.diff(jd) > self.pwidth*period))[0]
             #put in dummy first and last element # placeholders
             
             chunk = np.append(chunk, len(jd)-2).flatten()
@@ -1721,7 +1778,7 @@ class Keblat(object):
             chunk=chunk3
             chunk[-1]+=1
             chunk = np.unique(np.sort(np.append(chunk, np.where(np.diff(quarter)>0)[0]+1)))
-            totpol = poly_lc_cwrapper(jd, flux, dflux, totmod, chunk, porder=polyorder)
+            totpol = poly_lc_cwrapper(jd, flux, dflux, totmod, chunk, porder=polyorder, ooe=ooe)
 #            phase = ((jd - tpe) % period) / period
 #            sorting = np.argsort(phase)
 #            nopoly = (totpol[sorting] == 1.)
@@ -1752,44 +1809,44 @@ class Keblat(object):
             self.updatepars(**fit_params.valuesdict())
             return self.getpars(partype=partype)
 
-    def _getvals_defunct(self, fit_params, ntotpars, lctype):
-        """Fetch values from parameters
+#    def _getvals_defunct(self, fit_params, ntotpars, lctype):
+#        """Fetch values from parameters
+#
+#        Parameters
+#        ----------
+#        fit_params : dict or float array
+#            can input lmfit's Parameter class or just an array of parameter vals
+#        ntotpars : int
+#            total number of parameters to be fit
+#        lcpars : Boolean
+#            if True, returns set of parameters for light-curve fitting only
+#            if False, returns all parameters
+#
+#        Returns
+#        -------
+#        guess : float array
+#            array of values for each parameter
+#        """
+#
+#        guess=np.empty(ntotpars)
+#        for jj in range(ntotpars):
+#            try:
+#                guess[jj] = fit_params[self.pars.keys()[jj]].value
+#            except KeyError:
+#                guess[jj] = self.pars.values()[jj]
+#            except ValueError:
+#                guess[jj] = fit_params[jj]
+#            except IndexError:
+#                guess[jj] = fit_params[jj]
+#        if lcpars:
+#            return np.array([guess[0], guess[1], self.r1+self.r2,
+#                                           self.r2/self.r1, guess[7], guess[8],
+#                                           guess[9], guess[10], guess[11],
+#                                            self.frat, guess[12], guess[13],
+#                                            guess[14], guess[15]])
+#        return guess
 
-        Parameters
-        ----------
-        fit_params : dict or float array
-            can input lmfit's Parameter class or just an array of parameter vals
-        ntotpars : int
-            total number of parameters to be fit
-        lcpars : Boolean
-            if True, returns set of parameters for light-curve fitting only
-            if False, returns all parameters
-
-        Returns
-        -------
-        guess : float array
-            array of values for each parameter
-        """
-
-        guess=np.empty(ntotpars)
-        for jj in range(ntotpars):
-            try:
-                guess[jj] = fit_params[self.pars.keys()[jj]].value
-            except KeyError:
-                guess[jj] = self.pars.values()[jj]
-            except ValueError:
-                guess[jj] = fit_params[jj]
-            except IndexError:
-                guess[jj] = fit_params[jj]
-        if lcpars:
-            return np.array([guess[0], guess[1], self.r1+self.r2,
-                                           self.r2/self.r1, guess[7], guess[8],
-                                           guess[9], guess[10], guess[11],
-                                            self.frat, guess[12], guess[13],
-                                            guess[14], guess[15]])
-        return guess
-
-    def ilnlike(self, fisopars, lc_constraints=None, ebv_dist=None, ebv_arr=None,
+    def ilnlike(self, fisopars, lc_constraints=[], ebv_dist=None, ebv_arr=None,
                 residual=False, retpars=False):
         """Computes log likelihood of isochrone fit portion of KEBLAT
         
@@ -1842,7 +1899,7 @@ class Keblat(object):
         lc_uncertainty = np.array([0.002, 0.002, 0.002])
         if np.any(np.isinf(lc_inputs)):
             if residual:
-                return np.ones(len(isores))*1e12
+                return np.ones(len(self.magsobs) + len(lc_constraints))*1e12
             else:
             	return -np.inf, str((0,0,0))
 
@@ -1908,7 +1965,7 @@ class Keblat(object):
         return lp + ll, blobs
 
     def lnlike(self, allpars, lc_constraints=None, qua=[1], polyorder=2,
-               residual=False, ld4=False, clip=None):
+               residual=False, ld4=False, clip=None, ooe=True):
         """Returns loglikelihood for both SED + LC fitting
         
         Parameters
@@ -1950,7 +2007,7 @@ class Keblat(object):
             self.updatepars(m1=m1, m2=m2, z0=z0, age=age, dist=dist, ebv=ebv,
                             h0=h0, period=period, tpe=tpe, esinw=esinw, 
                             ecosw=ecosw, b=b, q1=q1, q2=q2, q3=q3, q4=q4, 
-                            lcerr=lcerr, isoerr=isoerr)
+                            lcerr=lcerr, isoerr=isoerr, msum=m1+m2, mrat=m2/m1)
         # do isochrone matching first
         isopars = [m1, m2, z0, age, dist, ebv, h0, isoerr]
         magsmod = self.isofit(isopars)
@@ -1979,7 +2036,7 @@ class Keblat(object):
         #now the light curve fitting part
         lcpars = np.concatenate((np.array([m1+m2, self.r1+self.r2, 
                                            self.r2/self.r1, period, 
-                                           tpe, esinw, ecosw, b, self.frat]), 
+                                           tpe, esinw, ecosw, b, self.frat]),
                                            ldcoeffs))
 
         # conds = [self.quarter == ii for ii in np.array(qua)]
@@ -1991,7 +2048,7 @@ class Keblat(object):
         lcmod, lcpol = self.lcfit(lcpars, self.jd[clip],
                                   self.quarter[clip], self.flux[clip],
                                 self.fluxerr[clip], self.crowd[clip],
-                                polyorder=polyorder)
+                                polyorder=polyorder, ooe=ooe)
         lcres = (lcmod*lcpol - self.flux[clip]) / np.sqrt(self.fluxerr[clip]**2 + lcerr**2)
 
         if np.any(np.isinf(lcmod)):
@@ -2018,7 +2075,7 @@ class Keblat(object):
         msum = ((k1+k2)/29794.509)**3 * (1-e**2)**(3./2.) * (P/d2y)
         return msum/(1.+mrat), msum/(1.+1./mrat)
 
-    def lnlike_lcrv(self, lcrvpars, qua=[1], polyorder=2, residual=False, clip=None):
+    def lnlike_lcrv(self, lcrvpars, qua=[1], polyorder=2, residual=False, clip=None, ooe=True):
         self.ldtype = 1
         #            allpars = self.getvals(fitpars, 18)
         msum, mrat, rsum, rrat, period, tpe, esinw, ecosw, b, frat, q1, q2, q3, q4, lcerr, k0, rverr = lcrvpars
@@ -2038,7 +2095,7 @@ class Keblat(object):
         lcmod, lcpol = self.lcfit(lcpars, self.jd[clip],
                                   self.quarter[clip], self.flux[clip],
                                   self.fluxerr[clip], self.crowd[clip],
-                                  polyorder=polyorder)
+                                  polyorder=polyorder, ooe=ooe)
         lcres = (lcmod * lcpol - self.flux[clip]) / np.sqrt(self.fluxerr[clip] ** 2 + lcerr ** 2)
 
         if np.any(np.isinf(lcmod)):
@@ -2046,19 +2103,22 @@ class Keblat(object):
 
         rvpars = [msum, mrat, period, tpe, esinw, ecosw, self.pars['inc'], k0, rverr]
         rv1, rv2 = self.rvfit(rvpars, self.rv_t)
-        rvres = np.concatenate(((rv1 - self.rv1_obs) / np.sqrt(self.rv1_err_obs ** 2 + rverr ** 2),
-                                (rv2 - self.rv2_obs) / np.sqrt(self.rv2_err_obs ** 2 + rverr ** 2)))
+
+        rvres = np.concatenate(((rv1[~self.bad1] - self.rv1_obs[~self.bad1]) /
+                                np.sqrt(self.rv1_err_obs[~self.bad1] ** 2 + rverr ** 2),
+                                (rv2[~self.bad2] - self.rv2_obs[~self.bad2]) /
+                                np.sqrt(self.rv2_err_obs[~self.bad2] ** 2 + rverr ** 2)))
 
         totres = np.concatenate((lcres, rvres))
         self.chi = np.sum(totres ** 2)
         if residual:
             return totres
 
-        chisq += np.sum(lcres ** 2) + \
+        chisq = np.sum(lcres ** 2) + \
                  np.sum(np.log((self.fluxerr[clip] ** 2 + lcerr ** 2)))
         chisq += np.sum(rvres ** 2) + \
-                 np.sum(np.log((self.rv1_err_obs ** 2 + rverr ** 2))) + \
-                 np.sum(np.log((self.rv2_err_obs ** 2 + rverr ** 2)))
+                 np.sum(np.log((self.rv1_err_obs[~self.bad1] ** 2 + rverr ** 2))) + \
+                 np.sum(np.log((self.rv2_err_obs[~self.bad2] ** 2 + rverr ** 2)))
 
         lili = -0.5 * chisq
         return lili
@@ -2123,6 +2183,326 @@ class Keblat(object):
             return -np.inf, str((-np.inf, -np.inf, -np.inf, -np.inf))
         return lp + ll, str((self.chi, self.r1, self.r2, self.frat))
 
+    def plot_sed(self, mlpars, prefix, suffix='sed', lc_constraints=None, 
+                       savefig=True):
+        isoerr = mlpars[-1]
+        if isoerr < 0:
+            isoerr = np.exp(isoerr)
+        magsmod = self.isofit(mlpars)
+        #magsmod, r, T, logg = isofit_single(mlpars[:5])
+        if np.any(np.isinf(magsmod)):
+            print "Input isopars give -inf magsmod: ", mlpars, magsmod
+            return magsmod
+        plt.figure()
+        plt.subplot(311)
+        plt.errorbar(self.maglams, self.magsobs, 
+                     np.sqrt(self.emagsobs**2 + isoerr**2), fmt='k.')
+        plt.plot(self.maglams, magsmod, 'r.')
+        plt.ylabel('magnitude')
+    
+        plt.subplot(312)
+        plt.errorbar(self.maglams, self.magsobs-magsmod, 
+                     np.sqrt(self.emagsobs**2 + isoerr**2), fmt='k.')
+        plt.xlabel('wavelength (angstrom)')
+        plt.ylabel('data-model')
+        plt.suptitle('KIC '+str(self.kic) +' SED (only)')
+    
+        plt.subplot(313)
+        if lc_constraints is not None:
+            plt.plot(lc_constraints, 'ko')
+        lc_inputs = np.array([(self.r1 +self.r2)/(mlpars[0]+mlpars[1])**(1./3.), 
+                              self.r2/self.r1, self.frat])
+        plt.plot(lc_inputs, 'ro')
+        plt.xlim((-1, 3))
+        if savefig:
+            plt.savefig(prefix + suffix+'.png')
+        return magsmod
+
+        
+    def plot_lc(self, lcpars, prefix, suffix='lc', savefig=True, 
+                      polyorder=2, ooe=True, clip_tol=1.5):
+        self.updatephase(lcpars[4], lcpars[3], clip_tol=clip_tol)
+    
+        lcmod, lcpol = self.lcfit(lcpars[:13], self.jd[self.clip], self.quarter[self.clip],
+                                    self.flux[self.clip], self.dflux[self.clip],
+                                    self.crowd[self.clip], polyorder=polyorder, ooe=ooe)
+    
+        lcres = self.flux[self.clip] - lcmod*lcpol
+    
+        lcerr=0
+        if len(lcpars)==14:
+            lcerr=lcpars[-1]
+            if lcerr<0:
+                lcerr=np.exp(lcerr)
+    
+        pe = (self.phase[self.clip] >= -1.2*self.pwidth) * (self.phase[self.clip] <= 1.2*self.pwidth)
+        se = (self.phase[self.clip] >= -1.2*self.swidth+self.sep) * (self.phase[self.clip] <= 1.2*self.swidth+self.sep)
+    
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, sharex='col')
+    
+        ax1.errorbar(self.phase[self.clip][pe], self.flux[self.clip][pe]/lcpol[pe],
+                     self.dflux[self.clip][pe], fmt='k.', ecolor='0.9')
+        ax1.plot(self.phase[self.clip][pe], lcmod[pe], 'r.')
+        ax2.errorbar(self.phase[self.clip][se], self.flux[self.clip][se]/lcpol[se],
+                     self.dflux[self.clip][se], fmt='k.', ecolor='0.9')
+        ax2.plot(self.phase[self.clip][se], lcmod[se], 'r.')
+        ax3.errorbar(self.phase[self.clip][pe], lcres[pe],
+                     self.dflux[self.clip][pe], fmt='k.', ecolor='0.9')
+        ax4.errorbar(self.phase[self.clip][se], lcres[se],
+                     self.dflux[self.clip][se], fmt='k.', ecolor='0.9')
+    
+    
+    
+        ax1.set_xlim((-1.2*self.pwidth, 1.2*self.pwidth))
+    
+    
+        ax2.set_xlim((-1.2*self.swidth+self.sep, 1.2*self.swidth+self.sep))
+    
+    
+        fig.suptitle('KIC '+str(self.kic)+' LC (only)')
+        plt.subplots_adjust(hspace=0)
+        if savefig:
+            plt.savefig(prefix + suffix+'.png')
+        return True
+
+    def plot_sedlc(self, allpars, prefix, suffix='sedlc', savefig=True, 
+                         polyorder=2, ooe=True):
+        if allpars[-1] < 0:
+            allpars[-1] = np.exp(allpars[-1])
+        if allpars[4] < 10:
+            allpars[4] = np.exp(allpars[4])
+        if allpars[16] < 0:
+            allpars[16] = np.exp(allpars[16])
+        residuals = self.lnlike(allpars, lc_constraints=None, qua=np.unique(self.quarter),
+                                  polyorder=polyorder, residual=True)
+        lcpars = self.getpars(partype='lc')[:13]
+    
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.errorbar(self.maglams, self.magsobs, self.emagsobs, fmt='k.')
+        ax.plot(self.maglams, residuals[:len(self.maglams)] * \
+                 np.sqrt(self.emagsobs**2 + self.pars['isoerr']**2) + self.magsobs, 'r.')
+        for ii in range(len(self.maglams)):
+            ax.text(self.maglams[ii], self.magsobs[ii], self.ipname[ii].replace('mag', ''))
+        ax.set_ylabel('Magnitude')
+    
+        divider = make_axes_locatable(ax)
+        ax2 = divider.append_axes("bottom", size=2.0, pad=0, sharex=ax)
+        ax2.errorbar(self.maglams, residuals[:len(self.maglams)] * \
+                 np.sqrt(self.emagsobs**2 + self.pars['isoerr']**2),
+                     np.sqrt(self.emagsobs**2 + self.pars['isoerr']**2), fmt='k.')
+        ax2.set_xlabel('Wavelength (Angstrom)')
+        ax2.set_ylabel('Data - Model')
+        ax2.set_ylim((-0.3, 0.3))
+        plt.setp(ax.get_xticklabels(), visible=False)
+    
+        plt.suptitle('KIC '+str(self.kic)+' SED (simultaneous)')
+        if savefig:
+            plt.savefig(prefix+suffix+'_SED.png')
+    
+        self.updatephase(lcpars[4], lcpars[3], clip_tol=self.clip_tol)
+        lcmod, lcpol = self.lcfit(lcpars, self.jd[self.clip], self.quarter[self.clip],
+        				self.flux[self.clip], self.dflux[self.clip],
+        				self.crowd[self.clip], polyorder=polyorder, ooe=ooe)
+    
+        lcres = self.flux[self.clip] - lcmod*lcpol
+    
+        fig = plt.figure(figsize=(16, 16))
+        ax = fig.add_subplot(121)
+        ax.errorbar(self.phase[self.clip], self.flux[self.clip]/lcpol,
+                     self.dflux[self.clip], fmt='k.', ecolor='0.9')
+        ax.plot(self.phase[self.clip], lcmod, 'r.')
+        ax.set_xlim((-1.2*self.pwidth, 1.2*self.pwidth))
+        ax.set_ylabel('Kepler Flux')
+    
+        divider = make_axes_locatable(ax)
+        axb = divider.append_axes("bottom", size=2.0, pad=0, sharex=ax)
+        axb.errorbar(self.phase[self.clip], lcres,
+                     np.sqrt(self.dflux[self.clip]**2 + self.pars['lcerr']**2), fmt='k.', ecolor='0.9')
+    
+        axb.set_xlim((-1.2*self.pwidth, 1.2*self.pwidth))
+        axb.set_ylabel('Data - Model')
+        axb.set_xlabel('Phase (Primary Eclipse)')
+        #axb.set_yticklabels(axb.yaxis.get_majorticklabels()[1:])
+    
+        ax2 = fig.add_subplot(122)
+        ax2.errorbar(self.phase[self.clip], self.flux[self.clip]/lcpol,
+                     self.dflux[self.clip], fmt='k.', ecolor='0.9')
+        ax2.plot(self.phase[self.clip], lcmod, 'r.')
+        ax2.set_xlim((-1.2*self.swidth+self.sep, 1.2*self.swidth+self.sep))
+    
+        divider2 = make_axes_locatable(ax2)
+        ax2b = divider2.append_axes("bottom", size=2.0, pad=0, sharex=ax2)
+        ax2b.errorbar(self.phase[self.clip], lcres,
+                     np.sqrt(self.dflux[self.clip]**2 + self.pars['lcerr']**2), fmt='k.', ecolor='0.9')
+    
+        ax2b.set_xlim((-1.2*self.swidth+self.sep, 1.2*self.swidth+self.sep))
+        ax2b.set_xlabel('Phase (Secondary Eclipse)')
+    
+        #ax2b.set_yticklabels(ax2b.yaxis.get_majorticklabels()[1:])
+    
+    
+        plt.setp(ax.get_xticklabels(), visible=False)
+        plt.setp(ax2.get_xticklabels(), visible=False)
+        plt.suptitle('KIC '+str(self.kic)+' LC (simultaneous)')
+        if savefig:
+            plt.savefig(prefix+suffix+'_LC.png')
+        return True
+
+    def plot_lcrv(self, allpars, prefix, suffix='lcrv', savefig=True, polyorder=2, ooe=True):
+        residuals = self.lnlike_lcrv(allpars, qua=np.unique(self.quarter), polyorder=polyorder,
+                                residual=True)
+        lcpars = self.getpars(partype='lc')[:13]
+        lcmod, lcpol = self.lcfit(lcpars, self.jd[self.clip], self.quarter[self.clip],
+        				self.flux[self.clip], self.dflux[self.clip],
+        				self.crowd[self.clip], polyorder=2, ooe=ooe)
+    
+        phase = ((self.jd[self.clip]-lcpars[4]) % lcpars[3])/lcpars[3]
+        phase[phase<-np.clip(self.pwidth*3., 0., 0.2)]+=1.
+        phase[phase>np.clip(self.sep+self.swidth*3., self.sep, 1.0)]-=1.
+    
+        lcres = self.flux[self.clip] - lcmod*lcpol
+    
+        fig = plt.figure(figsize=(16, 16))
+        ax = fig.add_subplot(121)
+        ax.plot(self.phase[self.clip], self.flux[self.clip]/lcpol, 'g.', alpha=0.4)
+        ax.errorbar(phase, self.flux[self.clip]/lcpol,
+                     self.dflux[self.clip], fmt='k.', ecolor='gray')
+        ax.plot(phase, lcmod, 'r.')
+        ax.set_xlim((-1.2*self.pwidth, 1.2*self.pwidth))
+        ax.set_ylim((np.min(lcmod)*0.98, np.max(lcmod)*1.02))
+        ax.set_ylabel('Kepler Flux')
+    
+        divider = make_axes_locatable(ax)
+        axb = divider.append_axes("bottom", size=2.0, pad=0, sharex=ax)
+        axb.plot(self.phase[self.clip], lcres, 'g.', alpha=0.4)
+        axb.errorbar(phase, lcres,
+                     np.sqrt(self.dflux[self.clip]**2 + self.pars['lcerr']**2), fmt='k.', ecolor='gray')
+    
+        axb.set_xlim((-1.2*self.pwidth, 1.2*self.pwidth))
+        axb.set_ylim((np.min(lcres), np.max(lcres)))
+        axb.set_ylabel('Data - Model')
+        axb.set_xlabel('Phase (Primary Eclipse)')
+        #axb.set_yticklabels(axb.yaxis.get_majorticklabels()[1:])
+    
+        ax2 = fig.add_subplot(122)
+        ax2.plot(self.phase[self.clip], self.flux[self.clip]/lcpol, 'g.', alpha=0.4)
+        ax2.errorbar(phase, self.flux[self.clip]/lcpol,
+                     self.dflux[self.clip], fmt='k.', ecolor='gray')
+        ax2.plot(phase, lcmod, 'r.')
+        ax2.set_xlim((-1.2*self.swidth+self.sep, 1.2*self.swidth+self.sep))
+        ax2.set_ylim((np.min(lcmod)*0.98, np.max(lcmod)*1.02))
+    
+        divider2 = make_axes_locatable(ax2)
+        ax2b = divider2.append_axes("bottom", size=2.0, pad=0, sharex=ax2)
+        ax2b.plot(self.phase[self.clip], lcres, 'g.', alpha=0.4)
+        ax2b.errorbar(phase, lcres,
+                     np.sqrt(self.dflux[self.clip]**2 + self.pars['lcerr']**2), fmt='k.', ecolor='gray')
+    
+        ax2b.set_xlim((-1.2*self.swidth+self.sep, 1.2*self.swidth+self.sep))
+        ax2b.set_ylim((np.min(lcres), np.max(lcres)))
+        ax2b.set_xlabel('Phase (Secondary Eclipse)')
+    
+        #ax2b.set_yticklabels(ax2b.yaxis.get_majorticklabels()[1:])
+    
+    
+        plt.setp(ax.get_xticklabels(), visible=False)
+        plt.setp(ax2.get_xticklabels(), visible=False)
+        plt.suptitle('KIC '+str(self.kic)+' LC (simultaneous)')
+        if savefig:
+            plt.savefig(prefix+suffix+'_LC.png')
+    
+        # rvpars = self.getpars(partype='rv')
+        rvpars = np.array([self.pars['msum'], self.pars['mrat'], self.pars['period'], self.pars['tpe'],
+                           self.pars['esinw'], self.pars['ecosw'], self.pars['inc'], self.pars['k0'], self.pars['rverr']])
+    
+        rv_fit = self.rvfit(rvpars, self.rv_t)
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        rvphase = (self.rv_t - self.pars['tpe'])%self.pars['period']/self.pars['period']
+        ax.errorbar(rvphase[~self.bad1], self.rv1_obs[~self.bad1], self.rv1_err_obs[~self.bad1], fmt='b*')
+        ax.errorbar(rvphase[~self.bad2], self.rv2_obs[~self.bad2], self.rv2_err_obs[~self.bad2], fmt='r*')
+        rvt = np.linspace(0, 1, 100)*self.pars['period']+self.pars['tpe']
+        rvmod = self.rvfit(rvpars, rvt)
+        ax.plot(np.linspace(0, 1, 100), rvmod[0], 'b-')
+        ax.plot(np.linspace(0, 1, 100), rvmod[1], 'r-')
+        ax.set_ylabel('RV [m/s]')
+        #ax.set_yticklabels(ax.yaxis.get_majorticklabels()[:-1])
+    
+        divider = make_axes_locatable(ax)
+        ax2 = divider.append_axes("bottom", size=2.0, pad=0, sharex=ax)
+        ax2.errorbar(rvphase[~self.bad1], (self.rv1_obs-rv_fit[0])[~self.bad1], np.sqrt(self.rv1_err_obs**2+rvpars[-1]**2)[~self.bad1], fmt='b.')
+        ax2.errorbar(rvphase[~self.bad2], (self.rv2_obs-rv_fit[1])[~self.bad2], np.sqrt(self.rv2_err_obs**2+rvpars[-1]**2)[~self.bad2], fmt='r.')
+    
+        ax2.set_xlabel('Phase')
+        ax2.set_ylabel('Data - Model')
+        #ax2.set_yticklabels(ax2.yaxis.get_majorticklabels()[:-1])
+        plt.setp(ax.get_xticklabels(), visible=False)
+        #plt.setp(ax2.get_yticklabels()[-1], visible=False)
+    
+        plt.suptitle('KIC '+str(self.kic)+' RV (simultaneous)')
+        if savefig:
+            plt.savefig(prefix+suffix+'_RV.png')
+    
+        return True
+
+
+    def plot_rv(self, rvpars, prefix, suffix='rv', savefig=True):  
+        rv_fit = self.rvfit(rvpars, self.rv_t)
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        rvphase = (self.rv_t - self.pars['tpe'])%self.pars['period']/self.pars['period']
+        ax.errorbar(rvphase[~self.bad1], self.rv1_obs[~self.bad1], self.rv1_err_obs[~self.bad1], fmt='b*')
+        ax.errorbar(rvphase[~self.bad2], self.rv2_obs[~self.bad2], self.rv2_err_obs[~self.bad2], fmt='r*')
+        rvt = np.linspace(0, 1, 100)*self.pars['period']+self.pars['tpe']
+        rvmod = self.rvfit(rvpars, rvt)
+        ax.plot(np.linspace(0, 1, 100), rvmod[0], 'b-')
+        ax.plot(np.linspace(0, 1, 100), rvmod[1], 'r-')
+        ax.set_ylabel('RV [m/s]')
+        #ax.set_yticklabels(ax.yaxis.get_majorticklabels()[:-1])
+    
+        divider = make_axes_locatable(ax)
+        ax2 = divider.append_axes("bottom", size=2.0, pad=0, sharex=ax)
+        ax2.errorbar(rvphase[~self.bad1], (self.rv1_obs-rv_fit[0])[~self.bad1], np.sqrt(self.rv1_err_obs**2+rvpars[-1]**2)[~self.bad1], fmt='b.')
+        ax2.errorbar(rvphase[~self.bad2], (self.rv2_obs-rv_fit[1])[~self.bad2], np.sqrt(self.rv2_err_obs**2+rvpars[-1]**2)[~self.bad2], fmt='r.')
+    
+        ax2.set_xlabel('Phase')
+        ax2.set_ylabel('Data - Model')
+        #ax2.set_yticklabels(ax2.yaxis.get_majorticklabels()[:-1])
+        plt.setp(ax.get_xticklabels(), visible=False)
+        #plt.setp(ax2.get_yticklabels()[-1], visible=False)
+    
+        plt.suptitle('KIC '+str(self.kic)+' RV (simultaneous)')
+        if savefig:
+            plt.savefig(prefix+suffix+'_RV.png')
+    
+        return True
+        
+
+    @staticmethod
+    def get_pars2vals(fisopars, partype='lc', crow=[]):
+        try:
+            parnames = parnames_dict[partype]
+            if len(crow)>0:
+                parnames += ['cr' + str(ii) for ii in crow]
+        except:
+            print("You entered: {0}. Partype options are 'lc', 'sed', 'rv', 'lcsed', 'lcrv'. Try again.".format(partype))
+            return
+    
+        parvals = np.zeros(len(parnames))
+        novalue = (len(fisopars) == len(parnames))
+        #print fisopars, type(fisopars), parnames
+        if isinstance(fisopars, lmfit.parameter.Parameters):
+            for j in range(len(parnames)):
+                parvals[j] = fisopars[parnames[j]].value
+        elif isinstance(fisopars, dict):
+            for j in range(len(parnames)):
+                parvals[j] = fisopars[parnames[j]]
+        else:
+            for j in range(len(parnames)):
+                parvals[j] = fisopars[j]*novalue
+        return parvals
+        
     @staticmethod
     def broadcast_crowd(qrt, cro):
         """Takes in crowding parameters for each quarter and broadcasts to all cadences
@@ -2147,6 +2527,11 @@ class Keblat(object):
         for ii in range(len(good)-1):
             cro_casted[good[ii]:good[ii+1]] = cro[ii]
         return cro_casted
+
+        
+    @staticmethod
+    def get_P(a, msum):
+        return np.sqrt(a**3 / msum) * d2y
 
     @staticmethod
     def get_a(period, msum):
@@ -2263,7 +2648,7 @@ class Keblat(object):
         -------
         z : array or scalar
             Z metallicity"""
-        return self.zsun * 10**feh
+        return 0.01524 * 10**feh
 
     @staticmethod
     def z2feh(z):
@@ -2277,4 +2662,16 @@ class Keblat(object):
         -------
         feh : array or scalar
         """
-        return np.log10(z/self.zsun)
+        return np.log10(z/0.01524)
+        
+    @staticmethod
+    def kipping_q2u(q1, q2):
+        c1 = 2.*np.sqrt(q1)*q2
+        c2 = np.sqrt(q1)*(1.-2.*q2)
+        return c1, c2
+    
+    @staticmethod
+    def kipping_u2q(u1, u2):
+        q1 = (u1+u2)**2
+        q2 = 0.5 * u1 / (u1+u2)
+        return q1, q2
