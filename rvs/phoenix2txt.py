@@ -47,17 +47,15 @@ def fitPhoenix(spec, specerr, wave, deg=4, niter=10, usigma=3., lsigma=0.1, cont
 #######################
 ## edit values below ##
 #######################
-# full path to where PHOENIX wavelength file lives:
-##Joni hoping not to screw things up
-wavedir = 'data/PHOENIX'
-#wavedir = '../../../PHOENIX/PHOENIX-ACES-AGSS-COND-2011/'
-# full path to where PHOENIX spectra live:
+# directory where PHOENIX wavelength file lives:
+wavedir = 'data/PHOENIX/'
+# directory where PHOENIX spectra live:
 specdir = 'data/PHOENIX/Z-0.0/'
-# spectrum file you want to run the program on:
-#specfile = 'lte05500-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits'
-
-##Joni trying target 5285607 and hopefully not screwing everything up!##
-specfile = 'data/PHOENIX/Z-0.0/lte06400-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits'
+# spectrum filename:
+#specfile = 'lte05500-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #example
+#specfile = 'lte06400-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #5285607
+#specfile = 'lte06500-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #6449358
+specfile = 'lte05700-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #6781535
 #######################
 ## edit values above ##
 #######################
@@ -71,8 +69,7 @@ wavestart = 15100
 waveend = 17000
 
 # read in PHOENIX FITS spectrum and corresponding wavelength FITS file
-hdu = fits.open(specfile)
-#hdu = fits.open(specpath)
+hdu = fits.open(specpath)
 spec = hdu[0].data
 hduwave = fits.open(wavepath)
 wave = hduwave[0].data
