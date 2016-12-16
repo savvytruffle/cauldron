@@ -1,7 +1,0 @@
-data/4851217/modelspec.txt
-data/4851217/obsspec1.txt 
-data/4851217/obsspec2.txt 
-data/4851217/obsspec3.txt 
-data/4851217/obsspec4.txt 
-data/4851217/obsspec5.txt 
-data/4851217/obsspec6.txt 
