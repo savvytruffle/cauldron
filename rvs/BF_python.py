@@ -80,10 +80,16 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   'data/5285607/5285607Outfile.txt'
 
 #6449358
-infiles =   'data/6449358/6449358infiles.txt'
-bjdinfile = 'data/6449358/6449358bjdinfile.txt'
-gausspars = 'data/6449358/6449358gausspars.txt'
-outfile =   'data/6449358/6449358Outfile.txt'
+#infiles =   'data/6449358/6449358infiles.txt'
+#bjdinfile = 'data/6449358/6449358bjdinfile.txt'
+#gausspars = 'data/6449358/6449358gausspars.txt'
+#outfile =   'data/6449358/6449358Outfile.txt'
+
+#5284133
+infiles =   'data/5284133/5284133infiles.txt'
+bjdinfile = 'data/5284133/5284133bjdinfile.txt'
+gausspars = 'data/5284133/5284133gausspars.txt'
+outfile =   'data/5284133/5284133Outfile.txt'
 
 # STUFF YOU NEED TO DEFINE CORRECTLY !!!
 isAPOGEE = True        # toggle to use near-IR stuff, or not
@@ -97,6 +103,7 @@ widlimits = [0,30, 0,30]   # limits for gaussian width (km/s) [min1,max1,min2,ma
 #period = 2.47028; BJD0 = 2455813.69734 # 4851217
 #period = 3.8994011; BJD0 = 2455813.69734 # 5285607
 period = 5.7767904; BJD0 = 2456760.90580 # 6449358
+period = 8.7845759; BJD0 = 245800.46231
 #period = 30.13015; BJD0 = #6778289
 
 # RADIAL VELOCITY AND BCV INFO FOR TEMPLATE (km/s; set both to 0 if using a model !!!)
