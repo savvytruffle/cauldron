@@ -74,10 +74,11 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   'data/4851217/A4851217Outfile.txt'
 
 #5285607
-#infiles =   'data/5285607/5285607infiles.txt'
-#bjdinfile = 'data/5285607/5285607bjdinfile.txt'
-#gausspars = 'data/5285607/5285607gausspars.txt'
-#outfile =   'data/5285607/5285607Outfile.txt'
+infiles =   'data/5285607/5285607infiles.txt'
+bjdinfile = 'data/5285607/5285607bjdinfile.txt'
+gausspars = 'data/5285607/5285607gausspars.txt'
+outfile =   'data/5285607/5285607Outfile-Meredith.txt'
+bfoutfile = 'data/5285607/5285607BFdata.txt'
 
 #6449358
 #infiles =   'data/6449358/6449358infiles.txt'
@@ -86,10 +87,10 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   'data/6449358/6449358Outfile.txt'
 
 #5284133
-infiles =   'data/5284133/5284133infiles.txt'
-bjdinfile = 'data/5284133/5284133bjdinfile.txt'
-gausspars = 'data/5284133/5284133gausspars.txt'
-outfile =   'data/5284133/5284133Outfile.txt'
+#infiles =   'data/5284133/5284133infiles.txt'
+#bjdinfile = 'data/5284133/5284133bjdinfile.txt'
+#gausspars = 'data/5284133/5284133gausspars.txt'
+#outfile =   'data/5284133/5284133Outfile.txt'
 
 # STUFF YOU NEED TO DEFINE CORRECTLY !!!
 isAPOGEE = True        # toggle to use near-IR stuff, or not
@@ -97,13 +98,14 @@ SpecPlot = True         # toggle to plot spectra before BFs, or not
 bjdoffset = 2454833.    # difference between real BJDs and 'bjdfunny' (truncated BJDs)
 amplimits = [0,1.2, 0,1.2] # limits for gaussian normalized amplitude [min1,max1,min2,max2]
 threshold = 10             # margin for gaussian position (raw RV in km/s)
-widlimits = [0,30, 0,30]   # limits for gaussian width (km/s) [min1,max1,min2,max2]
+#widlimits = [0,25, 0,22]   # limits for gaussian width (km/s) [min1,max1,min2,max2]
+# ^^^ widlimits IS NOW SPECIFIED ON A PER-STAR BASIS BELOW
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734 # 4851217
-#period = 3.8994011; BJD0 = 2455813.69734 # 5285607
-period = 5.7767904; BJD0 = 2456760.90580 # 6449358
-period = 8.7845759; BJD0 = 245800.46231
+period = 3.8994011; BJD0 = 2454959.576010 # 5285607
+#period = 5.7767904; BJD0 = 2456760.90580 # 6449358
+#period = 8.7845759; BJD0 = 245800.46231
 #period = 30.13015; BJD0 = #6778289
 
 # RADIAL VELOCITY AND BCV INFO FOR TEMPLATE (km/s; set both to 0 if using a model !!!)
@@ -115,18 +117,19 @@ smoothstd = 1.5      # stdev of Gaussian to smooth BFs by (~slit width in pixels
 #w00 = 5400          # starting wavelength for new grid
 #n = 38750           # number of wavelength points for new grid
 #stepV = 1.7         # roughly 3e5 / (max_wavelength / wavelength_step) km/s, rounded down
-m = 301              # length of the BF (must be longer if RVs are far from 0)
+m = 331              # length of the BF (must be longer if RVs are far from 0)
 ## good values for APOGEE:
-#w00 = 15170; n = 32000; stepV = 1.0 # all of APOGEE, high res
-w00 = 15170; n = 22000; stepV = 1.5 # testing
+#w00 = 15170; n = 32000; stepV = 1.0 # all of APOGEE, (too) high res
+w00 = 15170; n = 22000; stepV = 1.5 # all of APOGEE, still pretty high res
 #w00 = 15170; n = 2000; stepV = 4.0 # a little piece of APOGEE (lower res, apStar)
 ## good values for ARCES & TRES together:
 #w00 = 5400; n = 38750; stepV = 1.7
 ## good values HET, low & high res together:
 #w00 = 4485; n = 53000; stepV = 1.5
 
-# LIMITS TO MAKE PLOTS LOOK NICE
-rvneg = -100; rvpos = 200; ymin = -0.15; ymax = 1.05 # 5285607
+# CUSTOMIZED BF WIDTH AND PLOT LIMITS
+widlimits = [0,15, 0,15] # 5285607
+rvneg = -95; rvpos = 245; ymin = -0.15; ymax = 1.05 # 5285607
 ##########
 
 print('Welcome to the Broadening Function party!')
