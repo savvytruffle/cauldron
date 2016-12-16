@@ -1,5 +1,5 @@
 ###
-# timestamp: 2455813.69734
+# timestamp: 2455813.6996682
 # Gaussian 1 [amp, RV +/- err, wid]: [1.05, 127.75 +/- 0.05, 15.00]
 # Gaussian 2 [amp, RV +/- err, wid]: [0.64, 18.42 +/- 0.08, 15.00]
 # Uncorrected_RV, BF_amp, Gaussian_fit
@@ -336,7 +336,7 @@
 -246.0 0.0 1.7780795943e-84
 -247.5 0.0 2.48192934274e-85
 ###
-# timestamp: 2455849.57742
+# timestamp: 2455823.7264655
 # Gaussian 1 [amp, RV +/- err, wid]: [1.05, 127.75 +/- 0.05, 15.00]
 # Gaussian 2 [amp, RV +/- err, wid]: [0.64, 18.42 +/- 0.08, 15.00]
 # Uncorrected_RV, BF_amp, Gaussian_fit
@@ -673,7 +673,7 @@
 -246.0 0.0 2.00788910578e-63
 -247.5 0.0 3.66004836367e-64
 ###
-# timestamp: 2455866.56934
+# timestamp: 2455840.6611226
 # Gaussian 1 [amp, RV +/- err, wid]: [1.05, 127.75 +/- 0.05, 15.00]
 # Gaussian 2 [amp, RV +/- err, wid]: [0.64, 18.42 +/- 0.08, 15.00]
 # Uncorrected_RV, BF_amp, Gaussian_fit
@@ -1010,7 +1010,7 @@
 -246.0 0.0 3.26955478093e-81
 -247.5 0.0 4.74891236397e-82
 ###
-# timestamp: 2455823.72446
+# timestamp: 2455849.5783494
 # Gaussian 1 [amp, RV +/- err, wid]: [1.05, 127.75 +/- 0.05, 15.00]
 # Gaussian 2 [amp, RV +/- err, wid]: [0.64, 18.42 +/- 0.08, 15.00]
 # Uncorrected_RV, BF_amp, Gaussian_fit
@@ -1347,7 +1347,7 @@
 -246.0 0.0 7.80122331941e-54
 -247.5 0.0 1.62413038608e-54
 ###
-# timestamp: 2455840.65979
+# timestamp: 2455851.6487423
 # Gaussian 1 [amp, RV +/- err, wid]: [1.05, 127.75 +/- 0.05, 15.00]
 # Gaussian 2 [amp, RV +/- err, wid]: [0.64, 18.42 +/- 0.08, 15.00]
 # Uncorrected_RV, BF_amp, Gaussian_fit
@@ -1684,7 +1684,7 @@
 -246.0 0.0 4.43183736075e-48
 -247.5 0.0 1.00982160286e-48
 ###
-# timestamp: 2455851.64791
+# timestamp: 2455866.5694483
 # Gaussian 1 [amp, RV +/- err, wid]: [1.05, 127.75 +/- 0.05, 15.00]
 # Gaussian 2 [amp, RV +/- err, wid]: [0.64, 18.42 +/- 0.08, 15.00]
 # Uncorrected_RV, BF_amp, Gaussian_fit
