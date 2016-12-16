@@ -1,4 +1,4 @@
-data/5284133/modeltest.txt
+data/PHOENIX/Z-0.0/lte04200-5.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes_apogee_norm 
 data/5284133/apVisitnorm-5214-55813-299.txt
 data/5284133/apVisitnorm-5215-55823-277.txt
 data/5284133/apVisitnorm-5215-55840-277.txt
