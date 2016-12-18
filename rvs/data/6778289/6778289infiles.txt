@@ -1,4 +1,4 @@
-lte06300-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes_apogee_norm.txt
+data/PHOENIX/Z-0.0/lte06300-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes_apogee_norm.txt
 data/6778289/apVisitnorm-7441-56820-182.txt
 data/6778289/apVisitnorm-7439-56762-188.txt
 data/6778289/apVisitnorm-7440-56788-188.txt
