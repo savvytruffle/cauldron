@@ -67,11 +67,11 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #gausspars = '/Users/revhalzoo/SDSS/DCA/DChoAgausspars.txt'
 #outfile =   '/Users/revhalzoo/SDSS/DCA/DChoAOutfile.txt'
 
-#A4851217
-infiles =   'data/4851217/4851217infiles.txt' #_despiked.txt' #option for despiked infiles
-bjdinfile = 'data/4851217/4851217bjdinfile.txt'
-gausspars = 'data/4851217/4851217gausspars.txt'
-outfile =   'data/4851217/4851217Outfile.txt'
+#4851217
+#infiles =   'data/4851217/4851217infiles.txt' #_despiked.txt' #option for despiked infiles
+#bjdinfile = 'data/4851217/4851217bjdinfile.txt'
+#gausspars = 'data/4851217/4851217gausspars.txt'
+#outfile =   'data/4851217/4851217Outfile.txt'
 
 #5285607
 #infiles =   'data/5285607/5285607infiles.txt'
@@ -81,10 +81,10 @@ outfile =   'data/4851217/4851217Outfile.txt'
 #bfoutfile = 'data/5285607/5285607BFdata.txt'
 
 #6449358
-#infiles =   'data/6449358/6449358infiles.txt'
-#bjdinfile = 'data/6449358/6449358bjdinfile.txt'
-#gausspars = 'data/6449358/6449358gausspars.txt'
-#outfile =   'data/6449358/6449358Outfile.txt'
+infiles =   'data/6449358/6449358infiles.txt'
+bjdinfile = 'data/6449358/6449358bjdinfile.txt'
+gausspars = 'data/6449358/6449358gausspars.txt'
+outfile =   'data/6449358/6449358Outfile.txt'
 
 #5284133
 #infiles =   'data/5284133/5284133infiles.txt'
@@ -102,9 +102,9 @@ threshold = 10             # margin for gaussian position (raw RV in km/s)
 # ^^^ widlimits IS NOW SPECIFIED ON A PER-STAR BASIS BELOW
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
-period = 2.47028; BJD0 = 2455813.69734 # 4851217
+#period = 2.47028; BJD0 = 2455813.69734 # 4851217
 #period = 3.8994011; BJD0 = 2454959.576010 # 5285607
-#period = 5.7767904; BJD0 = 2456760.90580 # 6449358
+period = 5.7767904; BJD0 = 2456760.90580 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
 #period = 30.13015; BJD0 = 2456557.73097 #6778289
 #period = 9.1220856; BJD0 = 2456557.733 #6781535
