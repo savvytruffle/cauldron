@@ -93,10 +93,16 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   'data/5284133/5284133Outfile.txt'
 
 #6778289
-infiles =   'data/6778289/6778289infiles.txt'
-bjdinfile = 'data/6778289/6778289bjdinfile.txt'
-gausspars = 'data/6778289/6778289gausspars.txt'
-outfile =   'data/6778289/6778289Outfile.txt'
+#infiles =   'data/6778289/6778289infiles.txt'
+#bjdinfile = 'data/6778289/6778289bjdinfile.txt'
+#gausspars = 'data/6778289/6778289gausspars.txt'
+#outfile =   'data/6778289/6778289Outfile.txt'
+
+#6781535
+infiles =   'data/6781535/6781535infiles.txt'
+bjdinfile = 'data/6781535/6781535bjdinfile.txt'
+gausspars = 'data/6781535/6781535gausspars.txt'
+outfile =   'data/6781535/6781535Outfile.txt'
 
 # STUFF YOU NEED TO DEFINE CORRECTLY !!!
 isAPOGEE = True        # toggle to use near-IR stuff, or not
@@ -112,8 +118,8 @@ threshold = 10             # margin for gaussian position (raw RV in km/s)
 #period = 3.8994011; BJD0 = 2454959.576010 # 5285607
 #period = 5.7767904; BJD0 = 2456760.90580 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
-period = 30.13015; BJD0 = 2456557.73097 #6778289
-#period = 9.1220856; BJD0 = 2456557.733 #6781535
+#period = 30.13015; BJD0 = 2456557.73097 #6778289
+period = 9.1220856; BJD0 = 2456557.733 #6781535
 
 # RADIAL VELOCITY AND BCV INFO FOR TEMPLATE (km/s; set both to 0 if using a model !!!)
 rvstd = 0; bcvstd = 0 # model template
