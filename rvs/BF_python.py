@@ -103,10 +103,11 @@ threshold = 10             # margin for gaussian position (raw RV in km/s)
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734 # 4851217
-period = 3.8994011; BJD0 = 2454959.576010 # 5285607
+#period = 3.8994011; BJD0 = 2454959.576010 # 5285607
 #period = 5.7767904; BJD0 = 2456760.90580 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231
 #period = 30.13015; BJD0 = #6778289
+period = 9.1220856; BJD0 = 2456557.733 #6781535
 
 # RADIAL VELOCITY AND BCV INFO FOR TEMPLATE (km/s; set both to 0 if using a model !!!)
 rvstd = 0; bcvstd = 0 # model template
