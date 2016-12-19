@@ -91,6 +91,7 @@ infiles =   'data/5284133/5284133infiles.txt'
 bjdinfile = 'data/5284133/5284133bjdinfile.txt'
 gausspars = 'data/5284133/5284133gausspars.txt'
 outfile =   'data/5284133/5284133Outfile.txt'
+bfoutfile = 'data/5284133/5284133BFOut.txt'
 
 #6778289
 #infiles =   'data/6778289/6778289infiles.txt'
