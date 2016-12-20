@@ -153,7 +153,7 @@ w00 = 15170; n = 22000; stepV = 1.5 # all of APOGEE, still pretty high res
 ##########
 
 widlimits = [0,5, 0,5] 
-rvneg = 150; rvpos = 250; ymin = -0.15; ymax = 1.05 #6778289
+rvneg = 120; rvpos = 280; ymin = -0.15; ymax = 1.05 #6778289
 ##########
 
 print('Welcome to the Broadening Function party!')
