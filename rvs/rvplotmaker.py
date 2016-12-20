@@ -27,6 +27,11 @@ timestart = 980; timeend = 1020
 phasemin = 0.5; phasemax = 1.5
 RVmin = -45; RVmax = 180
 
+#sysname = '6449358'; filename = 'data/6449358/6449358Outfile.txt'
+#timestart = 980; timeend = 1020
+#phasemin = 0.5; phasemax = 1.5
+#RVmin = 150; RVmax = 270
+
 # Other useful definitions
 red = '#e34a33' # red, star 1
 yel = '#fdbb84' # yellow, star 2
