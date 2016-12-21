@@ -22,7 +22,7 @@ def user_rc(lw=1.5):
     plt.rc('xtick', labelsize=14)
     plt.rc('xtick.major', size=6, width=1)
     plt.rc('axes', color_cycle=tableau20, lw=1, labelsize=18, titlesize=22)
-	return tableau20
+    return tableau20
 	
 # storing tableau20 color cycle into colors array, in case you want to use specific ones
 # i.e., plt.plot(np.arange(10), color=colors[5])
