@@ -81,7 +81,7 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #bfoutfile = 'data/5285607/5285607BFdata.txt'
 
 #6449358
-infiles =   'data/6449358/6449358infiles1.txt'
+infiles =   'data/6449358/6449358infiles2.txt'
 bjdinfile = 'data/6449358/6449358bjdinfile1.txt'
 gausspars = 'data/6449358/6449358gausspars1.txt'
 outfile =   'data/6449358/6449358Outfile1.txt'
@@ -134,7 +134,7 @@ smoothstd = 1.5      # stdev of Gaussian to smooth BFs by (~slit width in pixels
 #w00 = 5400          # starting wavelength for new grid
 #n = 38750           # number of wavelength points for new grid
 #stepV = 1.7         # roughly 3e5 / (max_wavelength / wavelength_step) km/s, rounded down
-m = 401              # length of the BF (must be longer if RVs are far from 0)
+m = 301              # length of the BF (must be longer if RVs are far from 0)
 ## good values for APOGEE:
 #w00 = 15170; n = 32000; stepV = 1.0 # all of APOGEE, (too) high res
 w00 = 15170; n = 22000; stepV = 1.5 # all of APOGEE, still pretty high res
@@ -148,8 +148,8 @@ w00 = 15170; n = 22000; stepV = 1.5 # all of APOGEE, still pretty high res
 #widlimits = [0,15, 0,15] # 5285607
 #rvneg = -95; rvpos = 245; ymin = -0.15; ymax = 1.05 # 5285607
 
-widlimits = [0,5, 0,5] 
-rvneg = 0; rvpos = 150; ymin = -0.15; ymax = 1.05 #6449358
+widlimits = [0,10, 0,10] 
+rvneg = -50; rvpos = 120; ymin = -0.15; ymax = 1.05 #6449358
 ##########
 
 #widlimits = [0,5, 0,5] 
