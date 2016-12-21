@@ -81,11 +81,11 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #bfoutfile = 'data/5285607/5285607BFdata.txt'
 
 #6449358
-infiles =   'data/6449358/6449358infiles.txt'
-bjdinfile = 'data/6449358/6449358bjdinfile.txt'
-gausspars = 'data/6449358/6449358gausspars.txt'
-outfile =   'data/6449358/6449358Outfile.txt'
-bfoutfile = 'data/6449358/6449358BFdata.txt'
+infiles =   'data/6449358/6449358infiles1.txt'
+bjdinfile = 'data/6449358/6449358bjdinfile1.txt'
+gausspars = 'data/6449358/6449358gausspars1.txt'
+outfile =   'data/6449358/6449358Outfile1.txt'
+bfoutfile = 'data/6449358/6449358BFdata1.txt'
 
 #5284133
 #infiles =   'data/5284133/5284133infiles.txt'
@@ -149,7 +149,7 @@ w00 = 15170; n = 22000; stepV = 1.5 # all of APOGEE, still pretty high res
 #rvneg = -95; rvpos = 245; ymin = -0.15; ymax = 1.05 # 5285607
 
 widlimits = [0,5, 0,5] 
-rvneg = 150; rvpos = 270; ymin = -0.15; ymax = 1.05 #6449358
+rvneg = 0; rvpos = 150; ymin = -0.15; ymax = 1.05 #6449358
 ##########
 
 #widlimits = [0,5, 0,5] 
