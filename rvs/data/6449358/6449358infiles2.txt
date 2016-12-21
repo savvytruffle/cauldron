@@ -1,0 +1,16 @@
+data/PHOENIX/Z-0.0/lte06500-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes_apogee_norm.txt
+data/6449358/apVisitnorm-7125-56557-71_despiked.txt
+data/6449358/apVisitnorm-7125-56559-71_despiked.txt
+data/6449358/apVisitnorm-7125-56560-71_despiked.txt
+data/6449358/apVisitnorm-7125-56584-71_despiked.txt
+data/6449358/apVisitnorm-7439-56757-64_despiked.txt
+data/6449358/apVisitnorm-7439-56760-64_despiked.txt
+data/6449358/apVisitnorm-7439-56762-64_despiked.txt
+data/6449358/apVisitnorm-7439-56763-64_despiked.txt
+data/6449358/apVisitnorm-7440-56787-86_despiked.txt
+data/6449358/apVisitnorm-7440-56788-80_despiked.txt
+data/6449358/apVisitnorm-7441-56815-86_despiked.txt
+data/6449358/apVisitnorm-7441-56817-86_despiked.txt
+data/6449358/apVisitnorm-7441-56818-86_despiked.txt
+data/6449358/apVisitnorm-7441-56819-86_despiked.txt
+data/6449358/apVisitnorm-7441-56820-86_despiked.txt
