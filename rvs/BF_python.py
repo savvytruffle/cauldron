@@ -81,11 +81,11 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #bfoutfile = 'data/5285607/5285607BFdata.txt'
 
 #6449358
-#infiles =   'data/6449358/6449358infiles.txt'
-#bjdinfile = 'data/6449358/6449358bjdinfile.txt'
-#gausspars = 'data/6449358/6449358gausspars.txt'
-#outfile =   'data/6449358/6449358Outfile.txt'
-#bfoutfile = 'data/6449358/6449358BFdata.txt'
+infiles =   'data/6449358/6449358infiles.txt'
+bjdinfile = 'data/6449358/6449358bjdinfile.txt'
+gausspars = 'data/6449358/6449358gausspars.txt'
+outfile =   'data/6449358/6449358Outfile.txt'
+bfoutfile = 'data/6449358/6449358BFdata.txt'
 
 #5284133
 #infiles =   'data/5284133/5284133infiles.txt'
@@ -95,11 +95,11 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #bfoutfile = 'data/5284133/5284133BFOut.txt'
 
 #6778289
-infiles =   'data/6778289/6778289infiles.txt'
-bjdinfile = 'data/6778289/6778289bjdinfile.txt'
-gausspars = 'data/6778289/6778289gausspars.txt'
-outfile =   'data/6778289/6778289Outfile.txt'
-bfoutfile = 'data/6778289/6778289BFOut.txt'
+#infiles =   'data/6778289/6778289infiles.txt'
+#bjdinfile = 'data/6778289/6778289bjdinfile.txt'
+#gausspars = 'data/6778289/6778289gausspars.txt'
+#outfile =   'data/6778289/6778289Outfile.txt'
+#bfoutfile = 'data/6778289/6778289BFOut.txt'
 
 #6781535
 #infiles =   'data/6781535/6781535infiles.txt'
@@ -120,9 +120,9 @@ threshold = 10             # margin for gaussian position (raw RV in km/s)
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734 # 4851217
 #period = 3.8994011; BJD0 = 2454959.576010 # 5285607
-#period = 5.7767904; BJD0 = 2456760.90580 # 6449358
+period = 5.7767904; BJD0 = 2456760.90580 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
-period = 30.13015; BJD0 = 2456557.73097 #6778289
+#period = 30.13015; BJD0 = 2456557.73097 #6778289
 #period = 9.1220856; BJD0 = 2456557.733 #6781535
 
 # RADIAL VELOCITY AND BCV INFO FOR TEMPLATE (km/s; set both to 0 if using a model !!!)
@@ -148,12 +148,12 @@ w00 = 15170; n = 22000; stepV = 1.5 # all of APOGEE, still pretty high res
 #widlimits = [0,15, 0,15] # 5285607
 #rvneg = -95; rvpos = 245; ymin = -0.15; ymax = 1.05 # 5285607
 
-#widlimits = [0,5, 0,5] 
-#rvneg = 150; rvpos = 270; ymin = -0.15; ymax = 1.05 #6449358
+widlimits = [0,5, 0,5] 
+rvneg = 150; rvpos = 270; ymin = -0.15; ymax = 1.05 #6449358
 ##########
 
-widlimits = [0,5, 0,5] 
-rvneg = 120; rvpos = 280; ymin = -0.15; ymax = 1.05 #6778289
+#widlimits = [0,5, 0,5] 
+#rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.05 #6778289
 ##########
 
 print('Welcome to the Broadening Function party!')
