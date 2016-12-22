@@ -75,7 +75,8 @@ class Keblat(object):
         self.ldtype = 1 # quadratic limb darkening
         self.parnames = ['m1', 'm2', 'z0', 'age', 'dist', 'ebv', 'h0', 'period', 'tpe',
                          'esinw', 'ecosw', 'b', 'q1', 'q2', 'q3', 'q4', 'lcerr', 'isoerr',
-                         'k0', 'rverr', 'msum', 'mrat', 'rsum', 'rrat', 'r1', 'r2', 'inc', 'frat']
+                         'k0', 'rverr', 'msum', 'mrat', 'rsum', 'rrat', 'r1', 'r2', 'inc', 
+                         'frat', 'e']
 
         self.pars = OrderedDict(zip(self.parnames, [None]*len(self.parnames)))
 
@@ -84,14 +85,15 @@ class Keblat(object):
                           ('dist', [10., 15000.]), ('ebv', [0., 1.]),
                           ('h0', [119-1., 119+1.]), ('period', [0.05, 1000.]),
                           ('tpe', [0., 1e8]), ('esinw', [-.99, .99]),
-                          ('ecosw', [-.99, .99]), ('b', [0., 7.]), ('q1', [0., 1.]),
+                          ('ecosw', [-.99, .99]), ('b', [-7., 7.]), ('q1', [0., 1.]),
                           ('q2', [0., 1.]), ('q3', [0., 1.]), ('q4', [0., 1.]), 
                           ('lcerr', [0., 0.01]), ('isoerr', [0., 0.3]),
                                       ('k0', [-1e8, 1e8]), ('rverr', [0., 1e4]),
-                                      ('msum', [0.2, 24.]), ('mrat', [0.0085, 1.0]),
+                                      ('msum', [0.01, 30.]), ('mrat', [0.0085, 10.]),
                                       ('rsum', [0.1, 1e6]), ('rrat', [1e-6, 1e3]),
                                       ('r1', [0.01, 1e6]), ('r2', [0.01, 1e6]),
-                                      ('inc', [0., np.pi/2.]), ('frat', [1e-8, 1e2])])
+                                      ('inc', [0., np.pi/2.]), ('frat', [1e-8, 2e2]),
+                                    ('e', [0., .999])])
         if preload:
             self.loadiso2()
             self.loadsed()
@@ -207,7 +209,7 @@ class Keblat(object):
             T1, dT1, T2, dT2 of EB components
 
         """
-        armstrong = np.loadtxt('data/makesedfile/armstrong_keb_cat.csv', delimiter=',', usecols=(0,1,2,3,4))
+        armstrong = np.loadtxt('data/armstrong_keb_cat.csv', delimiter=',', usecols=(0,1,2,3,4))
         indx = self.kiclookup(kic, armstrong[:,0])
         self.armstrongT1 = armstrong[indx,1]
         self.armstrongdT1 = armstrong[indx,2]
@@ -247,7 +249,7 @@ class Keblat(object):
             return None
         return sedidx[0]
         
-    def loadiso_defunct(self, isodir = 'data/'):
+    def _loadiso_defunct(self, isodir = 'data/'):
         """Function which loads Padova isochrone data
         
         Parameters
@@ -369,7 +371,7 @@ class Keblat(object):
 
         return True
         
-    def loadsed(self, sedfile='data/makesedfile/kepsedall_0216_full_test.dat'):
+    def loadsed(self, sedfile='data/kepsedall_0216.dat'):
         """Loads SED file 
         
         Parameters
@@ -837,7 +839,7 @@ class Keblat(object):
         return True
         
     def loadvkeb(self, 
-                 filename='data/makesedfile/kebproperties_0216_full.dat', 
+                 filename='data/kebproperties_0216.dat',  
                  user_specified=None):
         """Loads information from Villanova Kepler EB database into keblat.vkeb, 
         including period, time of PE, PE width, SE width, sep, ecosw, esinw
@@ -889,7 +891,7 @@ class Keblat(object):
         return True
 
     # Computes a template eclipse light curve with Mandel & Agol (2002) algorithm
-    def lctemplate_slow(self, lcpars, period, omega, e, a, inc, bgr, ldcoeffs,
+    def _lctemplate_slow(self, lcpars, period, omega, e, a, inc, bgr, ldcoeffs,
                    rrat, tc, t0, cadence, exp, pe=True):
         """Computes a template Mandel & Agol (2002) eclipse lightcurve with
         correction for long-cadence binning (Kipping 2013)
@@ -1073,7 +1075,7 @@ class Keblat(object):
         return np.mean(tt, axis=1), np.mean(rres, axis=1)
         
     # LIGHT CURVE MODEL
-    def lcfit_slow(self, lcpars, jd, phase, flux, dflux, crowd, 
+    def _lcfit_slow(self, lcpars, jd, phase, flux, dflux, crowd, 
               polyorder=2):
         """Computes light curve model
         
@@ -1308,7 +1310,7 @@ class Keblat(object):
         #     return totmod, totmod
         return totmod, totpol
 
-    def lcfit_slow2(self, lcpars, jd, phase, flux, dflux, crowd, 
+    def _lcfit_slow2(self, lcpars, jd, phase, flux, dflux, crowd, 
               polyorder=2):
         """Computes light curve model
         
@@ -1651,8 +1653,158 @@ class Keblat(object):
             msum, rsum, rratio, period, tpe, esinw, ecosw, b, frat, q1, q2, q3, q4
         jd : float array
             time array
-        phase : float array
-            corresponding phase
+        quarter : float array
+            corresponding kepler quarter for a given time
+        flux : float array
+            observed flux
+        dflux : float array
+            flux error
+        crowd : float array
+            array of crowding values (additional flux)
+        polyorder : int
+            order of polynomial to detrend lightcurve
+        
+        Returns
+        -------
+        totmod : float array
+            array of model fluxes
+        totpol : float array
+            array of polynomials for detrending
+        """
+        # r1, r2, frat derive from m1, m2, z0, t0, dist, E(B-V), scaleheight
+        msum, rsum, rrat, period, tpe, esinw, ecosw, b, frat, \
+            q1, q2, q3, q4 = lcpars
+
+        # LD transformations (Kipping 2013)
+        c1 = 2.*np.sqrt(q1)*q2
+        c2 = np.sqrt(q1)*(1.-2.*q2)
+        c3 = 2.*np.sqrt(q3)*q4
+        c4 = np.sqrt(q3)*(1.-2.*q4)
+        ldcoeffs1 = np.array([c1, c2])
+        ldcoeffs2 = np.array([c3, c4])
+            
+#        if r2 > r1:
+#            r1, r2 = r2, r1
+#            m1, m2 = m2, m1
+#            frat = 1./frat
+        omega=np.arctan2(esinw,ecosw)
+        e=np.sqrt(esinw**2+ecosw**2)
+
+        # nip it at the bud.
+        if (e>=1.):
+            #print "e>=1", e
+            return -np.inf, -np.inf
+            
+        # r1 = rsum/(1.+rrat)
+        # r2 = rsum/(1.+1./rrat)
+        r1, r2 = self.sumrat_to_12(rsum, rrat)
+        a = self.get_a(period, msum)
+        inc = self.get_inc(b, r1, a)
+        #inc = np.arccos(b*r1/(a/r2au))
+        
+        if np.isnan(inc):
+            #print "inc is nan", inc
+            return -np.inf, -np.inf
+
+        self.updatepars(msum=msum, rsum=rsum, rrat=rrat, period=period, tpe=tpe,
+                       esinw=esinw, ecosw=ecosw, b=b, q1=q1, q2=q2, q3=q3, q4=q4,
+                       frat=frat, r1=r1, r2=r2, inc=inc, e=e)
+        fpe = np.pi/2. - omega
+        fse = -np.pi/2. - omega
+
+        # transform time of center of PE to time of periastron (t0)
+        # from Eq 9 of Sudarsky et al (2005)
+        t0 = tpe - self.sudarsky(fpe, e, period)
+        tse = t0 + self.sudarsky(fse, e, period)
+        # t0 = tpe - (-np.sqrt(1.-e**2) * period / (2.*np.pi)) * \
+        #     (e*np.sin(fpe)/(1.+e*np.cos(fpe)) - 2.*(1.-e**2)**(-0.5) * \
+        #     np.arctan(np.sqrt(1.-e**2) * np.tan((fpe)/2.) / (1.+e)))
+        # tse = t0 + (-np.sqrt(1.-e**2) * period / (2.*np.pi)) * \
+        #     (e*np.sin(fse)/(1.+e*np.cos(fse)) - 2.*(1.-e**2)**(-0.5) * \
+        #     np.arctan(np.sqrt(1.-e**2) * np.tan((fse)/2.) / (1.+e)))
+        self.tpe = tpe
+        self.tse = tse
+        # if tse<tpe:
+        #     tse+=period
+            
+        tempt1, tempres1 = self.lctemplate(lcpars, period, omega, e, a, inc, r1,
+                                           ldcoeffs1, r2/r1, tpe, t0,
+                                           cadence = self.cadence,
+                                           exp = self.exp, pe=True)
+
+        tempt2, tempres2 = self.lctemplate(lcpars, period, omega, e, a, inc, r2,
+                                           ldcoeffs2, r1/r2, tse, t0,
+                                           cadence = self.cadence,
+                                           exp = self.exp, pe=False)
+
+        tempt1 = tempt1 % period
+        tempt2 = tempt2 % period
+        tempres1 = (tempres1 - 1.)/(1. + frat) + 1.
+        tempres2 = (tempres2 - 1.)/(1. + 1./frat) + 1.
+
+        sorting1 = np.argsort(tempt1)
+        sorting2 = np.argsort(tempt2)
+
+        tempres1 = tempres1[sorting1]
+        tempt1 = tempt1[sorting1]
+        tempres2 = tempres2[sorting2]
+        tempt2 = tempt2[sorting2]
+
+        #not including crowdsap term.
+        #tempres1 = (tempres1 + frat) / (1.+frat)
+        #tempres2 = (tempres2 * frat + 1.) / (1. + frat)
+        totmod, totpol = np.ones(len(jd)), np.ones(len(jd))
+
+        maf = rsky(e, period, t0, 1e-8, jd)
+        r = a*(1.-e**2) / (1.+e*np.cos(maf))
+        zcomp = np.sin(omega+maf) * np.sin(inc) 
+        pe = ((r*zcomp>0.)) #& (z <= 1.05*(r1+r2)*r2au))
+        se = ((r*zcomp<0.)) #& (z <= 1.05*(r1+r2)*r2au))
+        tt = jd % period
+        if pe.any():
+            totmod[pe] = np.interp(tt[pe], tempt1, tempres1)
+            totmod[pe] = (totmod[pe] - 1.) * crowd[pe] + 1.
+        if se.any():
+            totmod[se] = np.interp(tt[se], tempt2, tempres2)
+            totmod[se] = (totmod[se] - 1.) * crowd[se] + 1.
+
+        if polyorder>0:
+            if (self.sep-self.clip_tol*(self.pwidth+self.swidth) < self.pwidth):
+                chunk = np.array(np.where(np.diff(jd) > np.median(np.diff(jd))*4.))[0]
+            else:
+                chunk = np.array(np.where(np.diff(jd) > self.pwidth*period))[0]
+            #put in dummy first and last element # placeholders
+            
+            chunk = np.append(chunk, len(jd)-2).flatten()
+            _, chunk3 = np.unique(np.searchsorted(jd[chunk], jd), return_index=True)
+            chunk=chunk3
+            chunk[-1]+=1
+            chunk = np.unique(np.sort(np.append(chunk, np.where(np.diff(quarter)>0)[0]+1)))
+            totpol = poly_lc_cwrapper(jd, flux, dflux, totmod, chunk, porder=polyorder, ooe=ooe)
+#            phase = ((jd - tpe) % period) / period
+#            sorting = np.argsort(phase)
+#            nopoly = (totpol[sorting] == 1.)
+#            if (np.sum(nopoly)>0) and (np.sum(nopoly)<len(totpol)*0.1):
+#                _totpol = totpol[sorting]
+#                tmp = np.interp(phase[sorting][nopoly], phase[sorting][~nopoly], flux[sorting][~nopoly]/totpol[sorting][~nopoly])
+#                #print np.sum(nopoly), np.sum(~nopoly)
+#                _totpol[nopoly] = flux[sorting][nopoly] / tmp
+#                totpol[sorting] = _totpol
+        return totmod, totpol
+
+    def _lcfit(self, lcpars, jd, quarter, flux, dflux, crowd,
+              polyorder=2, ooe=True, flares=None):
+        """Computes light curve model
+        
+        Parameters
+        ----------
+        lcpars : float array
+            parameters for LC fitting: 
+            msum, rsum, rratio, period, tpe, esinw, ecosw, b, frat, q1, q2, q3, q4
+        jd : float array
+            time array
+        quarter : float array
+            corresponding kepler quarter for a given time
         flux : float array
             observed flux
         dflux : float array
@@ -1759,26 +1911,66 @@ class Keblat(object):
         pe = ((r*zcomp>0.)) #& (z <= 1.05*(r1+r2)*r2au))
         se = ((r*zcomp<0.)) #& (z <= 1.05*(r1+r2)*r2au))
         tt = jd % period
+
         if pe.any():
             totmod[pe] = np.interp(tt[pe], tempt1, tempres1)
             totmod[pe] = (totmod[pe] - 1.) * crowd[pe] + 1.
+            
         if se.any():
             totmod[se] = np.interp(tt[se], tempt2, tempres2)
             totmod[se] = (totmod[se] - 1.) * crowd[se] + 1.
-
+        
         if polyorder>0:
-            if (self.sep-self.clip_tol*(self.pwidth+self.swidth) < self.pwidth):
-                chunk = np.array(np.where(np.diff(jd) > np.median(np.diff(jd))*4.))[0]
+            mult=1.7
+            clip = (abs((tt - tpe%period))<self.pe_dur%period*mult) | (abs((tt - tpe%period))>period-self.pe_dur%period*mult) | (abs((tt - tse%period))<self.se_dur%period*mult) | (abs((tt - tse%period))>period-self.se_dur%period*mult)
+            chunk = np.where(abs(np.diff(clip.astype(int)))>0)[0]
+            chunk = np.append(chunk, 0)
+            chunk = np.unique(np.sort(np.append(chunk, len(tt))))
+            self.chunk = chunk
+            if flares is None:
+                totpol = poly_lc_cwrapper(jd, flux, dflux, totmod, chunk, porder=polyorder, ooe=ooe)
             else:
-                chunk = np.array(np.where(np.diff(jd) > self.pwidth*period))[0]
-            #put in dummy first and last element # placeholders
-            
-            chunk = np.append(chunk, len(jd)-2).flatten()
-            _, chunk3 = np.unique(np.searchsorted(jd[chunk], jd), return_index=True)
-            chunk=chunk3
-            chunk[-1]+=1
-            chunk = np.unique(np.sort(np.append(chunk, np.where(np.diff(quarter)>0)[0]+1)))
-            totpol = poly_lc_cwrapper(jd, flux, dflux, totmod, chunk, porder=polyorder, ooe=ooe)
+                totpol = np.ones(len(jd))
+                for ii in range(len(chunk)-1):
+                    bad = (totmod[chunk[ii]:chunk[ii+1]] < 1) | flares[chunk[ii]:chunk[ii+1]]
+                    tt = jd[chunk[ii]:chunk[ii+1]][~bad]
+                    mmodel = totmod[chunk[ii]:chunk[ii+1]][~bad]
+                    ff = flux[chunk[ii]:chunk[ii+1]][~bad]
+                    eef = dflux[chunk[ii]:chunk[ii+1]][~bad]
+                    tnew = tt - np.mean(tt)
+                    nnpts = len(ff)
+                    npts = len(bad)
+                    if bad[0] or bad[-1]:
+                        poly_remember = polyorder
+                        polyorder=1
+                    order_pow = np.arange(polyorder+1)
+                    t_pow = tnew[:,np.newaxis]**order_pow
+                    Bk = np.ones(shape=(polyorder+1,nnpts))*((ff/mmodel)/(eef/mmodel)**2)
+                    Bk*=t_pow.T
+                    #sum along 'i' (or along each row)
+                    Bksum = np.sum(Bk,axis=1)
+                    #Mjk = sum over i (tdiff_i)^j * (tdiff_i)^k / (sigma_i/M_i)^2
+                    #construct 3 rows x npts columns 
+                    Mj = np.ones(shape=(polyorder+1,nnpts))/(eef/mmodel)**2
+                    Mj*=t_pow.T
+                    #transform from 2D (j rows x i columns) to 3D (k x j x i)
+                    t_pow_3d = tnew[:,np.newaxis,np.newaxis]**order_pow
+                    Mjk = t_pow_3d.T * Mj[np.newaxis,:,:]
+                    #now sum along 'i' 
+                    Mjksum = np.sum(Mjk,axis=2)
+                    #do matrix inversion solver thing to get polynomial coeffs
+                    try:
+                        Aj = np.linalg.lstsq(Mjksum,Bksum)[0]
+                        pol = np.polyval(Aj[::-1],jd[chunk[ii]:chunk[ii+1]]-np.mean(jd[chunk[ii]:chunk[ii+1]]))
+                    except: 
+                        pol = np.ones(npts)
+                    #Aj = np.dot(np.linalg.pinv(Mjksum), Bksum)
+        #                plt.plot(t, f, 'ro', t, model*pol, 'go')
+        #                plt.plot(t, pol, 'ms', tt, np.polyval(Aj[::-1],tnew), 'cs')
+        #                plt.show()
+                    if bad[0] or bad[-1]:
+                        polyorder = poly_remember
+                    totpol[chunk[ii]:chunk[ii+1]] = pol         
 #            phase = ((jd - tpe) % period) / period
 #            sorting = np.argsort(phase)
 #            nopoly = (totpol[sorting] == 1.)
@@ -2083,7 +2275,8 @@ class Keblat(object):
         m1, m2 = self.sumrat_to_12(msum, mrat)
         self.updatepars(m1=m1, m2=m2, period=period, tpe=tpe, esinw=esinw,
                         ecosw=ecosw, b=b, q1=q1, q2=q2, q3=q3, q4=q4,
-                        lcerr=lcerr, k0=k0, rverr=rverr, frat=frat)
+                        lcerr=lcerr, k0=k0, rverr=rverr, frat=frat, 
+                        msum=msum, mrat=mrat)
 
         lcpars = [msum, rsum, rrat, period, tpe, esinw, ecosw, b, frat, q1, q2, q3, q4]
         # conds = [self.quarter == ii for ii in np.array(qua)]
@@ -2123,6 +2316,20 @@ class Keblat(object):
         lili = -0.5 * chisq
         return lili
 
+    def lnprior_lcrv(self, lcrvpars):
+        msum, mrat, rsum, rrat, period, tpe, esinw, ecosw, b, frat, q1, q2, q3, q4, lcerr, k0, rverr = lcrvpars
+        e = np.sqrt(esinw**2 + ecosw**2)
+        pars2check = np.array([msum, mrat, rsum, rrat, period, tpe, e, b, frat, 
+                               q1, q2, q3, q4, lcerr, k0, rverr])
+        bounds = np.array([self.parbounds[ii] for ii in ['msum', 'mrat', 'rsum', 
+                           'rrat', 'period', 'tpe', 'e', 'b', 'frat', 
+                               'q1', 'q2', 'q3', 'q4', 'lcerr', 'k0', 'rverr']])
+        pcheck = np.all((pars2check >= bounds[:,0]) & (pars2check <= bounds[:1]))
+        if pcheck:
+            return 0.0
+        else:
+            return -np.inf
+    
     def lnprior(self, allpars):
         """Returns logprior of SED + LC model
         
@@ -2183,6 +2390,15 @@ class Keblat(object):
             return -np.inf, str((-np.inf, -np.inf, -np.inf, -np.inf))
         return lp + ll, str((self.chi, self.r1, self.r2, self.frat))
 
+    def lnprob_lcrv(self, lcrvpars, qua=[1]):        
+        lp = self.lnprior_lcrv(lcrvpars)
+        if np.isinf(lp):
+            return -np.inf
+        ll = self.lnlike_lcrv(lcrvpars, qua=qua)
+        if (np.isnan(ll) or np.isinf(ll)):
+            return -np.inf
+        return lp + ll
+        
     def plot_sed(self, mlpars, prefix, suffix='sed', lc_constraints=None, 
                        savefig=True):
         isoerr = mlpars[-1]
