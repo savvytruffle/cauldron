@@ -33,6 +33,7 @@ except:
 #from nbody import occultquad, rsky
 from scipy.optimize import minimize as sp_minimize
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import emcee
 
 #############################################
 ################ constants ##################
@@ -1573,8 +1574,12 @@ class Keblat(object):
         k1 = (np.nanmax(self.rv1_obs) - np.nanmin(self.rv1_obs))/2.
         k2 = (np.nanmax(self.rv2_obs) - np.nanmin(self.rv2_obs))/2.
         k0 = np.nanmedian(np.append(self.rv1_obs, self.rv2_obs))
-        m1, m2 = self.rvpars_guess_mass(k1, k2, self.pars['period'],
+        try:
+            m1, m2 = self.rvpars_guess_mass(k1, k2, self.pars['period'],
                                         np.sqrt(self.pars['esinw']**2 + self.pars['ecosw']**2))
+        except:
+            print("Could not compute m1, m2 b/c esinw, ecosw not loaded to keblat.pars")
+            m1, m2 = 1.0, 1.0
         return m1, m2, k0
 
     def _rvfit_old(self, rvpars, t):
@@ -2271,7 +2276,6 @@ class Keblat(object):
         self.ldtype = 1
         #            allpars = self.getvals(fitpars, 18)
         msum, mrat, rsum, rrat, period, tpe, esinw, ecosw, b, frat, q1, q2, q3, q4, lcerr, k0, rverr = lcrvpars
-
         m1, m2 = self.sumrat_to_12(msum, mrat)
         self.updatepars(m1=m1, m2=m2, period=period, tpe=tpe, esinw=esinw,
                         ecosw=ecosw, b=b, q1=q1, q2=q2, q3=q3, q4=q4,
@@ -2317,6 +2321,7 @@ class Keblat(object):
         return lili
 
     def lnprior_lcrv(self, lcrvpars):
+        #lcerr, rverr in log space
         msum, mrat, rsum, rrat, period, tpe, esinw, ecosw, b, frat, q1, q2, q3, q4, lcerr, k0, rverr = lcrvpars
         e = np.sqrt(esinw**2 + ecosw**2)
         pars2check = np.array([msum, mrat, rsum, rrat, period, tpe, e, b, frat, 
@@ -2324,7 +2329,9 @@ class Keblat(object):
         bounds = np.array([self.parbounds[ii] for ii in ['msum', 'mrat', 'rsum', 
                            'rrat', 'period', 'tpe', 'e', 'b', 'frat', 
                                'q1', 'q2', 'q3', 'q4', 'lcerr', 'k0', 'rverr']])
-        pcheck = np.all((pars2check >= bounds[:,0]) & (pars2check <= bounds[:1]))
+        bounds[-1,:] = [-8, 12]
+        bounds[-3,:] = [-12, -2]
+        pcheck = np.all((pars2check >= bounds[:,0]) & (pars2check <= bounds[:,1]))
         if pcheck:
             return 0.0
         else:
@@ -2390,14 +2397,79 @@ class Keblat(object):
             return -np.inf, str((-np.inf, -np.inf, -np.inf, -np.inf))
         return lp + ll, str((self.chi, self.r1, self.r2, self.frat))
 
-    def lnprob_lcrv(self, lcrvpars, qua=[1]):        
+    def lnprob_lcrv(self, lcrvpars, qua=[1]):
         lp = self.lnprior_lcrv(lcrvpars)
         if np.isinf(lp):
             return -np.inf
+        lcrvpars[-1] = np.exp(lcrvpars[-1])
+        lcrvpars[-3] = np.exp(lcrvpars[-3])
         ll = self.lnlike_lcrv(lcrvpars, qua=qua)
         if (np.isnan(ll) or np.isinf(ll)):
             return -np.inf
         return lp + ll
+        
+    def run_emcee(self, pars, mcfile, p0_scale=None, nwalkers=64, niter=40000):
+        assert self.rv_t is not None, "no rv data found"
+        assert self.jd is not None, "no lc data found"
+        self.ndim = len(pars)
+        self.nwalkers=nwalkers
+        self.niter=niter
+        if p0_scale is None:
+            p0_scale = np.ones(self.ndim)*1e-4
+        self.p0 = [pars + p0_scale*pars*np.random.randn(self.ndim) for ii in range(self.nwalkers)]
+        if os.path.isfile(mcfile):
+            print("File {0} already exists... do you want to clobber?".format(mcfile))
+            return
+        outf=open(mcfile, "w")
+        outf.close()
+        start_time = time.time()
+        self.sampler = emcee.EnsembleSampler(self.nwalkers, self.ndim, 
+                                             self.lnprob_lcrv, threads=4,
+                                             args=[np.unique(self.quarter)])
+        print("Running {0}k MCMC chain".format(self.niter/1000))
+        for res in self.sampler.sample(self.p0, iterations=self.niter, storechain=False):
+            if self.sampler.iterations % 10 == 0:
+                position = res[0]
+                outf = open(mcfile, "a")
+                for k in range(position.shape[0]):
+                    outf.write("{0} {1} {2} {3} {4}\n".format(self.sampler.iterations,
+                               k, self.sampler.acceptance_fraction[k], res[1][k],
+                                " ".join([str(ii) for ii in position[k]])))
+                outf.close()
+            if self.sampler.iterations % 10000 == 0:
+                print("Time elapsed since niter={0}:{1}".format(self.sampler.iterations, 
+                      time.time-start_time))
+        print("Total time elapsed for MCMC run:{0}".format(time.time()-start_time))
+        print("Total acceptance fraction:{0}".format(np.mean(self.sampler.acceptance_fraction)))
+        try:
+            print("Total autocorr time:{0}".format(np.mean(self.sampler.acor)))
+        except:
+            print("Could not compute autocorr time...")
+        return
+
+    def run_emcee2(self, pars, mcfile, p0_scale=None, nwalkers=64, niter=40000):
+        assert self.rv_t is not None, "no rv data found"
+        assert self.jd is not None, "no lc data found"
+        self.ndim = len(pars)
+        self.nwalkers=nwalkers
+        self.niter=niter
+        if p0_scale is None:
+            p0_scale = np.ones(self.ndim)*1e-4
+        self.p0 = [pars + p0_scale*pars*np.random.randn(self.ndim) for ii in range(self.nwalkers)]
+        start_time = time.time()
+        self.sampler = emcee.EnsembleSampler(self.nwalkers, self.ndim, 
+                                             self.lnprob_lcrv, threads=4,
+                                             args=[np.unique(self.quarter)])
+        self.sampler.run_mcmc(self.p0, self.niter)
+        print("Running {0}k MCMC chain".format(self.niter/1000))
+        
+        print("Total time elapsed for MCMC run:{0}".format(time.time()-start_time))
+        print("Total acceptance fraction:{0}".format(np.mean(self.sampler.acceptance_fraction)))
+        try:
+            print("Total autocorr time:{0}".format(np.mean(self.sampler.acor)))
+        except:
+            print("Could not compute autocorr time...")
+        return
         
     def plot_sed(self, mlpars, prefix, suffix='sed', lc_constraints=None, 
                        savefig=True):
