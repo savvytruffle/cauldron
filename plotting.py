@@ -22,22 +22,26 @@ def user_rc(lw=1.5):
     plt.rc('xtick', labelsize=14)
     plt.rc('xtick.major', size=6, width=1)
     plt.rc('axes', color_cycle=tableau20, lw=1, labelsize=18, titlesize=22)
+    plt.rc('figure', titlesize=22, figsize=(10,8))
     return tableau20
-	
+
+
 # storing tableau20 color cycle into colors array, in case you want to use specific ones
 # i.e., plt.plot(np.arange(10), color=colors[5])
 colors=user_rc()
-x = np.linspace(0, 2*np.pi, 100)
-y1 = np.sin(x)
-y2 = np.sin(x+0.5)
-y3 = 2.0*np.sin(x+0.5)
-y4 = 2.7*np.cos(x)
 
-plt.plot(x, y1)
-plt.plot(x, y2)
-plt.plot(x, y3)
-plt.plot(x, y4)
-plt.xlabel('x axis label here')
-plt.ylabel('y axis label here')
-plt.title('spaceman spiff strikes again!')
-plt.show()
+def example_plot():
+    x = np.linspace(0, 2*np.pi, 100)
+    y1 = np.sin(x)
+    y2 = np.sin(x+0.5)
+    y3 = 2.0*np.sin(x+0.5)
+    y4 = 2.7*np.cos(x)
+    
+    plt.plot(x, y1)
+    plt.plot(x, y2)
+    plt.plot(x, y3)
+    plt.plot(x, y4)
+    plt.xlabel('x axis label here')
+    plt.ylabel('y axis label here')
+    plt.title('spaceman spiff strikes again!')
+    plt.show()
