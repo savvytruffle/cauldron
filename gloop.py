@@ -114,7 +114,7 @@ def opt_lc(lcpars0, jd, phase, flux, dflux, crowd, clip, set_upperb=2., fit_crow
 
     fit_params = Parameters()
     fit_params.add('esinw', value=esinw, min=-.999, max=0.999, vary=False)
-    fit_params.add('ecosw', value=ecosw, min=-.999, max=0.999, vary=False)  # ecosw-0.05, max=ecosw+0.05, vary=False)
+    fit_params.add('ecosw', value=ecosw, min=min(ecosw-0.05, -0.9), max=max(ecosw+0.05,0.9), vary=False)
     fit_params.add('rsum', value=rsum, min=0.1, max=10000., vary=False)
     fit_params.add('rrat', value=rrat, min=1e-4, max=1., vary=False)
     fit_params.add('b', value=b, min=0., max=set_upperb, vary=False)

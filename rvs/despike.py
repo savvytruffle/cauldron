@@ -14,13 +14,15 @@ speclist = []
 #filelist = '/Users/revhalzoo/SDSS/C6449358/C6449358infiles.txt'
 #filelist = '/Users/revhalzoo/SDSS/DCA/DChoAinfiles.txt'
 #filelist = '/Users/revhalzoo/SDSS/A4851217/A4851217phx.txt'
-filelist = 'data/4851217/A4851217infiles.txt'
+#filelist = 'data/4851217/A4851217infiles.txt'
+filelist = 'data/6449358/6449358infiles1.txt'
 f1 = open(filelist)
 infilelist = [] # for use later to make outfilelist
 
 # option to just turn the fits file into a text file without any despiking
 doDespike = True
 isFits = False
+simpleDespike = True; threshold = 0.05
 
 if isFits == True: #it's a FITS file
     for line in f1:
@@ -54,12 +56,16 @@ newwavelist = []
 newspeclist = []
 for wave, spec in zip(wavelist, speclist):
     if doDespike == True:
-        r = pyasl.pointDistGESD(spec, maxOLs=1000, alpha=5000)
-        # r[0] is number of outliers found, r[i] is indices of outliers
-        # maxOLs is max number of outliers that may be identified; increase alpha to find more
-        #print(r[0], 'outliers found')
-        newwave, newspec = np.delete(wave, r[1]), np.delete(spec, r[1])
-    else:
+        if simpleDespike == False:
+            r = pyasl.pointDistGESD(spec, maxOLs=1000, alpha=5000)
+            # r[0] is number of outliers found, r[i] is indices of outliers
+            # maxOLs is max number of outliers that may be identified; increase alpha to find more
+            #print(r[0], 'outliers found')
+            newwave, newspec = np.delete(wave, r[1]), np.delete(spec, r[1])
+        else: # simpleDespike == True
+            outliers = np.where(spec > 1.0 + threshold)
+            newwave, newspec = np.delete(wave, outliers), np.delete(spec, outliers)
+    else: # doDespike == False
         newspec = spec
         newwave = wave
     # option to plot the result

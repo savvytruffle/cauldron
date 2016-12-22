@@ -150,7 +150,7 @@ def make_lc_plots(kic, lcpars, prefix, suffix='', savefig=True, polyorder=2, ooe
     pe = (keblat.phase[keblat.clip] >= -1.2*keblat.pwidth) * (keblat.phase[keblat.clip] <= 1.2*keblat.pwidth)
     se = (keblat.phase[keblat.clip] >= -1.2*keblat.swidth+keblat.sep) * (keblat.phase[keblat.clip] <= 1.2*keblat.swidth+keblat.sep)
 
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, sharex='col')
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, sharex='col', figsize=(10,8))
 
     ax1.errorbar(keblat.phase[keblat.clip][pe], keblat.flux[keblat.clip][pe]/lcpol[pe],
                  keblat.dflux[keblat.clip][pe], fmt='k.', ecolor='0.9')
@@ -291,7 +291,7 @@ def make_lcrv_plots(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, 
                             residual=True)
     lcpars = keblat.getpars(partype='lc')[:13]
     lcmod, lcpol = keblat.lcfit(lcpars, keblat.jd[keblat.clip], keblat.quarter[keblat.clip],
-    				keblat.flux[keblat.clip], keblat.dflux[keblat.clip],
+    				keblat.flux[keblat.clip], keblat.fluxerr[keblat.clip],
     				keblat.crowd[keblat.clip], polyorder=2, ooe=ooe)
 
     phase = ((keblat.jd[keblat.clip]-lcpars[4]) % lcpars[3])/lcpars[3]
@@ -300,11 +300,11 @@ def make_lcrv_plots(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, 
 
     lcres = keblat.flux[keblat.clip] - lcmod*lcpol
 
-    fig = plt.figure(figsize=(16, 16))
+    fig = plt.figure(figsize=(10, 8))
     ax = fig.add_subplot(121)
     ax.plot(keblat.phase[keblat.clip], keblat.flux[keblat.clip]/lcpol, 'g.', alpha=0.4)
     ax.errorbar(phase, keblat.flux[keblat.clip]/lcpol,
-                 keblat.dflux[keblat.clip], fmt='k.', ecolor='gray')
+                 keblat.fluxerr[keblat.clip], fmt='k.', ecolor='gray')
     ax.plot(phase, lcmod, 'r.')
     ax.set_xlim((-1.2*keblat.pwidth, 1.2*keblat.pwidth))
     ax.set_ylim((np.min(lcmod)*0.98, np.max(lcmod)*1.02))
@@ -314,7 +314,7 @@ def make_lcrv_plots(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, 
     axb = divider.append_axes("bottom", size=2.0, pad=0, sharex=ax)
     axb.plot(keblat.phase[keblat.clip], lcres, 'g.', alpha=0.4)
     axb.errorbar(phase, lcres,
-                 np.sqrt(keblat.dflux[keblat.clip]**2 + keblat.pars['lcerr']**2), fmt='k.', ecolor='gray')
+                 np.sqrt(keblat.fluxerr[keblat.clip]**2 + keblat.pars['lcerr']**2), fmt='k.', ecolor='gray')
 
     axb.set_xlim((-1.2*keblat.pwidth, 1.2*keblat.pwidth))
     axb.set_ylim((np.min(lcres), np.max(lcres)))
@@ -325,7 +325,7 @@ def make_lcrv_plots(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, 
     ax2 = fig.add_subplot(122)
     ax2.plot(keblat.phase[keblat.clip], keblat.flux[keblat.clip]/lcpol, 'g.', alpha=0.4)
     ax2.errorbar(phase, keblat.flux[keblat.clip]/lcpol,
-                 keblat.dflux[keblat.clip], fmt='k.', ecolor='gray')
+                 keblat.fluxerr[keblat.clip], fmt='k.', ecolor='gray')
     ax2.plot(phase, lcmod, 'r.')
     ax2.set_xlim((-1.2*keblat.swidth+keblat.sep, 1.2*keblat.swidth+keblat.sep))
     ax2.set_ylim((np.min(lcmod)*0.98, np.max(lcmod)*1.02))
@@ -334,7 +334,7 @@ def make_lcrv_plots(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, 
     ax2b = divider2.append_axes("bottom", size=2.0, pad=0, sharex=ax2)
     ax2b.plot(keblat.phase[keblat.clip], lcres, 'g.', alpha=0.4)
     ax2b.errorbar(phase, lcres,
-                 np.sqrt(keblat.dflux[keblat.clip]**2 + keblat.pars['lcerr']**2), fmt='k.', ecolor='gray')
+                 np.sqrt(keblat.fluxerr[keblat.clip]**2 + keblat.pars['lcerr']**2), fmt='k.', ecolor='gray')
 
     ax2b.set_xlim((-1.2*keblat.swidth+keblat.sep, 1.2*keblat.swidth+keblat.sep))
     ax2b.set_ylim((np.min(lcres), np.max(lcres)))
@@ -354,7 +354,7 @@ def make_lcrv_plots(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, 
                        keblat.pars['esinw'], keblat.pars['ecosw'], keblat.pars['inc'], keblat.pars['k0'], keblat.pars['rverr']])
 
     rv_fit = keblat.rvfit(rvpars, keblat.rv_t)
-    fig = plt.figure()
+    fig = plt.figure(figsize=(10,8))
     ax = fig.add_subplot(111)
     rvphase = (keblat.rv_t - keblat.pars['tpe'])%keblat.pars['period']/keblat.pars['period']
     ax.errorbar(rvphase[~keblat.bad1], keblat.rv1_obs[~keblat.bad1], keblat.rv1_err_obs[~keblat.bad1], fmt='b*')
@@ -367,13 +367,13 @@ def make_lcrv_plots(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, 
     #ax.set_yticklabels(ax.yaxis.get_majorticklabels()[:-1])
 
     divider = make_axes_locatable(ax)
-    ax2 = divider.append_axes("bottom", size=2.0, pad=0, sharex=ax)
+    ax2 = divider.append_axes("bottom", size=1.5, pad=0, sharex=ax)
     ax2.errorbar(rvphase[~keblat.bad1], (keblat.rv1_obs-rv_fit[0])[~keblat.bad1], np.sqrt(keblat.rv1_err_obs**2+rvpars[-1]**2)[~keblat.bad1], fmt='b.')
     ax2.errorbar(rvphase[~keblat.bad2], (keblat.rv2_obs-rv_fit[1])[~keblat.bad2], np.sqrt(keblat.rv2_err_obs**2+rvpars[-1]**2)[~keblat.bad2], fmt='r.')
 
     ax2.set_xlabel('Phase')
     ax2.set_ylabel('Data - Model')
-    #ax2.set_yticklabels(ax2.yaxis.get_majorticklabels()[:-1])
+    ax2.set_yticklabels(ax2.yaxis.get_majorticklabels()[:-1])
     plt.setp(ax.get_xticklabels(), visible=False)
     #plt.setp(ax2.get_yticklabels()[-1], visible=False)
 
@@ -851,11 +851,11 @@ def opt_lc_old(lcpars0, jd, phase, flux, dflux, crowd, clip, set_upperb=2., fit_
 
 def opt_lc(**kwargs):
     #msum, rsum, rrat, period, tpe, esinw, ecosw, b, frat, q1, q2, q3, q4 = lcpars0
-    keblat.updatepars(**kwargs)
     #set_upperb = kwargs.pop('set_upperb', 2.0)
     vary_msum = kwargs.pop('vary_msum', True)
     fit_crowd = kwargs.pop('fit_crowd', False)
     ooe = kwargs.pop('ooe', True)
+    keblat.updatepars(**kwargs)
 
     fit_params = Parameters()
     # fit_params.add('esinw', value=esinw, min=-.999, max=0.999, vary=False)
@@ -1704,6 +1704,53 @@ def lcpars_guess_init(x, y, period, sep, swidth, pwidth, sdep, pdep):
         msum = np.clip(rsum**0.7, 0.2, 3.)
     return msum, rsum, rrat, b, frat
 
+def lnprob_lcrv(lcrvpars, qua=[1]):
+    lp = keblat.lnprior_lcrv(lcrvpars)
+    if np.isinf(lp):
+        return -np.inf
+    lcrvpars[-1] = np.exp(lcrvpars[-1])
+    lcrvpars[-3] = np.exp(lcrvpars[-3])
+    ll = keblat.lnlike_lcrv(lcrvpars, qua=qua)
+    if (np.isnan(ll) or np.isinf(ll)):
+        return -np.inf
+    return lp + ll
+
+def run_emcee(pars, mcfile, p0_scale=None, nwalkers=64, niter=40000):
+    assert keblat.rv_t is not None, "no rv data found"
+    assert keblat.jd is not None, "no lc data found"
+    ndim = len(pars)
+    if p0_scale is None:
+        p0_scale = np.ones(ndim)*1e-4
+    p0 = [pars + p0_scale*pars*np.random.randn(ndim) for ii in range(nwalkers)]
+    if os.path.isfile(mcfile):
+        print("File {0} already exists... do you want to clobber?".format(mcfile))
+        return
+    outf=open(mcfile, "w")
+    outf.close()
+    start_time = time.time()
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_lcrv, threads=4,
+                                         args=[np.unique(keblat.quarter)])
+    print("Running {0}k MCMC chain".format(niter/1000))
+    for res in sampler.sample(p0, iterations=niter, storechain=False):
+        if sampler.iterations % 10 == 0:
+            position = res[0]
+            outf = open(mcfile, "a")
+            for k in range(position.shape[0]):
+                outf.write("{0} {1} {2} {3} {4}\n".format(sampler.iterations,
+                           k, sampler.acceptance_fraction[k], res[1][k],
+                            " ".join([str(ii) for ii in position[k]])))
+            outf.close()
+        if sampler.iterations % 10000 == 0:
+            print("Time elapsed since niter={0}:{1}".format(sampler.iterations, 
+                  time.time-start_time))
+    print("Total time elapsed for MCMC run:{0}".format(time.time()-start_time))
+    print("Total acceptance fraction:{0}".format(np.mean(sampler.acceptance_fraction)))
+    try:
+        print("Total autocorr time:{0}".format(np.mean(sampler.acor)))
+    except:
+        print("Could not compute autocorr time...")
+    return p0, sampler
+    
 q1, q2, q3, q4 = 0.01, 0.01, 0.01, 0.01
 age, h0, dist = 9.2, 119., 850.
 chunks = identify_gaps(keblat.cadnum, retbounds_inds=True)
@@ -1711,7 +1758,95 @@ chunks = np.delete(chunks, np.where(np.diff(chunks)<2)[0])
 lcchi2_threshold = 3/np.nanmedian(np.array([np.nanmedian(abs(keblat.flux[chunks[ii]:chunks[ii+1]] -
                                                           np.nanmedian(keblat.flux[chunks[ii]:chunks[ii+1]])))
                                           for ii in range(len(chunks)-1)]))
-        
+
+
+prefix = 'kics/{0}/'.format(kic)
+t, rv1, rv1err, rv2, rv2err = np.loadtxt('data/5285607_jm.rv.txt', usecols=(2, 3, 4, 5, 6), unpack=True)
+m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3, rv1err*1e3, rv2err*1e3)
+opt_lcrvpars = np.loadtxt(prefix+'lcrv.lmfit')
+make_lcrv_plots(kic, opt_lcrvpars, prefix, savefig=False)
+plt.close('all')
+keblat.updatebounds('period', 'tpe')
+
+opt_lcrvpars[-1] = -4 #rverr in m/s
+opt_lcrvpars[-3] = -11 #lcerr in kep flux
+ndim = len(opt_lcrvpars)
+nwalkers = 64
+niter = 20000
+header = prefix+'lc_'
+footer = str(nwalkers)+'x'+str(niter/1000)+'k'
+mcfile = header+footer+'.mcmc'
+#p0_scale = np.ones(ndim)*1e-4
+#p0 = [opt_lcrvpars + p0_scale*opt_lcrvpars*np.random.randn(ndim) for ii in range(nwalkers)]
+p0, sampler = run_emcee(opt_lcrvpars, mcfile, nwalkers=nwalkers, niter=niter)
+burnin=10000
+isonames = parnames_dict['lcrv']
+iwalker = np.arange(nwalkers)
+afrac = np.empty((data.shape[0]/nwalkers, nwalkers))
+logli = afrac*0.
+params = np.empty((data.shape[0]/nwalkers, nwalkers, len(isonames)))
+for jj in iwalker:
+    afrac[:,jj] = data[jj::nwalkers,2]
+    logli[:,jj] = data[jj::nwalkers,3]
+    for ii in range(len(isonames)):
+        params[:, jj, ii] = data[jj::nwalkers, ii+4]
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+print "Making plots now."
+fig = plt.figure(figsize=(16, 16))
+for ii in range(len(isonames)):
+    ax = fig.add_subplot(int(len(isonames)/2)+1, 2, ii+1)
+    ax.plot(params[:, :, ii])
+    ax.plot([burnin/10, burnin/10], plt.ylim(), 'y-', lw=2.0)
+    ax.set_xlabel('N/10 iteration')
+    ax.set_ylabel(isonames[ii])
+    divider = make_axes_locatable(ax)
+    axhist = divider.append_axes("right", size=1.2, pad=0.1, sharey=ax)
+    axhist.hist(params[:,:,ii], 100, histtype='step', alpha=0.6, normed=True,
+                orientation='horizontal')
+    axhist.hist(params[:,:,ii].ravel(), 100, histtype='step', color='k',
+                normed=True, orientation='horizontal')
+    plt.setp(axhist.get_yticklabels(), visible=False)
+plt.savefig(header+footer+'_parameters.png')
+
+mostlike = np.where(logli == np.max(logli))
+mlpars = params[:,:,:][mostlike][0]
+print "Max likelihood out of all samples: ", logli[:,:][mostlike]
+for kk in range(len(isonames)):
+    print("""{0} = {1}""".format(str(isonames[kk]), mlpars[kk]))
+if burnin/10>=params.shape[0]:
+    print "Burn-in shorter than length of MCMC run, adjusting..."
+    burnin = params.shape[0]*3/4*10
+afrac, logli = afrac[burnin/10:,:], logli[burnin/10:,:]
+params = params[burnin/10:,:,:]
+
+keep = iwalker
+
+bfpars = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
+             zip(*np.percentile(params[:,keep,:].reshape((-1, ndim)),
+                                [16, 50, 84], axis=0)))
+print "MCMC result: "
+print "Accep. Frac = ", np.mean(afrac[:, keep])
+for kk in range(len(isonames)):
+    print("""{0} = {1[0]} +{1[1]} -{1[2]}""".format(str(isonames[kk]),
+          bfpars[kk]))
+
+bfpars[-1] = np.exp(bfpars[-1])
+bfpars[-3] = np.exp(bfpars[-3])
+make_lcrv_plots(kic, bfpars, header+footer, suffix='', savefig=True)
+
+import corner
+plt.figure(figsize=(14, 14))
+samples = params[:, :, :]
+post_inds = np.arange(len(isonames))
+post_inds = np.delete(post_inds, np.where(np.std(samples, axis=(0,1)) == 0)[0])
+try:
+    corner.corner(samples[:, keep,:][:,:,post_inds].reshape((-1, len(post_inds))),
+                    labels=np.array(isonames)[post_inds])
+    plt.savefig(header+footer+'_posteriors.png')
+except Exception, e:
+    print str(e)
+
+
 ############################################################################
 ################ implementation code below is commented out ################
 #################### uncomment them if want to run #########################
