@@ -9,6 +9,52 @@ from scipy import ndimage
 import pandas as pd
 import gaussfitter as gf
 import BF_functions as bff
+
+##Diana's Function to make the plots look nice##
+
+
+def user_rc(lw=1.5):
+    """Set plotting RC parameters"""
+    # These are the "Tableau 20" colors as RGB.
+    tableau20 = [(31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),
+                 (44, 160, 44), (152, 223, 138), (214, 39, 40), (255, 152, 150),
+                 (148, 103, 189), (197, 176, 213), (140, 86, 75), (196, 156, 148),
+                 (227, 119, 194), (247, 182, 210), (127, 127, 127), (199, 199, 199),
+                 (188, 189, 34), (219, 219, 141), (23, 190, 207), (158, 218, 229)]
+
+    # Scale the RGB values to the [0, 1] range, which is the format matplotlib accepts.
+    for i in range(len(tableau20)):
+        r, g, b = tableau20[i]
+        tableau20[i] = (r / 255., g / 255., b / 255.)
+
+    # Change some of the default line-widths, font sizes for xticks, labels, titles,
+    # and the color cycle to tableau20
+    plt.rc('lines', linewidth=lw)
+    plt.rc('font', size=14, weight='normal')
+    plt.rc('xtick', labelsize=14)
+    plt.rc('xtick.major', size=6, width=1)
+    plt.rc('axes', color_cycle=tableau20, lw=1, labelsize=18, titlesize=22)
+    return tableau20
+
+# storing tableau20 color cycle into colors array, in case you want to use specific ones
+# i.e., plt.plot(np.arange(10), color=colors[5])
+colors=user_rc()
+x = np.linspace(0, 2*np.pi, 100)
+y1 = np.sin(x)
+y2 = np.sin(x+0.5)
+y3 = 2.0*np.sin(x+0.5)
+y4 = 2.7*np.cos(x)
+
+plt.plot(x, y1)
+plt.plot(x, y2)
+plt.plot(x, y3)
+plt.plot(x, y4)
+plt.xlabel('x axis label here')
+plt.ylabel('y axis label here')
+plt.title('spaceman spiff strikes again!')
+plt.show()
+
+##/end Diana's program to make the plots look nice##
 '''
 Program to extract radial velocities from a double-lined binary star spectrum.
 Uses the Broadening Function technique.
@@ -155,6 +201,10 @@ w00 = 15170; n = 22000; stepV = 1.5 # all of APOGEE, still pretty high res
 # CUSTOMIZED BF WIDTH AND PLOT LIMITS
 #widlimits = [0,15, 0,15] # 5285607
 #rvneg = -95; rvpos = 245; ymin = -0.15; ymax = 1.05 # 5285607
+
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 widlimits = [0,5, 0,5] 
 rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.05 #6449358
