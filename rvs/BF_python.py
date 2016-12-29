@@ -132,34 +132,9 @@ w00 = 15170; n = 22000; stepV = 1.5 # all of APOGEE, still pretty high res
 #widlimits = [0,15, 0,15]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.1 # 5285607
 #widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6449358
 #widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6778289
-widlimits = [0,7, 0,7]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.2 # 6864859
+widlimits = [0,9, 0,9]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.2 # 6864859
 
-
-def user_rc(lw=1.5):
-    """Diana's Function to make the plots look nice (set plotting RC parameters)"""
-    # These are the "Tableau 20" colors as RGB.
-    tableau20 = [(31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),
-                 (44, 160, 44), (152, 223, 138), (214, 39, 40), (255, 152, 150),
-                 (148, 103, 189), (197, 176, 213), (140, 86, 75), (196, 156, 148),
-                 (227, 119, 194), (247, 182, 210), (127, 127, 127), (199, 199, 199),
-                 (188, 189, 34), (219, 219, 141), (23, 190, 207), (158, 218, 229)]
-    # Scale the RGB values to the [0, 1] range, which is the format matplotlib accepts.
-    for i in range(len(tableau20)):
-        r, g, b = tableau20[i]
-        tableau20[i] = (r / 255., g / 255., b / 255.)
-    # Change some of the default line-widths, font sizes for xticks, labels, titles,
-    # and the color cycle to tableau20
-    plt.rc('lines', linewidth=lw)
-    plt.rc('font', size=14, weight='normal')
-    plt.rc('xtick', labelsize=14)
-    plt.rc('xtick.major', size=6, width=1)
-    plt.rc('axes', color_cycle=tableau20, lw=1, labelsize=18, titlesize=22)
-    return tableau20
-# store tableau20 color cycle into 'colors' array
-# if you want to use specific ones, you can do, e.g., plt.plot(np.arange(10), color=colors[5])
-colors = user_rc()
-
-
+colors = bff.user_rc()
 
 print('Welcome to the Broadening Function party!')
 print('')
