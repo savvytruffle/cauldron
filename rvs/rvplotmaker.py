@@ -23,10 +23,10 @@ If you want that functionality, use an older version of this code... it was mess
 
 dateoffset = 2454833. # this value will be subtracted from bjds in pane vs. time
 
-#sysname = '5285607'; filename = '5285607Outfile_take2.txt'
-#timestart = 980; timeend = 1020
-#phasemin = 0.5; phasemax = 1.5
-#RVmin = -45; RVmax = 180
+sysname = '5285607'; filename = '5285607Outfile_take2.txt'
+timestart = 980; timeend = 1020
+phasemin = 0.5; phasemax = 1.5
+RVmin = -45; RVmax = 180
 
 #sysname = '6449358'; filename = 'data/6449358/6449358Outfile.txt'
 #timestart = 1725; timeend = 1986
@@ -35,11 +35,11 @@ dateoffset = 2454833. # this value will be subtracted from bjds in pane vs. time
 
 colors = user_rc()
 
-sysname = '6864859'; filename = 'data/6864859/6864859Outfile-Meredith.txt'
-timestart = 1720; timeend = 1990
-phasemin = 0.5; phasemax = 1.5
+#sysname = '6864859'; filename = 'data/6864859/6864859Outfile-Meredith.txt'
+#timestart = 1720; timeend = 1990
+#phasemin = 0.5; phasemax = 1.5
 #RVmin = 0; RVmax = 200 # 5285607
-RVmin = 40; RVmax = 140 # 6864859
+#RVmin = 40; RVmax = 140 # 6864859
 
 # Other useful definitions
 red = '#e34a33' # red, star 1
