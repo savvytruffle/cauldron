@@ -10,51 +10,6 @@ import pandas as pd
 import gaussfitter as gf
 import BF_functions as bff
 
-##Diana's Function to make the plots look nice##
-
-
-def user_rc(lw=1.5):
-    """Set plotting RC parameters"""
-    # These are the "Tableau 20" colors as RGB.
-    tableau20 = [(31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),
-                 (44, 160, 44), (152, 223, 138), (214, 39, 40), (255, 152, 150),
-                 (148, 103, 189), (197, 176, 213), (140, 86, 75), (196, 156, 148),
-                 (227, 119, 194), (247, 182, 210), (127, 127, 127), (199, 199, 199),
-                 (188, 189, 34), (219, 219, 141), (23, 190, 207), (158, 218, 229)]
-
-    # Scale the RGB values to the [0, 1] range, which is the format matplotlib accepts.
-    for i in range(len(tableau20)):
-        r, g, b = tableau20[i]
-        tableau20[i] = (r / 255., g / 255., b / 255.)
-
-    # Change some of the default line-widths, font sizes for xticks, labels, titles,
-    # and the color cycle to tableau20
-    plt.rc('lines', linewidth=lw)
-    plt.rc('font', size=14, weight='normal')
-    plt.rc('xtick', labelsize=14)
-    plt.rc('xtick.major', size=6, width=1)
-    plt.rc('axes', color_cycle=tableau20, lw=1, labelsize=18, titlesize=22)
-    return tableau20
-
-# storing tableau20 color cycle into colors array, in case you want to use specific ones
-# i.e., plt.plot(np.arange(10), color=colors[5])
-colors=user_rc()
-x = np.linspace(0, 2*np.pi, 100)
-y1 = np.sin(x)
-y2 = np.sin(x+0.5)
-y3 = 2.0*np.sin(x+0.5)
-y4 = 2.7*np.cos(x)
-
-plt.plot(x, y1)
-plt.plot(x, y2)
-plt.plot(x, y3)
-plt.plot(x, y4)
-plt.xlabel('x axis label here')
-plt.ylabel('y axis label here')
-plt.title('spaceman spiff strikes again!')
-plt.show()
-
-##/end Diana's program to make the plots look nice##
 '''
 Program to extract radial velocities from a double-lined binary star spectrum.
 Uses the Broadening Function technique.
@@ -102,64 +57,53 @@ both in days, and the constant RV and BCV of whatever template you are using.
 # THE OUTPUT FILE WILL BE CREATED FOR YOU
 
 # EXAMPLE INFILES AND OUTFILES
-#infiles =   'infiles.txt'
-#bjdinfile = 'bjdinfile.txt'
+#infiles =   'infiles.txt'; bjdinfile = 'bjdinfile.txt'
 #gausspars = 'gausspars.txt'
-#outfile =   'rvoutfile.txt'
-
-# joni's POCs
-#infiles =   '/Users/revhalzoo/SDSS/DCA/DChoAinfiles.txt'
-#bjdinfile = '/Users/revhalzoo/SDSS/DCA/DChoAbjdinfile.txt'
-#gausspars = '/Users/revhalzoo/SDSS/DCA/DChoAgausspars.txt'
-#outfile =   '/Users/revhalzoo/SDSS/DCA/DChoAOutfile.txt'
+#outfile =   'rvoutfile.txt'; bfoutfile = 'bfoutfile.txt'
 
 #4851217
-#infiles =   'data/4851217/4851217infiles.txt' #_despiked.txt' #option for despiked infiles
-#bjdinfile = 'data/4851217/4851217bjdinfile.txt'
+#infiles =   'data/4851217/4851217infiles.txt'; bjdinfile = 'data/4851217/4851217bjdinfile.txt'
 #gausspars = 'data/4851217/4851217gausspars.txt'
 #outfile =   'data/4851217/4851217Outfile.txt'
 
 #5285607
-infiles =   'data/5285607/5285607infiles.txt'
-bjdinfile = 'data/5285607/5285607bjdinfile.txt'
-gausspars = 'data/5285607/5285607gausspars.txt'
-outfile =   'data/5285607/5285607Outfile-Meredith.txt'
-bfoutfile = 'data/5285607/5285607BFdata.txt'
+#infiles =   'data/5285607/5285607infiles.txt'; bjdinfile = 'data/5285607/5285607bjdinfile.txt'
+#gausspars = 'data/5285607/5285607gausspars.txt'
+#outfile =   'data/5285607/5285607Outfile-Meredith.txt'; bfoutfile = 'data/5285607/5285607BFdata.txt'
 
 #6449358
-#infiles =   'data/6449358/6449358infiles2.txt'
-#bjdinfile = 'data/6449358/6449358bjdinfile1.txt'
+#infiles =   'data/6449358/6449358infiles2.txt'; bjdinfile = 'data/6449358/6449358bjdinfile1.txt'
 #gausspars = 'data/6449358/6449358gausspars1.txt'
-#outfile =   'data/6449358/6449358Outfile1.txt'
-#bfoutfile = 'data/6449358/6449358BFdata1.txt'
+#outfile =   'data/6449358/6449358Outfile1.txt'; bfoutfile = 'data/6449358/6449358BFdata1.txt'
 
 #5284133
-#infiles =   'data/5284133/5284133infiles.txt'
-#bjdinfile = 'data/5284133/5284133bjdinfile.txt'
+#infiles =   'data/5284133/5284133infiles.txt'; bjdinfile = 'data/5284133/5284133bjdinfile.txt'
 #gausspars = 'data/5284133/5284133gausspars.txt'
-#outfile =   'data/5284133/5284133Outfile.txt'
-#bfoutfile = 'data/5284133/5284133BFOut.txt'
+#outfile =   'data/5284133/5284133Outfile.txt'; bfoutfile = 'data/5284133/5284133BFOut.txt'
 
 #6778289
-#infiles =   'data/6778289/6778289infiles.txt'
-#bjdinfile = 'data/6778289/6778289bjdinfile.txt'
+#infiles =   'data/6778289/6778289infiles.txt'; bjdinfile = 'data/6778289/6778289bjdinfile.txt'
 #gausspars = 'data/6778289/6778289gausspars.txt'
-#outfile =   'data/6778289/6778289Outfile.txt'
-#bfoutfile = 'data/6778289/6778289BFOut.txt'
+#outfile =   'data/6778289/6778289Outfile.txt'; bfoutfile = 'data/6778289/6778289BFOut.txt'
 
 #6781535
-#infiles =   'data/6781535/6781535infiles.txt'
-#bjdinfile = 'data/6781535/6781535bjdinfile.txt'
+#infiles =   'data/6781535/6781535infiles.txt'; bjdinfile = 'data/6781535/6781535bjdinfile.txt'
 #gausspars = 'data/6781535/6781535gausspars.txt'
-#outfile =   'data/6781535/6781535Outfile.txt'
-#bfoutfile = 'data/6781535/6781535BFOut.txt'
+#outfile =   'data/6781535/6781535Outfile.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
 
 #6864859
-#infiles =   'data/6864859/6864859infiles.txt'
-#bjdinfile = 'data/6864859/6864859bjdinfile.txt'
-#gausspars = 'data/6864859/6864859gausspars.txt'
-#outfile =   'data/6864859/6864859OutfileALL.txt'
-#bfoutfile = 'data/6864859/6864859BFOut.txt'
+infiles =   'data/6864859/6864859infiles1.txt'; bjdinfile = 'data/6864859/6864859bjdinfile1.txt'
+gausspars = 'data/6864859/6864859gausspars1.txt'
+outfile =   'data/6864859/6864859Outfile-Meredith.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
+
+# ORBITAL PERIOD AND ZEROPOINT !!!
+#period = 2.47028; BJD0 = 2455813.69734 # 4851217
+#period = 3.8994011; BJD0 = 2454959.576010 # 5285607
+#period = 5.7767904; BJD0 = 2456760.90580 # 6449358
+#period = 8.7845759; BJD0 = 245800.46231 #5284133
+#period = 30.13015; BJD0 = 2456557.73097 #6778289
+#period = 9.1220856; BJD0 = 2456557.733 #6781535
+period = 40.8778427; BJD0 = 2454955.556300 #6864859
 
 # STUFF YOU NEED TO DEFINE CORRECTLY !!!
 isAPOGEE = True        # toggle to use near-IR stuff, or not
@@ -170,18 +114,8 @@ threshold = 10             # margin for gaussian position (raw RV in km/s)
 #widlimits = [0,25, 0,22]   # limits for gaussian width (km/s) [min1,max1,min2,max2]
 # ^^^ widlimits IS NOW SPECIFIED ON A PER-STAR BASIS BELOW
 
-# ORBITAL PERIOD AND ZEROPOINT !!!
-#period = 2.47028; BJD0 = 2455813.69734 # 4851217
-period = 3.8994011; BJD0 = 2454959.576010 # 5285607
-#period = 5.7767904; BJD0 = 2456760.90580 # 6449358
-#period = 8.7845759; BJD0 = 245800.46231 #5284133
-#period = 30.13015; BJD0 = 2456557.73097 #6778289
-#period = 9.1220856; BJD0 = 2456557.733 #6781535
-#period = 40.8778427; BJD0 = 2454955.556300 #6864859
-
 # RADIAL VELOCITY AND BCV INFO FOR TEMPLATE (km/s; set both to 0 if using a model !!!)
 rvstd = 0; bcvstd = 0 # model template
-#rvstd = 0; bcvstd = 13.5073 # joni's OA with self-template
 
 # PARAMETERS FOR THE BROADENING FUNCTION (IMPORTANT PAY ATTENTION !!!)
 smoothstd = 1.5      # stdev of Gaussian to smooth BFs by (~slit width in pixels)
@@ -193,26 +127,39 @@ m = 401              # length of the BF (must be longer if RVs are far from 0)
 #w00 = 15170; n = 32000; stepV = 1.0 # all of APOGEE, (too) high res
 w00 = 15170; n = 22000; stepV = 1.5 # all of APOGEE, still pretty high res
 #w00 = 15170; n = 2000; stepV = 4.0 # a little piece of APOGEE (lower res, apStar)
-## good values for ARCES & TRES together:
-#w00 = 5400; n = 38750; stepV = 1.7
-## good values HET, low & high res together:
-#w00 = 4485; n = 53000; stepV = 1.5
 
 # CUSTOMIZED BF WIDTH AND PLOT LIMITS
-widlimits = [0,15, 0,15] # 5285607
-rvneg = -95; rvpos = 245; ymin = -0.15; ymax = 1.05 # 5285607
+#widlimits = [0,15, 0,15]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.1 # 5285607
+#widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6449358
+#widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6778289
+widlimits = [0,7, 0,7]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.2 # 6864859
 
 
-import matplotlib.pyplot as plt
-import numpy as np
+def user_rc(lw=1.5):
+    """Diana's Function to make the plots look nice (set plotting RC parameters)"""
+    # These are the "Tableau 20" colors as RGB.
+    tableau20 = [(31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),
+                 (44, 160, 44), (152, 223, 138), (214, 39, 40), (255, 152, 150),
+                 (148, 103, 189), (197, 176, 213), (140, 86, 75), (196, 156, 148),
+                 (227, 119, 194), (247, 182, 210), (127, 127, 127), (199, 199, 199),
+                 (188, 189, 34), (219, 219, 141), (23, 190, 207), (158, 218, 229)]
+    # Scale the RGB values to the [0, 1] range, which is the format matplotlib accepts.
+    for i in range(len(tableau20)):
+        r, g, b = tableau20[i]
+        tableau20[i] = (r / 255., g / 255., b / 255.)
+    # Change some of the default line-widths, font sizes for xticks, labels, titles,
+    # and the color cycle to tableau20
+    plt.rc('lines', linewidth=lw)
+    plt.rc('font', size=14, weight='normal')
+    plt.rc('xtick', labelsize=14)
+    plt.rc('xtick.major', size=6, width=1)
+    plt.rc('axes', color_cycle=tableau20, lw=1, labelsize=18, titlesize=22)
+    return tableau20
+# store tableau20 color cycle into 'colors' array
+# if you want to use specific ones, you can do, e.g., plt.plot(np.arange(10), color=colors[5])
+colors = user_rc()
 
-#widlimits = [0,5, 0,5] 
-#rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.05 #6449358
-##########
 
-#widlimits = [0,5, 0,5] 
-#rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.05 #6778289
-##########
 
 print('Welcome to the Broadening Function party!')
 print('')
