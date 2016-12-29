@@ -2,6 +2,7 @@ from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import RegularPolyCollection
+from BF_functions import user_rc
 '''
 Radial velocity plotter!
 Makes a plot with two panels: top is RV vs. time, bottom is RV vs. orbital phase
@@ -22,20 +23,23 @@ If you want that functionality, use an older version of this code... it was mess
 
 dateoffset = 2454833. # this value will be subtracted from bjds in pane vs. time
 
-#sysname = '5285607'; filename = '5285607Outfile_take2.txt'
-#timestart = 980; timeend = 1020
-#phasemin = 0.5; phasemax = 1.5
-#RVmin = -45; RVmax = 180
+sysname = '5285607'; filename = '5285607Outfile_take2.txt'
+timestart = 980; timeend = 1020
+phasemin = 0.5; phasemax = 1.5
+RVmin = -45; RVmax = 180
 
 #sysname = '6449358'; filename = 'data/6449358/6449358Outfile.txt'
 #timestart = 1725; timeend = 1986
 #phasemin = 0.5; phasemax = 1.5
 #RVmin = 150; RVmax = 270
 
-sysname = '6864859'; filename = 'data/6864859/6864859Outfile.txt'
-timestart = 1726; timeend = 1987
-phasemin = 0.5; phasemax = 1.5
-RVmin = 0; RVmax = 200
+colors = user_rc()
+
+#sysname = '6864859'; filename = 'data/6864859/6864859Outfile-Meredith.txt'
+#timestart = 1720; timeend = 1990
+#phasemin = 0.5; phasemax = 1.5
+#RVmin = 0; RVmax = 200 # 5285607
+#RVmin = 40; RVmax = 140 # 6864859
 
 # Other useful definitions
 red = '#e34a33' # red, star 1
@@ -78,11 +82,11 @@ ax2.xaxis.set_ticks_position('bottom')
 ax2.yaxis.set_ticks_position('left')
 plt.tick_params(axis='both', which='major', labelsize=20)
 # dotted lines to guide the eye
-plt.plot(bjd[rv1mask]-dateoffset, rv1[rv1mask], color='0.75', mfc=None, mec=None, lw=1.5, ls=':')
-plt.plot(bjd[rv2mask]-dateoffset, rv2[rv2mask], color='0.75', mfc=None, mec=None, lw=1.5, ls=':')
+plt.plot(bjd[rv1mask]-dateoffset, rv1[rv1mask], color=colors[15], mfc=None, mec=None, lw=1.5, ls=':')
+plt.plot(bjd[rv2mask]-dateoffset, rv2[rv2mask], color=colors[15], mfc=None, mec=None, lw=1.5, ls=':')
 for idx, date in enumerate(bjd):
-    plt.errorbar(date-dateoffset, rv1[idx], yerr=rverr1[idx], fmt='ko', color='0.75', mfc=red, mec='k', ms=10, lw=1.5)
-    plt.errorbar(date-dateoffset, rv2[idx], yerr=rverr2[idx], fmt='ko', color='0.75', mfc=yel, mec='k', ms=10, lw=1.5)
+    plt.errorbar(date-dateoffset, rv1[idx], yerr=rverr1[idx], fmt='ko', color=colors[15], mfc=colors[6], mec=colors[14], ms=10, lw=1.5)
+    plt.errorbar(date-dateoffset, rv2[idx], yerr=rverr2[idx], fmt='ko', color=colors[15], mfc=colors[2], mec=colors[14], ms=10, lw=1.5)
 plt.xlabel("Time (BJD -- {0:.0f})".format(dateoffset), size=24, labelpad=10)
 
 # Folded RV vs phase
@@ -94,8 +98,8 @@ ax1.xaxis.set_ticks_position('bottom')
 ax1.yaxis.set_ticks_position('left')
 plt.tick_params(axis='both', which='major', labelsize=20)
 for idx, ph in enumerate(phase_double):
-    plt.errorbar(phase_double[idx], rv1_double[idx], yerr=rverr1_double[idx], marker='o', color=red, mec='k', ecolor=red, ms=10, ls='None', lw=1.5)
-    plt.errorbar(phase_double[idx], rv2_double[idx], yerr=rverr2_double[idx], marker='o', color=yel, mec='k', ecolor=yel, ms=10, ls='None', lw=1.5)
+    plt.errorbar(phase_double[idx], rv1_double[idx], yerr=rverr1_double[idx], marker='o', color=colors[6], mec=colors[14], ecolor=colors[6], ms=10, ls='None', lw=1.5)
+    plt.errorbar(phase_double[idx], rv2_double[idx], yerr=rverr2_double[idx], marker='o', color=colors[2], mec=colors[14], ecolor=colors[2], ms=10, ls='None', lw=1.5)
 plt.xlabel("Orbital Phase", size=24)
 
 # Draw vertical lines at phase = 0.5
