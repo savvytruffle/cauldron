@@ -1727,9 +1727,10 @@ def run_emcee(pars, mcfile, p0_scale=None, nwalkers=64, niter=40000):
         return
     outf=open(mcfile, "w")
     outf.close()
-    start_time = time.time()
+
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_lcrv, threads=4,
                                          args=[np.unique(keblat.quarter)])
+    start_time = time.time()
     print("Running {0}k MCMC chain".format(niter/1000))
     for res in sampler.sample(p0, iterations=niter, storechain=False):
         if sampler.iterations % 10 == 0:
@@ -1742,7 +1743,7 @@ def run_emcee(pars, mcfile, p0_scale=None, nwalkers=64, niter=40000):
             outf.close()
         if sampler.iterations % 10000 == 0:
             print("Time elapsed since niter={0}:{1}".format(sampler.iterations, 
-                  time.time-start_time))
+                  time.time()-start_time))
     print("Total time elapsed for MCMC run:{0}".format(time.time()-start_time))
     print("Total acceptance fraction:{0}".format(np.mean(sampler.acceptance_fraction)))
     try:
@@ -1776,10 +1777,14 @@ niter = 20000
 header = prefix+'lc_'
 footer = str(nwalkers)+'x'+str(niter/1000)+'k'
 mcfile = header+footer+'.mcmc'
-#p0_scale = np.ones(ndim)*1e-4
+p0_scale = np.ones(ndim)*1e-4
+p0_scale[4] = 1e-7
+p0_scale[5] = 1e-6
+p0_scale[[1,3,9]] = 1e-5
 #p0 = [opt_lcrvpars + p0_scale*opt_lcrvpars*np.random.randn(ndim) for ii in range(nwalkers)]
-p0, sampler = run_emcee(opt_lcrvpars, mcfile, nwalkers=nwalkers, niter=niter)
-burnin=10000
+p0, sampler = run_emcee(opt_lcrvpars, mcfile, p0_scale=p0_scale, nwalkers=nwalkers, niter=niter)
+burnin=niter/2
+data=np.loadtxt(mcfile)
 isonames = parnames_dict['lcrv']
 iwalker = np.arange(nwalkers)
 afrac = np.empty((data.shape[0]/nwalkers, nwalkers))
@@ -1832,10 +1837,10 @@ for kk in range(len(isonames)):
 
 bfpars[-1] = np.exp(bfpars[-1])
 bfpars[-3] = np.exp(bfpars[-3])
-make_lcrv_plots(kic, bfpars, header+footer, suffix='', savefig=True)
+make_lcrv_plots(kic, mlpars, header+footer, suffix='', savefig=True)
 
 import corner
-plt.figure(figsize=(14, 14))
+#plt.figure(figsize=(14, 14))
 samples = params[:, :, :]
 post_inds = np.arange(len(isonames))
 post_inds = np.delete(post_inds, np.where(np.std(samples, axis=(0,1)) == 0)[0])
