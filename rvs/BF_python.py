@@ -129,10 +129,10 @@ w00 = 15170; n = 22000; stepV = 1.5 # all of APOGEE, still pretty high res
 #w00 = 15170; n = 2000; stepV = 4.0 # a little piece of APOGEE (lower res, apStar)
 
 # CUSTOMIZED BF WIDTH AND PLOT LIMITS
-widlimits = [0,15, 0,15]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.1 # 5285607
+widlimits = [0,15, 0,15]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
 #widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6449358
 #widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6778289
-#widlimits = [0,9, 0,9]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.2 # 6864859
+#widlimits = [0,9, 0,9]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
 
 colors = bff.user_rc()
 
@@ -301,7 +301,7 @@ fig.text(0.07, 0.6, 'Broadening Function', ha='center', va='center', size=26, ro
 #########0.07, 0.5
 for i in range (1,nspec):
     ax = fig.add_subplot(windowrows, windowcols, i) # out of range if windowcols x windowrows < nspec
-    ax.yaxis.set_major_locator(MultipleLocator(0.2))
+    ax.yaxis.set_major_locator(MultipleLocator(0.4))
     if windowcols == 4 and (i!=1 and i!=5 and i!=9 and i!=13 and i!=17 and i!=21 and i!=25):
         ax.set_yticklabels(())
     if windowcols == 3 and (i!=1 and i!=4 and i!=7 and i!=10 and i!=13 and i!=16 and i!=19 and i!=22 and i!=25):
@@ -323,7 +323,7 @@ for i in range (1,nspec):
     plt.plot(bf_ind, gauss1, color=colors[6], lw=3, ls='--')#, label='Gaussian fit 1')
     plt.plot(bf_ind, gauss2, color=colors[2], lw=3, ls='--')#, label='Gaussian fit 2')
     # OPTION TO PLOT VERTICAL LINE AT ZERO
-    plt.axvline(x=0, color=colors[15])    
+    #plt.axvline(x=0, color=colors[15])    
     # print legend
     if i==nspec-1: ax.legend(bbox_to_anchor=(2.6,0.7), loc=1, borderaxespad=0., 
                         frameon=False, handlelength=3, prop={'size':20})

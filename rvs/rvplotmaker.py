@@ -109,7 +109,7 @@ plt.xlabel("Orbital Phase", size=24)
 # Option for a legend and labels (note: for a legend you will need to add a label to the plt.errorbar commands)
 #plt.legend(ncol=2, loc=1, fontsize=20, numpoints=1, frameon=False, bbox_to_anchor=(1,2.35), columnspacing=0.7)
 fig.text(0.07, 0.5, 'Radial Velocity (km s$^{-1}$)', ha='center', va='center', size=24, rotation='vertical')
-fig.text(0.14, 0.115, 'Folded', size=24)
+#fig.text(0.14, 0.115, 'Folded', size=24)
 fig.text(0.14, 0.55, 'Unfolded', size=24)
 fig.text(0.2, 0.9, sysname, size=32)
 
