@@ -15,8 +15,8 @@ This program uses jobovy/apogee to make text files for APOGEE visit spectra and 
 The model spectrum should have stellar parameters similar to the target star for use with BF_python.
 All the final spectra are continuum normalized.
 '''
-## define useful variables upfront here so they're easy to change in one place.
-KIC = 6781535
+### define useful variables upfront here so they're easy to change in one place. ###
+KIC = 4285087
 #ApogeeID = '2M19432016+3957081'
 
 locIDs, mjds, fiberIDs = np.loadtxt('data/' + str(KIC) +'/' + str(KIC) + 'Visitlist.txt', 
@@ -31,7 +31,7 @@ for locID, mjd, fiberID in zip(locIDs, mjds, fiberIDs):
     fiberID = int(fiberID)
     print('locID, mjd, fiberID: ', locID, mjd, fiberID) # test to make sure the values are correct
 
-    # Make a unique outfile for each visit spectrum
+### Make a unique outfile for each visit spectrum ###
     specfileout = 'data/'+str(KIC)+'/apVisitnorm-'+str(locID)+'-'+str(mjd)+'-'+str(fiberID)+'.txt'
     infilelist.append(specfileout)
 
@@ -41,13 +41,16 @@ for locID, mjd, fiberID in zip(locIDs, mjds, fiberIDs):
     #header = apread.apVisit(locID, mjd, fiberID, ext=1, header=True) # only gives 1st extension header data
     
     # Manually access the file you just downloaded and read the header from it (ugh, sorry)
-    SDSSland = os.environ.get('SDSS_LOCAL_SAS_MIRROR')
-    fitsfilepath = (SDSSland + '/dr12/apogee/spectro/redux/r5/apo25m/' + str(locID) + '/' + str(mjd) + 
-                   '/apVisit-r5-'+ str(locID) + '-' + str(mjd) + '-' + str(fiberID) + '.fits')
+    #SDSSland = os.environ.get('SDSS_LOCAL_SAS_MIRROR')
+    #fitsfilepath = (SDSSland + '/dr12/apogee/spectro/redux/r5/apo25m/' + str(locID) + '/' + str(mjd) + 
+    #               '/apVisit-r5-'+ str(locID) + '-' + str(mjd) + '-' + str(fiberID) + '.fits'
+### Trying to fix the issue with spectra not being found on the server ###
+    fitsfilepath = 'data/'+str(KIC)+'/apVisit-r5-'+ str(locID) + '-' + str(mjd) + '-' + str(fiberID) + '.fits'
     header = fits.open(fitsfilepath)[0].header
     HJDlist.append(float('24'+str(header['HJD'])))
     BCVlist.append(header['BC'])
 
+### This part normalizes the spectrum ###
     contspec = continuum.fitApvisit(fluxes, fluxerrs, waves) #define continuum
     specnorm = fluxes/contspec #normalization is the spectra divided by the continuum
 
