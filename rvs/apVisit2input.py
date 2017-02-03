@@ -24,12 +24,19 @@ locIDs, mjds, fiberIDs = np.loadtxt('data/' + str(KIC) +'/' + str(KIC) + 'Visitl
 
 infilelist = []; HJDlist = []; BCVlist = []
 
+###This is where the spectra are downloaded from the server ###
 for locID, mjd, fiberID in zip(locIDs, mjds, fiberIDs):
     # the three arguments are location ID, MJD, and fiber ID, and they need to be integers
-    locID = int(locID)
-    mjd = int(mjd)
-    fiberID = int(fiberID)
-    print('locID, mjd, fiberID: ', locID, mjd, fiberID) # test to make sure the values are correct
+#    locID = int(locID)
+#    mjd = int(mjd)
+#    fiberID = int(fiberID)
+#    print('locID, mjd, fiberID: ', locID, mjd, fiberID) # test to make sure the values are correct
+    
+### Trying to fix the issue with spectra not being found on the server ###
+    fitsfilepath = 'data/'+str(KIC)+'/apVisit-r5-'+ str(locID) + '-' + str(mjd) + '-' + str(fiberID) + '.fits'
+    header = fits.open(fitsfilepath)[0].header
+    HJDlist.append(float('24'+str(header['HJD'])))
+    BCVlist.append(header['BC'])
 
 ### Make a unique outfile for each visit spectrum ###
     specfileout = 'data/'+str(KIC)+'/apVisitnorm-'+str(locID)+'-'+str(mjd)+'-'+str(fiberID)+'.txt'
