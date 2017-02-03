@@ -44,6 +44,7 @@ for locID, mjd, fiberID in zip(locIDs, mjds, fiberIDs):
     #SDSSland = os.environ.get('SDSS_LOCAL_SAS_MIRROR')
     #fitsfilepath = (SDSSland + '/dr12/apogee/spectro/redux/r5/apo25m/' + str(locID) + '/' + str(mjd) + 
     #               '/apVisit-r5-'+ str(locID) + '-' + str(mjd) + '-' + str(fiberID) + '.fits'
+    
 ### Trying to fix the issue with spectra not being found on the server ###
     fitsfilepath = 'data/'+str(KIC)+'/apVisit-r5-'+ str(locID) + '-' + str(mjd) + '-' + str(fiberID) + '.fits'
     header = fits.open(fitsfilepath)[0].header
@@ -61,7 +62,7 @@ for locID, mjd, fiberID in zip(locIDs, mjds, fiberIDs):
     plt.plot(waves, specnorm)
     plt.show()
 
-    # Save visit spectrum to text file    
+### Save visit spectrum to text file ###
     realstar = open(specfileout, 'w')
     for wave, flux in zip(waves, specnorm): 
         print(wave, flux, file=realstar)
