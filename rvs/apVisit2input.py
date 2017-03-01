@@ -21,6 +21,9 @@ KIC = 4285087
 
 locIDs, mjds, fiberIDs = np.loadtxt('data/' + str(KIC) +'/' + str(KIC) + 'Visitlist.txt', 
     usecols=(1, 2, 3), unpack=True, delimiter=',')
+    
+allVisit = apread.allVisit(rmcommissioning=True,main=True,ak=True, akvers='targ')
+spec = apread.apVisit(int(allVisit['PLATE'][i].strip()), allVisit['MJD'][i], allVisit['FIBERID'][i], ext=1, header=False)
 
 infilelist = []; HJDlist = []; BCVlist = []
 
