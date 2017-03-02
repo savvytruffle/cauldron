@@ -21,35 +21,24 @@ KIC = 4285087
 
 locIDs, mjds, fiberIDs = np.loadtxt('data/' + str(KIC) +'/' + str(KIC) + 'Visitlist.txt', 
     usecols=(1, 2, 3), unpack=True, delimiter=',')
-    
-#allVisit = apread.allVisit(rmcommissioning=True,main=True,ak=True, akvers='targ')
-#spec = apread.apVisit(int(allVisit['PLATE'][i].strip()), allVisit['MJD'][i], allVisit['FIBERID'][i], ext=1, header=False)
 
 infilelist = []; HJDlist = []; BCVlist = []
 
 for locID, mjd, fiberID in zip(locIDs, mjds, fiberIDs):
-    # the three arguments are location ID, MJD, and fiber ID, and they need to be integers
-    locID = int(locID)
-    mjd = int(mjd)
-    fiberID = int(fiberID)
-#    print('locID, mjd, fiberID: ', locID, mjd, fiberID) # test to make sure the values are correct
+    # the three arguments are location ID, MJD, and fiber ID (currently floats)
+    # they need to be strings of length 4, 5, and 3, respectively
+    locID = '{:04d}'.format(int(locID))
+    mjd = '{:05d}'.format(int(mjd))
+    fiberID = '{:03d}'.format(int(fiberID))
+    #print('locID, mjd, fiberID: ', locID, mjd, fiberID) # test to make sure the values are correct
     
 ### Trying to fix the issue with spectra not being found on the server ###
     locID = int(locID)
-    
-    #allVisit = apread.allVisit(rmcommissioning=True,main=True,ak=True, akvers='targ')
-    #spec = apread.apVisit(int(allVisit['PLATE'][i].strip()), allVisit['MJD'][i], allVisit['FIBERID'][i], ext=1, header=False)
-    
-    fitsfilepath = 'data/'+str(KIC)+'/apVisit-r5-'+ str(locID) + '-' + str(mjd) + '-' + str(fiberID) + '.fits'
-    header = fits.open(fitsfilepath)[0].header
-    ###PAD ALL THE ZEROS###
-    #print("{:03d}".format(i))
-    #HJDlist.append(float('24'+str(header['HJD'])))
-    #BCVlist.append(header['BC'])
 
 ### Make a unique outfile for each visit spectrum ###
     specfileout = 'data/'+str(KIC)+'/apVisitnorm-'+str(locID)+'-'+str(mjd)+'-'+str(fiberID)+'.txt'
-    infilelist.append(specfileout)
+    infilelist.append(specfileout)   
+    #test = apread.apVisit(int(allVisit['PLATE'][i].strip()), allVisit['MJD'][i], allVisit['FIBERID'][i], ext=1, header=False)
     
     fluxes = apread.apVisit(locID, mjd, fiberID, ext=1, header=False)
     fluxerrs = apread.apVisit(locID, mjd, fiberID, ext=2, header=False)
