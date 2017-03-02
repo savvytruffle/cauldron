@@ -22,8 +22,8 @@ KIC = 4285087
 locIDs, mjds, fiberIDs = np.loadtxt('data/' + str(KIC) +'/' + str(KIC) + 'Visitlist.txt', 
     usecols=(1, 2, 3), unpack=True, delimiter=',')
     
-allVisit = apread.allVisit(rmcommissioning=True,main=True,ak=True, akvers='targ')
-spec = apread.apVisit(int(allVisit['PLATE'][i].strip()), allVisit['MJD'][i], allVisit['FIBERID'][i], ext=1, header=False)
+#allVisit = apread.allVisit(rmcommissioning=True,main=True,ak=True, akvers='targ')
+#spec = apread.apVisit(int(allVisit['PLATE'][i].strip()), allVisit['MJD'][i], allVisit['FIBERID'][i], ext=1, header=False)
 
 infilelist = []; HJDlist = []; BCVlist = []
 
@@ -36,15 +36,21 @@ for locID, mjd, fiberID in zip(locIDs, mjds, fiberIDs):
     
 ### Trying to fix the issue with spectra not being found on the server ###
     locID = int(locID)
+    
+    #allVisit = apread.allVisit(rmcommissioning=True,main=True,ak=True, akvers='targ')
+    #spec = apread.apVisit(int(allVisit['PLATE'][i].strip()), allVisit['MJD'][i], allVisit['FIBERID'][i], ext=1, header=False)
+    
     fitsfilepath = 'data/'+str(KIC)+'/apVisit-r5-'+ str(locID) + '-' + str(mjd) + '-' + str(fiberID) + '.fits'
     header = fits.open(fitsfilepath)[0].header
+    ###PAD ALL THE ZEROS###
+    #print("{:03d}".format(i))
     #HJDlist.append(float('24'+str(header['HJD'])))
     #BCVlist.append(header['BC'])
 
 ### Make a unique outfile for each visit spectrum ###
     specfileout = 'data/'+str(KIC)+'/apVisitnorm-'+str(locID)+'-'+str(mjd)+'-'+str(fiberID)+'.txt'
     infilelist.append(specfileout)
-
+    
     fluxes = apread.apVisit(locID, mjd, fiberID, ext=1, header=False)
     fluxerrs = apread.apVisit(locID, mjd, fiberID, ext=2, header=False)
     waves = apread.apVisit(locID, mjd, fiberID, ext=4, header=False)
