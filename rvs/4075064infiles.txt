@@ -1,0 +1,7 @@
+data/PHEONIX
+data/4075064/apVisit-r5-5214-55849-079.fits
+data/4075064/apVisit-r5-5214-55813-079.fits
+data/4075064/apVisit-r5-5215-55823-061.fits
+data/4075064/apVisit-r5-5215-55840-061.fits
+data/4075064/apVisit-r5-5214-55866-079.fits
+data/4075064/apVisit-r5-5215-55851-079.fits
