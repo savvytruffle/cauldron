@@ -59,7 +59,7 @@ for idx, (rv, value, error) in enumerate(zip(BFrvaxis, BFvalues, BFerrors)):
         visitidx = visitidx + 1
         print(visitidx, idx)
         # save idx at this point; e.g., it should be 400 on the first time through
-        #408 is where "###" happens, but 414 is where the next pocket of data starts
+        # 408 is where "###" happens, but 414 is where the next pocket of data starts
 
 # Meanwhile, for just one visit, we can hardwire [0:400] as the start:end.
 # And we can also adjust the RV zeropoints and BF amplitudes arbitrarily.
