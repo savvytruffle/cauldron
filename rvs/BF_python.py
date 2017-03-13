@@ -110,6 +110,7 @@ outfile = 'data/4075064/4075064outfile.txt'; bfoutfile = 'data/4075064/4075064BF
 #period = 9.1220856; BJD0 = 2456557.733 #6781535
 #period = 40.8778427; BJD0 = 2454955.556300 #6864859
 period = 61.4228063; BJD0 = 2455813.69734 #4075064
+#period = 1.0472603; BJD0 = 2455813.69734 #3848919
 
 # STUFF YOU NEED TO DEFINE CORRECTLY !!!
 isAPOGEE = True        # toggle to use near-IR stuff, or not
