@@ -8,6 +8,7 @@ from PyAstronomy import pyasl
 from scipy import ndimage
 import pandas as pd
 import gaussfitter as gf
+from cycler import cycler
 '''
 Functions used in BF_python.py
 Read the damn comments
@@ -33,7 +34,8 @@ def user_rc(lw=1.5):
     plt.rc('font', size=14, weight='normal')
     plt.rc('xtick', labelsize=14)
     plt.rc('xtick.major', size=6, width=1)
-    plt.rc('axes', color_cycle=tableau20, lw=1, labelsize=18, titlesize=22)
+    plt.rc('axes', prop_cycle=cycler(c=tableau20), lw=1, labelsize=18, titlesize=22)
+    #plt.rc('axes', color_cycle=tableau20, lw=1, labelsize=18, titlesize=22)
     return tableau20
 
 def logify_spec(isAPOGEE=False, w00=5400, n=38750, stepV=1.7, m=171):
