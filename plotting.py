@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from cycler import cycler
 
 def user_rc(lw=1.5):
     """Set plotting RC parameters"""
@@ -21,7 +22,7 @@ def user_rc(lw=1.5):
     plt.rc('font', size=14, weight='normal')
     plt.rc('xtick', labelsize=14)
     plt.rc('xtick.major', size=6, width=1)
-    plt.rc('axes', color_cycle=tableau20, lw=1, labelsize=18, titlesize=22)
+    plt.rc('axes', prop_cycle=cycler(c=tableau20), lw=1, labelsize=18, titlesize=22)
     plt.rc('figure', titlesize=22, figsize=(10,8))
     return tableau20
 
