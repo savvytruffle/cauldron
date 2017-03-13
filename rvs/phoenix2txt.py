@@ -60,8 +60,8 @@ specdir = 'data/PHOENIX/Z-0.0/'
 #specfile = 'lte04200-5.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #5284133
 #specfile = 'lte06300-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #6778289
 #specfile = 'lte06800-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #6864859
-specfile = 'lte04700-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #4075064
-
+#specfile = 'lte04700-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #4075064
+specfile = 'lte05200-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #3848919
 #######################
 ## edit values above ##
 #######################
