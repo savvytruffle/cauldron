@@ -135,7 +135,8 @@ w00 = 15170; n = 22000; stepV = 1.5 # all of APOGEE, still pretty high res
 #w00 = 15170; n = 2000; stepV = 4.0 # a little piece of APOGEE (lower res, apStar)
 
 # CUSTOMIZED BF WIDTH AND PLOT LIMITS
-widlimits = [0,15, 0,15]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
+widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 100; ymin = -0.15; ymax = 1.19 # good starting default
+#widlimits = [0,15, 0,15]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
 #widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6449358
 #widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6778289
 #widlimits = [0,9, 0,9]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
@@ -301,9 +302,9 @@ windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols
 xmin = rvneg
 xmax = rvpos
 fig = plt.figure(1, figsize=(15,10))
-fig.text(0.5, 0.04, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size=26)
+fig.text(0.5, 0.04, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size='large')
 #########0.5, 0.04
-fig.text(0.07, 0.6, 'Broadening Function', ha='center', va='center', size=26, rotation='vertical')
+fig.text(0.07, 0.6, 'Broadening Function', ha='center', va='center', size='large', rotation='vertical')
 #########0.07, 0.5
 for i in range (1,nspec):
     ax = fig.add_subplot(windowrows, windowcols, i) # out of range if windowcols x windowrows < nspec
@@ -318,9 +319,9 @@ for i in range (1,nspec):
         ax.set_xticklabels(())
     plt.subplots_adjust(wspace=0, hspace=0)
     plt.axis([xmin, xmax, ymin, ymax])
-    plt.tick_params(axis='both', which='major', labelsize=14)
-    plt.text(xmax - 0.16*(np.abs(xmax-xmin)), 0.75*ymax, '%.3f $\phi$' % (phase[i]), size=12)
-    plt.text(xmax - 0.26*(np.abs(xmax-xmin)), 0.55*ymax, '%s' % (datetimelist[i].iso[0:10]), size=12)
+    plt.tick_params(axis='both', which='major')
+    plt.text(xmax - 0.16*(np.abs(xmax-xmin)), 0.75*ymax, '%.3f $\phi$' % (phase[i]), size='small')
+    plt.text(xmax - 0.26*(np.abs(xmax-xmin)), 0.55*ymax, '%s' % (datetimelist[i].iso[0:10]), size='small')
     #plt.plot(bf_ind, bfsmoothlist[i], color=colors[14], lw=1.5, ls='-', label='Smoothed BF')
     plt.plot(bf_ind, bfnormlist[i], color=colors[14], lw=1.5, ls='-', label='Normalized Smoothed BF')
     plt.plot(bf_ind, bffitlist[i][1], color=colors[0], lw=3, ls='-', label='Two Gaussian fit')
