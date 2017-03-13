@@ -1,3 +1,4 @@
+from __future__ import print_function
 import matplotlib
 matplotlib.use('agg')
 import sys, itertools, time, os
@@ -6,12 +7,13 @@ import matplotlib.pyplot as plt
 #import emcee
 import lmfit
 if lmfit.__version__[2] != '9':
-    print "Version >= 0.9 of lmfit required..."
+    print("Version >= 0.9 of lmfit required...")
     sys.exit()
 from lmfit import minimize, Parameters, report_fit
 import scipy.optimize
 from helper_funcs import *
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 
 
 clobber_lc=False #overwrite LC only fits?
@@ -37,7 +39,7 @@ magsobs, emagsobs, extinction, glat, z0 = keblat.getmags(kic)
 ebv = extinction[0]
 if np.isnan(z0):
     z0 = keblat.zsun
-#print "Loading SED data, excluding ", excludelist[kic]
+#print("Loading SED data, excluding "), excludelist[kic]
 try:
     exclusive = excludelist[kic]
 except:
@@ -55,11 +57,11 @@ lcbounds = np.array([(.2, 24.), (0.1, 1e4), (1e-4, 20.), (keblat.period*0.9, keb
                    (0.,1.), (0.,1.), (0.,1.), (-14., -3.)])
 
 if keblat.swidth < 0.:
-    print "No secondary eclipses detected. Exiting."
+    print("No secondary eclipses detected. Exiting.")
     sys.exit()
 
 if np.median(np.unique(keblat.crowd)) < 0.5:
-    print "Crowding > 0.5. Exiting."
+    print("Crowding > 0.5. Exiting.")
     sys.exit()
 
 parnames_dict = {'lc': ['msum', 'rsum', 'rrat', 'period', 'tpe', 'esinw', 'ecosw', 'b', 'frat', 'q1',
@@ -88,7 +90,7 @@ def make_sed_plots(kic, mlpars, prefix, suffix='', lc_constraints=None, savefig=
     magsmod = keblat.isofit(mlpars)
     #magsmod, r, T, logg = isofit_single(mlpars[:5])
     if np.any(np.isinf(magsmod)):
-        print "Input isopars give -inf magsmod: ", mlpars, magsmod
+        print("Input isopars give -inf magsmod: ", mlpars, magsmod)
         return magsmod
     plt.figure()
     plt.subplot(311)
@@ -568,16 +570,16 @@ def lnlike_lmfit(fisopars, lc_constraints=None, ebv_arr=None, qua=[1], polyorder
 
     if ebv_arr is not None:
         allpars[5] = np.interp(allpars[4], ebv_dist, ebv_arr)
-    #print "sum of clips = ", keblat.clip.sum()
+    #print("sum of clips = ", keblat.clip.sum())
     res = keblat.lnlike(allpars, lc_constraints=lc_constraints, qua=qua, polyorder=polyorder,
                          residual=residual)
     if np.any(np.isinf(res)):
-        print "Inf res"
+        print("Inf res")
         extra = 0 if lc_constraints is None else len(lc_constraints)
         return np.ones(len(keblat.magsobs)+len(keblat.flux[keblat.clip]) + extra)*1e20
     bads = np.isnan(res)
     if np.sum(bads) > 0.05*len(res):
-        print "Seems to be a lot of Nans..."
+        print("Seems to be a lot of Nans...")
         extra = 0 if lc_constraints is None else len(lc_constraints)
         return np.ones(len(keblat.magsobs)+len(keblat.flux[keblat.clip]) + extra)*1e20
     return res
@@ -594,7 +596,7 @@ def ew_search_lmfit(ew_trials, pars0, argpars, fit_ecosw=True, polyorder=0):
         if result.redchi < chisq or ii==0:
             chisq = result.redchi * 1.0
             ew_best = result.params['esinw'].value, result.params['ecosw'].value
-            print "Better redchi: ", chisq, result.redchi, ew_best
+            print("Better redchi: ", chisq, result.redchi, ew_best)
     return ew_best
 
 def ew_search(ew, pars0=None, argpars=None, polyorder=0, retmod=False):
@@ -671,14 +673,14 @@ def opt_sed(sedpars0, lc_constraints, ebv_dist, ebv_arr, fit_ebv=True, ret_lcpar
     if len(keblat.magsobs)<6:
         fit_params2['ebv'].vary=False
 
-    print "=========================================================================="
-    print "======================== Starting SED ONLY fit... ========================"
-    print "=========================================================================="
+    print("==========================================================================")
+    print("======================== Starting SED ONLY fit... ========================")
+    print("==========================================================================")
 
     result2 = minimize(keblat.ilnlike, fit_params2, kws=kws, iter_cb=MinimizeStopper(30), **fit_kws)
     isores = keblat.ilnlike(result2.params, lc_constraints=lc_constraints, residual=True)
     redchi2 = np.sum(isores**2) / len(isores)
-    print redchi2, result2.redchi
+    print(redchi2, result2.redchi)
     report_fit(result2)
     fit_params2 = result2.params.copy()
 
@@ -699,9 +701,9 @@ def opt_sed(sedpars0, lc_constraints, ebv_dist, ebv_arr, fit_ebv=True, ret_lcpar
         #redchi2_0 = keblat.ilnlike(result2.params, lc_constraints=lc_constraints)
         isores = keblat.ilnlike(result2.params, lc_constraints=lc_constraints, residual=True)
         current_redchi2 = np.sum(isores**2) / len(isores)
-        print "Iteration: ", niter, current_redchi2, result2.redchi, result2.nfev
+        print("Iteration: ", niter, current_redchi2, result2.redchi, result2.nfev)
         if current_redchi2 < redchi2:
-            print "Saving the following results:"
+            print("Saving the following results:")
             report_fit(result2)
             redchi2 = current_redchi2*1.0
             fit_params2 = result2.params.copy()
@@ -744,7 +746,7 @@ def opt_lc_old(lcpars0, jd, phase, flux, dflux, crowd, clip, set_upperb=2., fit_
     fit_kws={'maxfev':100*(len(fit_params)+1)}
 
     if fit_crowd:
-        print "Fitting crowding parameters..."
+        print("Fitting crowding parameters...")
         for ii in fit_params.keys():
             fit_params[ii].vary=True
         for ii in range(len(np.unique(keblat.quarter))):
@@ -768,9 +770,9 @@ def opt_lc_old(lcpars0, jd, phase, flux, dflux, crowd, clip, set_upperb=2., fit_
 
         return guess
 
-    print "=========================================================================="
-    print "==================== Starting LIGHTCURVE ONLY fit... ====================="
-    print "=========================================================================="
+    print("==========================================================================")
+    print("==================== Starting LIGHTCURVE ONLY fit... =====================")
+    print("==========================================================================")
     if fit_se:
         if ecosw == 0.:
             ecosw=1e-5
@@ -816,7 +818,7 @@ def opt_lc_old(lcpars0, jd, phase, flux, dflux, crowd, clip, set_upperb=2., fit_
         redchi2 = current_redchi * 1.
         #guess = get_lcvals(result0.params)
         fit_params = result0.params
-        print "polyorder = 1: ", current_redchi, result0.redchi
+        print("polyorder = 1: ", current_redchi, result0.redchi)
         report_fit(result0)
 
     result0 = minimize(rez, fit_params, kws={'polyorder': 2}, iter_cb=MinimizeStopper(10), **fit_kws)
@@ -826,7 +828,7 @@ def opt_lc_old(lcpars0, jd, phase, flux, dflux, crowd, clip, set_upperb=2., fit_
         redchi2 = current_redchi * 1.
         #guess = get_lcvals(result0.params)
         fit_params = result0.params
-        print "polyorder = 2: ", current_redchi, result0.redchi
+        print("polyorder = 2: ", current_redchi, result0.redchi)
         report_fit(result0)
 
 
@@ -837,10 +839,10 @@ def opt_lc_old(lcpars0, jd, phase, flux, dflux, crowd, clip, set_upperb=2., fit_
 #     while (redchi2>1.) and (niter<5):
 #         result0 = minimize(rez, fit_params, kws={'polyorder': 2}, iter_cb=MinimizeStopper(10), **fit_kws)
 #         current_redchi = np.sum((rez(get_lcvals(result0.params), polyorder=2))**2) / np.sum(keblat.clip)
-#         print "Iteration: ", niter, redchi2, current_redchi, result0.redchi, result0.nfev#, get_lcvals(result0.params)
+#         print("Iteration: ", niter, redchi2, current_redchi, result0.redchi, result0.nfev#, get_lcvals(result0.params)
 # #        current_redchi = np.sum((result0.residual)**2) / (len(result0.residual)-result0.nfev)
 #         if current_redchi < redchi2:
-#             print "Saving the following results:"
+#             print("Saving the following results:"
 #             report_fit(result0)
 #             redchi2 = current_redchi * 1.
 #             #guess = get_lcvals(result0.params)
@@ -888,7 +890,7 @@ def opt_lc(**kwargs):
 
     fit_kws={'maxfev':100*(len(fit_params)+1)}
     if fit_crowd:
-        print "Fitting crowding parameters..."
+        print("Fitting crowding parameters...")
         for ii in fit_params.keys():
             fit_params[ii].vary=True
         for ii in range(len(np.unique(keblat.quarter))):
@@ -912,9 +914,9 @@ def opt_lc(**kwargs):
 
         return guess
 
-    print "=========================================================================="
-    print "==================== Starting LIGHTCURVE ONLY fit... ====================="
-    print "=========================================================================="
+    print("==========================================================================")
+    print("==================== Starting LIGHTCURVE ONLY fit... =====================")
+    print("==========================================================================")
 
     result0 = minimize(rez, fit_params, kws={'polyorder': 1}, iter_cb=MinimizeStopper(10), **fit_kws)
     report_fit(result0)
@@ -947,7 +949,7 @@ def opt_lc(**kwargs):
         redchi2 = current_redchi * 1.
         #guess = get_lcvals(result0.params)
         fit_params = result0.params
-        print "polyorder = 1: ", current_redchi, result0.redchi
+        print("polyorder = 1: ", current_redchi, result0.redchi)
         report_fit(result0)
 
     result0 = minimize(rez, fit_params, kws={'polyorder': 2}, iter_cb=MinimizeStopper(10), **fit_kws)
@@ -957,7 +959,7 @@ def opt_lc(**kwargs):
         redchi2 = current_redchi * 1.
         #guess = get_lcvals(result0.params)
         fit_params = result0.params
-        print "polyorder = 2: ", current_redchi, result0.redchi
+        print("polyorder = 2: ", current_redchi, result0.redchi)
         report_fit(result0)
 
 
@@ -968,10 +970,10 @@ def opt_lc(**kwargs):
 #     while (redchi2>1.) and (niter<5):
 #         result0 = minimize(rez, fit_params, kws={'polyorder': 2}, iter_cb=MinimizeStopper(10), **fit_kws)
 #         current_redchi = np.sum((rez(get_lcvals(result0.params), polyorder=2))**2) / np.sum(keblat.clip)
-#         print "Iteration: ", niter, redchi2, current_redchi, result0.redchi, result0.nfev#, get_lcvals(result0.params)
+#         print("Iteration: ", niter, redchi2, current_redchi, result0.redchi, result0.nfev#, get_lcvals(result0.params))
 # #        current_redchi = np.sum((result0.residual)**2) / (len(result0.residual)-result0.nfev)
 #         if current_redchi < redchi2:
-#             print "Saving the following results:"
+#             print("Saving the following results:")
 #             report_fit(result0)
 #             redchi2 = current_redchi * 1.
 #             #guess = get_lcvals(result0.params)
@@ -1037,9 +1039,9 @@ def opt_sedlc(**kwargs):
 
     fit_kws={'maxfev':2000*(len(fit_params)+1)}
 
-    print "=========================================================================="
-    print "================= Starting SED + LC simultaneous fit... =================="
-    print "=========================================================================="
+    print("==========================================================================")
+    print("================= Starting SED + LC simultaneous fit... ==================")
+    print("==========================================================================")
 
     # print fit_params
     result3 = minimize(lnlike_lmfit, fit_params, kws=kws, iter_cb=MinimizeStopper(60), **fit_kws)
@@ -1048,9 +1050,9 @@ def opt_sedlc(**kwargs):
     fit_params = result3.params.copy()
     _allres = lnlike_lmfit(result3.params, lc_constraints=lc_constraints, qua=np.unique(keblat.quarter), polyorder=2, residual=True)
     redchi2 = np.sum(_allres**2) / len(_allres)
-    print redchi2, result3.redchi
+    print(redchi2, result3.redchi)
     report_fit(result3)
-    print result3.message
+    print(result3.message)
 
     fit_params['age'].vary=True
     fit_params['m1'].vary=True
@@ -1069,9 +1071,9 @@ def opt_sedlc(**kwargs):
     _allres = lnlike_lmfit(result3.params, lc_constraints=lc_constraints, qua=np.unique(keblat.quarter), polyorder=2, residual=True)
     current_redchi2 = np.sum(_allres**2) / len(_allres)
     if current_redchi2 < redchi2:
-        print "The following results are saved:", current_redchi2, result3.redchi
+        print("The following results are saved:", current_redchi2, result3.redchi)
         report_fit(result3)
-        print result3.message
+        print(result3.message)
         fit_params = result3.params.copy()
         redchi2 = current_redchi2
 
@@ -1085,15 +1087,15 @@ def opt_sedlc(**kwargs):
         result3 = minimize(lnlike_lmfit, fit_params, kws=kws, iter_cb=MinimizeStopper(60), **fit_kws)
         _allres = lnlike_lmfit(result3.params, lc_constraints=lc_constraints, qua=np.unique(keblat.quarter), polyorder=2, residual=True)
         current_redchi2 = np.sum(_allres**2) / len(_allres)
-        print "Iteration: ", niter, current_redchi2, result3.redchi
+        print("Iteration: ", niter, current_redchi2, result3.redchi)
 
         if current_redchi2 < redchi2:
-            print "The following results are saved:"
+            print("The following results are saved:")
             report_fit(result3)
             fit_params = result3.params.copy()
             redchi2 = current_redchi2
         niter+=1
-    #print "logL of best allpars = ", keblat.lnlike(allpars, lc_constraints=None, qua=np.unique(keblat.quarter), polyorder=2)
+    #print("logL of best allpars = ", keblat.lnlike(allpars, lc_constraints=None, qua=np.unique(keblat.quarter), polyorder=2))
     allpars = get_pars2vals(fit_params, partype='lcsed')
     #print fit_params
     return allpars
@@ -1159,20 +1161,20 @@ def opt_sedlc_old(fit_params2, guess, ebv_dist, ebv_arr, jd, phase, flux, dflux,
 
     fit_kws={'maxfev':2000*(len(fit_params)+1)}
 
-    print "=========================================================================="
-    print "================= Starting SED + LC simultaneous fit... =================="
-    print "=========================================================================="
+    print("==========================================================================")
+    print("================= Starting SED + LC simultaneous fit... ==================")
+    print("==========================================================================")
 
-    print fit_params
+    print(fit_params)
     result3 = minimize(lnlike_lmfit, fit_params, kws=kws, iter_cb=MinimizeStopper(60), **fit_kws)
 
 
     fit_params = result3.params.copy()
     _allres = lnlike_lmfit(result3.params, lc_constraints=lc_constraints, qua=np.unique(keblat.quarter), polyorder=2, residual=True)
     redchi2 = np.sum(_allres**2) / len(_allres)
-    print redchi2, result3.redchi
+    print(redchi2, result3.redchi)
     report_fit(result3)
-    print result3.message
+    print(result3.message)
 
     fit_params['age'].vary=True
     fit_params['m1'].vary=True
@@ -1191,9 +1193,9 @@ def opt_sedlc_old(fit_params2, guess, ebv_dist, ebv_arr, jd, phase, flux, dflux,
     _allres = lnlike_lmfit(result3.params, lc_constraints=lc_constraints, qua=np.unique(keblat.quarter), polyorder=2, residual=True)
     current_redchi2 = np.sum(_allres**2) / len(_allres)
     if current_redchi2 < redchi2:
-        print "The following results are saved:", current_redchi2, result3.redchi
+        print("The following results are saved:", current_redchi2, result3.redchi)
         report_fit(result3)
-        print result3.message
+        print(result3.message)
         fit_params = result3.params.copy()
         redchi2 = current_redchi2
 
@@ -1207,15 +1209,15 @@ def opt_sedlc_old(fit_params2, guess, ebv_dist, ebv_arr, jd, phase, flux, dflux,
         result3 = minimize(lnlike_lmfit, fit_params, kws=kws, iter_cb=MinimizeStopper(60), **fit_kws)
         _allres = lnlike_lmfit(result3.params, lc_constraints=lc_constraints, qua=np.unique(keblat.quarter), polyorder=2, residual=True)
         current_redchi2 = np.sum(_allres**2) / len(_allres)
-        print "Iteration: ", niter, current_redchi2, result3.redchi
+        print("Iteration: ", niter, current_redchi2, result3.redchi)
 
         if current_redchi2 < redchi2:
-            print "The following results are saved:"
+            print("The following results are saved:")
             report_fit(result3)
             fit_params = result3.params.copy()
             redchi2 = current_redchi2
         niter+=1
-    #print "logL of best allpars = ", keblat.lnlike(allpars, lc_constraints=None, qua=np.unique(keblat.quarter), polyorder=2)
+    #print("logL of best allpars = ", keblat.lnlike(allpars, lc_constraints=None, qua=np.unique(keblat.quarter), polyorder=2))
     allpars = get_pars2vals(fit_params, partype='lcsed')
     #print fit_params
     return allpars
@@ -1223,7 +1225,7 @@ def opt_sedlc_old(fit_params2, guess, ebv_dist, ebv_arr, jd, phase, flux, dflux,
 def opt_rv(**kwargs):
     fit_pars = Parameters()
     for name, val in kwargs.items():
-        print name, val
+        print(name, val)
         fit_pars.add(name, value=val, min=keblat.parbounds[name][0], max=keblat.parbounds[name][1])
     fit_pars['rverr'].vary=False
     fit_pars['period'].vary=False
@@ -1237,30 +1239,30 @@ def opt_rv(**kwargs):
 
     fit_kws = {'maxfev': 2000 * (len(fit_pars) + 1)}
 
-    print "=========================================================================="
-    print "========================= Starting RV ONLY fit... ========================"
-    print "=========================================================================="
-    print fit_pars
+    print("==========================================================================")
+    print("========================= Starting RV ONLY fit... ========================")
+    print("==========================================================================")
+    print(fit_pars)
     result3 = minimize(lnlike_rv, fit_pars, iter_cb=MinimizeStopper(60), **fit_kws)
     fit_params = result3.params.copy()
     _allres = lnlike_rv(result3.params)
     redchi2 = np.sum(_allres ** 2) / len(_allres)
-    print redchi2, result3.redchi
+    print(redchi2, result3.redchi)
     report_fit(result3)
-    print result3.message
+    print(result3.message)
     niter = 0
     while (niter < 10):  # (redchi2>1.) and (niter<10):
         result3 = minimize(lnlike_rv, fit_params,iter_cb=MinimizeStopper(60), **fit_kws)
         _allres = lnlike_rv(result3.params)
         current_redchi2 = np.sum(_allres ** 2) / len(_allres)
-        print "Iteration: ", niter, current_redchi2, result3.redchi
+        print("Iteration: ", niter, current_redchi2, result3.redchi)
         if current_redchi2 < redchi2:
-            print "The following results are saved:"
+            print("The following results are saved:")
             report_fit(result3)
             fit_params = result3.params.copy()
             redchi2 = current_redchi2
         niter += 1
-    # print "logL of best allpars = ", keblat.lnlike(allpars, lc_constraints=None, qua=np.unique(keblat.quarter), polyorder=2)
+    # print("logL of best allpars = ", keblat.lnlike(allpars, lc_constraints=None, qua=np.unique(keblat.quarter), polyorder=2))
     rvpars = get_pars2vals(fit_params, partype='rv')
     # print fit_params
     return rvpars
@@ -1276,29 +1278,29 @@ def opt_lcrv(**kwargs):
     fit_kws = {'maxfev': 2000 * (len(fit_pars) + 1)}
 
 
-    print "=========================================================================="
-    print "================= Starting LC + RV simultaneous fit... ==================="
-    print "=========================================================================="
+    print("==========================================================================")
+    print("================= Starting LC + RV simultaneous fit... ===================")
+    print("==========================================================================")
     result3 = minimize(lnlike_lcrv, fit_pars, kws=kws, iter_cb=MinimizeStopper(60), **fit_kws)
     fit_params = result3.params.copy()
     _allres = lnlike_lcrv(result3.params, qua=np.unique(keblat.quarter), polyorder=2, residual=True)
     redchi2 = np.sum(_allres ** 2) / len(_allres)
-    print redchi2, result3.redchi
+    print(redchi2, result3.redchi)
     report_fit(result3)
-    print result3.message
+    print(result3.message)
     niter = 0
     while (niter < 5):  # (redchi2>1.) and (niter<10):
         result3 = minimize(lnlike_lcrv, fit_params, kws=kws, iter_cb=MinimizeStopper(60), **fit_kws)
         _allres = lnlike_lcrv(result3.params, qua=np.unique(keblat.quarter), polyorder=2, residual=True)
         current_redchi2 = np.sum(_allres ** 2) / len(_allres)
-        print "Iteration: ", niter, current_redchi2, result3.redchi
+        print("Iteration: ", niter, current_redchi2, result3.redchi)
         if current_redchi2 < redchi2:
-            print "The following results are saved:"
+            print("The following results are saved:")
             report_fit(result3)
             fit_params = result3.params.copy()
             redchi2 = current_redchi2
         niter += 1
-    # print "logL of best allpars = ", keblat.lnlike(allpars, lc_constraints=None, qua=np.unique(keblat.quarter), polyorder=2)
+    # print("logL of best allpars = ", keblat.lnlike(allpars, lc_constraints=None, qua=np.unique(keblat.quarter), polyorder=2))
     lcrvpars = get_pars2vals(fit_params, partype='lcrv')
     # print fit_params
     return lcrvpars
@@ -1427,7 +1429,7 @@ def mix_lnlike2(allpars, polyorder=2, ooe=True):
     Lout = 1./np.sqrt(TWOPI * (isoerr**2 + keblat.emagsobs**2)) * \
         np.exp(-0.5 * (keblat.magsobs-Yb)**2 / (isoerr**2+keblat.emagsobs**2))
     lnll = np.sum(np.log((1.-Pb) * Lin + Pb * Lout))
-    print lnll
+    print(lnll)
     lcpars = np.concatenate((np.array([m1+m2, keblat.r1+keblat.r2,
                                        keblat.r2/keblat.r1, period,
                                        tpe, esinw, ecosw, b, keblat.frat]),
@@ -1561,7 +1563,7 @@ def plot_mc(filename, header, footer, nwalkers, ndim, niter, burnin=40000, plot=
     iwalker = np.arange(nwalkers)
     data = np.loadtxt(filename)
     if data.shape[0]/nwalkers < niter/20:
-        print "MC file not complete... returning the last ball of walkers (1, nwalkers, ndim)"
+        print("MC file not complete... returning the last ball of walkers (1, nwalkers, ndim)")
         return None, None, None, None, None, False
     afrac = np.empty((data.shape[0]/nwalkers, nwalkers))
     logli, r1, temp1, logg1 = afrac*0., afrac*0., afrac*0., afrac*0.
@@ -1581,7 +1583,7 @@ def plot_mc(filename, header, footer, nwalkers, ndim, niter, burnin=40000, plot=
 
     if plot:
         from mpl_toolkits.axes_grid1 import make_axes_locatable
-        print "Making plots now."
+        print("Making plots now.")
         fig = plt.figure(figsize=(16, 16))
         for ii in range(len(isonames)):
             ax = fig.add_subplot(int(len(isonames)/2)+1, 2, ii+1)
@@ -1604,17 +1606,17 @@ def plot_mc(filename, header, footer, nwalkers, ndim, niter, burnin=40000, plot=
 
     mostlike = np.where(logli == np.max(logli))
     mlpars = params[:,:,:][mostlike][0]
-    print "Max likelihood out of all samples: ", logli[:,:][mostlike]
+    print("Max likelihood out of all samples: ", logli[:,:][mostlike])
     for kk in range(len(isonames)):
         print("""{0} = {1}""".format(str(isonames[kk]), mlpars[kk]))
     if burnin/10>=params.shape[0]:
-        print "Burn-in shorter than length of MCMC run, adjusting..."
+        print("Burn-in shorter than length of MCMC run, adjusting...")
         burnin = params.shape[0]*3/4*10
     afrac, logli = afrac[burnin/10:,:], logli[burnin/10:,:]
     r1, temp1, logg1 = r1[burnin/10:,:], temp1[burnin/10:,:], logg1[burnin/10:,:]
     params = params[burnin/10:,:,:]
 
-    print "bad/stray walkers =", strays, len(strays)
+    print("bad/stray walkers =", strays, len(strays))
 
     keep = iwalker[~np.in1d(iwalker, strays)]
     if len(strays)>=0.33*nwalkers:
@@ -1623,15 +1625,15 @@ def plot_mc(filename, header, footer, nwalkers, ndim, niter, burnin=40000, plot=
     bfpars = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
                  zip(*np.percentile(params[:,keep,:].reshape((-1, ndim)),
                                     [16, 50, 84], axis=0)))
-    print "MCMC result: "
-    print "Accep. Frac = ", np.mean(afrac[:, keep])
+    print("MCMC result: ")
+    print("Accep. Frac = ", np.mean(afrac[:, keep]))
     for kk in range(len(isonames)):
         print("""{0} = {1[0]} +{1[1]} -{1[2]}""".format(str(isonames[kk]),
               bfpars[kk]))
 
     # mostlike = np.where(logli[:,keep] == np.max(logli[:,keep]))
     # mlpars = params[:,keep,:][mostlike][0]
-    # print "Max likelihood: ", logli[:,keep][mostlike]
+    # print("Max likelihood: ", logli[:,keep][mostlike])
     # for kk in range(len(isonames)):
     #     print("""{0} = {1}""".format(str(isonames[kk]), mlpars[kk]))
 
@@ -1649,7 +1651,7 @@ def plot_mc(filename, header, footer, nwalkers, ndim, niter, burnin=40000, plot=
             mlpars_sedlc = np.append(mlpars_sedlc, mlpars[-1])
             make_sedlc_plots(kic, mlpars_sedlc, None, header+footer, suffix='', savefig=True, polyorder=2)
         else:
-            print "Not recognized mcmc run"
+            print("Not recognized mcmc run")
     if posteriors:
         import corner
         plt.figure(figsize=(14, 14))
@@ -1666,7 +1668,7 @@ def plot_mc(filename, header, footer, nwalkers, ndim, niter, burnin=40000, plot=
                             labels=np.array(isonames)[post_inds], truths=np.array(huber_truths)[post_inds], truth_color='red')
             plt.savefig(header+footer+'_posteriors.png')
         except Exception, e:
-            print str(e)
+            print(str(e))
     return params, r1, temp1, logg1, mlpars, True
 
 def make_p0_ball(p_init, ndim, nwalkers, period_scale=1e-7, mass_scale=1e-4, age_scale=1e-5):
@@ -1727,9 +1729,10 @@ def run_emcee(pars, mcfile, p0_scale=None, nwalkers=64, niter=40000):
         return
     outf=open(mcfile, "w")
     outf.close()
-    start_time = time.time()
+
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_lcrv, threads=4,
                                          args=[np.unique(keblat.quarter)])
+    start_time = time.time()
     print("Running {0}k MCMC chain".format(niter/1000))
     for res in sampler.sample(p0, iterations=niter, storechain=False):
         if sampler.iterations % 10 == 0:
@@ -1742,7 +1745,7 @@ def run_emcee(pars, mcfile, p0_scale=None, nwalkers=64, niter=40000):
             outf.close()
         if sampler.iterations % 10000 == 0:
             print("Time elapsed since niter={0}:{1}".format(sampler.iterations, 
-                  time.time-start_time))
+                  time.time()-start_time))
     print("Total time elapsed for MCMC run:{0}".format(time.time()-start_time))
     print("Total acceptance fraction:{0}".format(np.mean(sampler.acceptance_fraction)))
     try:
@@ -1761,6 +1764,7 @@ lcchi2_threshold = 3/np.nanmedian(np.array([np.nanmedian(abs(keblat.flux[chunks[
 
 
 prefix = 'kics/{0}/'.format(kic)
+print(blah)
 t, rv1, rv1err, rv2, rv2err = np.loadtxt('data/5285607_jm.rv.txt', usecols=(2, 3, 4, 5, 6), unpack=True)
 m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3, rv1err*1e3, rv2err*1e3)
 opt_lcrvpars = np.loadtxt(prefix+'lcrv.lmfit')
@@ -1776,10 +1780,14 @@ niter = 20000
 header = prefix+'lc_'
 footer = str(nwalkers)+'x'+str(niter/1000)+'k'
 mcfile = header+footer+'.mcmc'
-#p0_scale = np.ones(ndim)*1e-4
+p0_scale = np.ones(ndim)*1e-4
+p0_scale[4] = 1e-7
+p0_scale[5] = 1e-6
+p0_scale[[1,3,9]] = 1e-5
 #p0 = [opt_lcrvpars + p0_scale*opt_lcrvpars*np.random.randn(ndim) for ii in range(nwalkers)]
-p0, sampler = run_emcee(opt_lcrvpars, mcfile, nwalkers=nwalkers, niter=niter)
-burnin=10000
+p0, sampler = run_emcee(opt_lcrvpars, mcfile, p0_scale=p0_scale, nwalkers=nwalkers, niter=niter)
+burnin=niter/2
+data=np.loadtxt(mcfile)
 isonames = parnames_dict['lcrv']
 iwalker = np.arange(nwalkers)
 afrac = np.empty((data.shape[0]/nwalkers, nwalkers))
@@ -1791,7 +1799,7 @@ for jj in iwalker:
     for ii in range(len(isonames)):
         params[:, jj, ii] = data[jj::nwalkers, ii+4]
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-print "Making plots now."
+print("Making plots now.")
 fig = plt.figure(figsize=(16, 16))
 for ii in range(len(isonames)):
     ax = fig.add_subplot(int(len(isonames)/2)+1, 2, ii+1)
@@ -1810,11 +1818,11 @@ plt.savefig(header+footer+'_parameters.png')
 
 mostlike = np.where(logli == np.max(logli))
 mlpars = params[:,:,:][mostlike][0]
-print "Max likelihood out of all samples: ", logli[:,:][mostlike]
+print("Max likelihood out of all samples: ", logli[:,:][mostlike])
 for kk in range(len(isonames)):
     print("""{0} = {1}""".format(str(isonames[kk]), mlpars[kk]))
 if burnin/10>=params.shape[0]:
-    print "Burn-in shorter than length of MCMC run, adjusting..."
+    print("Burn-in shorter than length of MCMC run, adjusting...")
     burnin = params.shape[0]*3/4*10
 afrac, logli = afrac[burnin/10:,:], logli[burnin/10:,:]
 params = params[burnin/10:,:,:]
@@ -1824,18 +1832,18 @@ keep = iwalker
 bfpars = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
              zip(*np.percentile(params[:,keep,:].reshape((-1, ndim)),
                                 [16, 50, 84], axis=0)))
-print "MCMC result: "
-print "Accep. Frac = ", np.mean(afrac[:, keep])
+print("MCMC result: ")
+print("Accep. Frac = ", np.mean(afrac[:, keep]))
 for kk in range(len(isonames)):
     print("""{0} = {1[0]} +{1[1]} -{1[2]}""".format(str(isonames[kk]),
           bfpars[kk]))
 
 bfpars[-1] = np.exp(bfpars[-1])
 bfpars[-3] = np.exp(bfpars[-3])
-make_lcrv_plots(kic, bfpars, header+footer, suffix='', savefig=True)
+make_lcrv_plots(kic, mlpars, header+footer, suffix='', savefig=True)
 
 import corner
-plt.figure(figsize=(14, 14))
+#plt.figure(figsize=(14, 14))
 samples = params[:, :, :]
 post_inds = np.arange(len(isonames))
 post_inds = np.delete(post_inds, np.where(np.std(samples, axis=(0,1)) == 0)[0])
@@ -1844,7 +1852,7 @@ try:
                     labels=np.array(isonames)[post_inds])
     plt.savefig(header+footer+'_posteriors.png')
 except Exception, e:
-    print str(e)
+    print(str(e))
 
 
 ############################################################################
@@ -1892,13 +1900,13 @@ except Exception, e:
 #
 #        lcchi2 = np.sum(rez(opt_lcpars0, polyorder=2)**2)/(np.sum(keblat.clip) - len(opt_lcpars0) - 1)
 #        if (lcchi2 < bestlcchi2) or (lc_search_counts < 1):
-#            print "Saving from this run:", lcchi2, bestlcchi2, lc_search_counts
+#            print("Saving from this run:", lcchi2, bestlcchi2, lc_search_counts
 #            bestlcchi2 = lcchi2*1.0
 #            opt_lcpars = opt_lcpars0
 #        lc_search_counts+=1
 #
 #        if (bestlcchi2 <= 1.5) and opt_lcpars[2]<=1.0:
-#            print "These init b, rrat, esinw, ecosw lcpars are: ", i_b, i_rrat, ew
+#            print("These init b, rrat, esinw, ecosw lcpars are: ", i_b, i_rrat, ew
 #            break
 #
 #    try:
@@ -1908,14 +1916,14 @@ except Exception, e:
 #
 #
 #    if bestlcchi2 < lcchi2_threshold:
-#        print "Saving lmfit lcpars..."
+#        print("Saving lmfit lcpars..."
 #        np.savetxt(prefix+'lcpars.lmfit', opt_lcpars)
 #    else:
 #        print("Bestlcchi2 = {0}, exiting.".format(bestlcchi2))
 #        np.savetxt(prefix+'lcpars.lmfit', opt_lcpars)
 #        exit()
 #else:
-#    print "Loading lcpars lmfit"
+#    print("Loading lcpars lmfit"
 #    opt_lcpars = np.loadtxt(prefix+'lcpars.lmfit')
 #
 ##############################################################################
@@ -1957,7 +1965,7 @@ except Exception, e:
 #        opt_lcpars[6] = ew[1]
 #        opt_lcpars[3] = period
 #        opt_lcpars[4] = tpe
-#    print "Some stuff seems to be out of bounds... somehow... changing them to mean bound values"
+#    print("Some stuff seems to be out of bounds... somehow... changing them to mean bound values"
 #
 ####################################################################################
 ################################### LC ONLY MCMC ###################################
@@ -1985,12 +1993,12 @@ except Exception, e:
 #
 #if not success or not os.path.isfile(mcfile) or clobber_lc:
 #    if not os.path.isfile(mcfile) or clobber_lc:
-#        print "MCMC file does not exist, creating..."
+#        print("MCMC file does not exist, creating..."
 #        outf = open(mcfile, "w")
 #        outf.close()
 #    else:
 #        if not success:
-#            print "MCMC file not complete, appending..."
+#            print("MCMC file not complete, appending..."
 #            #niter = niter-mlpars
 #            outf = open(mcfile, "a")
 #            outf.close()
@@ -2011,15 +2019,15 @@ except Exception, e:
 #                            " ".join([str(ii) for ii in position[k]])))
 #            outf.close()
 #        if sampler.iterations % 10000 == 0:
-#            print "Time Elapsed since niter = ", sampler.iterations, time.time()-start_time
+#            print("Time Elapsed since niter = ", sampler.iterations, time.time()-start_time
 #
-#    print "Total Time Elapsed for MCMC Run = ", time.time()-start_time
+#    print("Total Time Elapsed for MCMC Run = ", time.time()-start_time
 #
-#    print "Tot. Acceptance Fraction = ", np.mean(sampler.acceptance_fraction)
+#    print("Tot. Acceptance Fraction = ", np.mean(sampler.acceptance_fraction)
 #    try:
-#        print "Tot autocorr time = ", np.mean(sampler.acor)
+#        print("Tot autocorr time = ", np.mean(sampler.acor)
 #    except:
-#        print "Could not compute autocorr time..."
+#        print("Could not compute autocorr time..."
 #
 #    params, r1, temp1, logg1, mlpars, success = plot_mc(mcfile, header, footer, nwalkers, ndim, niter,
 #                                                        burnin=niter*3/4, plot=True, posteriors=True,
@@ -2040,10 +2048,10 @@ except Exception, e:
 #    dist = 1500.
 #
 #lc_constraints = np.array([opt_lcpars[1]/opt_lcpars[0]**(1./3.), opt_lcpars[2], opt_lcpars[8]])
-#print "LC Constraints (rsum/msum^(1/3), rrat, frat) are: ", lc_constraints
+#print("LC Constraints (rsum/msum^(1/3), rrat, frat) are: ", lc_constraints
 #
 #if os.path.isfile(prefix+'isopars.lmfit') and not clobber_sed:
-#    print "isopars lmfit file already exists, loading..."
+#    print("isopars lmfit file already exists, loading..."
 #    opt_isopars = np.loadtxt(prefix+'isopars.lmfit')
 #    fit_isopars = opt_sed(opt_isopars, lc_constraints, ebv_dist, ebv_arr, fit_ebv=True, ret_lcpars=False)
 #else:
@@ -2071,7 +2079,7 @@ except Exception, e:
 #    np.savetxt(prefix+'isopars.lmfit', opt_isopars)
 #
 #if np.isinf(ilnprob(opt_isopars, lc_constraints = lc_constraints)[0]):
-#    print "Somehow isopars are out of bounds? You should double check this, DIana; using initial iso parameters instead"
+#    print("Somehow isopars are out of bounds? You should double check this, DIana; using initial iso parameters instead"
 #    opt_isopars = isopars0
 ####################################################################################
 ################################### SED ONLY MCMC ##################################
@@ -2099,12 +2107,12 @@ except Exception, e:
 #
 #if not success or not os.path.isfile(mcfile) or clobber_sed:
 #    if not os.path.isfile(mcfile) or clobber_sed:
-#        print "MCMC file does not exist, creating..."
+#        print("MCMC file does not exist, creating..."
 #        outf = open(mcfile, "w")
 #        outf.close()
 #    else:
 #        if not success:
-#            print "MCMC file not complete, appending..."
+#            print("MCMC file not complete, appending..."
 #            #niter = niter-mlpars
 #            outf = open(mcfile, "a")
 #            outf.close()
@@ -2125,15 +2133,15 @@ except Exception, e:
 #                            " ".join([str(ii) for ii in position[k]])))
 #            outf.close()
 #        if sampler.iterations % 10000 == 0:
-#            print "Time Elapsed since niter = ", sampler.iterations, time.time()-start_time
+#            print("Time Elapsed since niter = ", sampler.iterations, time.time()-start_time
 #
-#    print "Total Time Elapsed for MCMC Run = ", time.time()-start_time
+#    print("Total Time Elapsed for MCMC Run = ", time.time()-start_time
 #
-#    print "Tot. Acceptance Fraction = ", np.mean(sampler.acceptance_fraction)
+#    print("Tot. Acceptance Fraction = ", np.mean(sampler.acceptance_fraction)
 #    try:
-#        print "Tot autocorr time = ", np.mean(sampler.acor)
+#        print("Tot autocorr time = ", np.mean(sampler.acor)
 #    except:
-#        print "Could not compute autocorr time..."
+#        print("Could not compute autocorr time..."
 #
 #    params, r1, temp1, logg1, mlpars, success = plot_mc(mcfile, header, footer, nwalkers, ndim, niter,
 #                                                        burnin=niter*3/4, plot=True, posteriors=True,
@@ -2175,10 +2183,10 @@ except Exception, e:
 #        break
 #
 #
-#print "Writing and making sedlc optimized plots..."
+#print("Writing and making sedlc optimized plots..."
 #np.savetxt(prefix+'allpars.lmfit', opt_allpars)
 #plt.close('all')
 #if allpars_chi2>=1e10:
-#    print "The sedlc yielded no good fits. No sedlc_opt plots will be made. "
+#    print("The sedlc yielded no good fits. No sedlc_opt plots will be made. "
 #else:
 #    make_sedlc_plots(kic, opt_allpars, prefix, suffix='sedlc_opt', savefig=True, polyorder=2)
