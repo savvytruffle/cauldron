@@ -839,10 +839,10 @@ def opt_lc_old(lcpars0, jd, phase, flux, dflux, crowd, clip, set_upperb=2., fit_
 #     while (redchi2>1.) and (niter<5):
 #         result0 = minimize(rez, fit_params, kws={'polyorder': 2}, iter_cb=MinimizeStopper(10), **fit_kws)
 #         current_redchi = np.sum((rez(get_lcvals(result0.params), polyorder=2))**2) / np.sum(keblat.clip)
-#         print("Iteration: ", niter, redchi2, current_redchi, result0.redchi, result0.nfev#, get_lcvals(result0.params)
+#         print("Iteration: ", niter, redchi2, current_redchi, result0.redchi, result0.nfev#, get_lcvals(result0.params))
 # #        current_redchi = np.sum((result0.residual)**2) / (len(result0.residual)-result0.nfev)
 #         if current_redchi < redchi2:
-#             print("Saving the following results:"
+#             print("Saving the following results:")
 #             report_fit(result0)
 #             redchi2 = current_redchi * 1.
 #             #guess = get_lcvals(result0.params)
@@ -1667,8 +1667,8 @@ def plot_mc(filename, header, footer, nwalkers, ndim, niter, burnin=40000, plot=
             corner.corner(samples[:, keep,:][:,:,post_inds].reshape((-1, len(post_inds))),
                             labels=np.array(isonames)[post_inds], truths=np.array(huber_truths)[post_inds], truth_color='red')
             plt.savefig(header+footer+'_posteriors.png')
-        except Exception, e:
-            print(str(e))
+        except Exception as e:
+            print(e)
     return params, r1, temp1, logg1, mlpars, True
 
 def make_p0_ball(p_init, ndim, nwalkers, period_scale=1e-7, mass_scale=1e-4, age_scale=1e-5):
@@ -1765,107 +1765,107 @@ lcchi2_threshold = 3/np.nanmedian(np.array([np.nanmedian(abs(keblat.flux[chunks[
 
 prefix = 'kics/{0}/'.format(kic)
 print(blah)
-t, rv1, rv1err, rv2, rv2err = np.loadtxt('data/5285607_jm.rv.txt', usecols=(2, 3, 4, 5, 6), unpack=True)
-m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3, rv1err*1e3, rv2err*1e3)
-opt_lcrvpars = np.loadtxt(prefix+'lcrv.lmfit')
-make_lcrv_plots(kic, opt_lcrvpars, prefix, savefig=False)
-plt.close('all')
-keblat.updatebounds('period', 'tpe')
-
-opt_lcrvpars[-1] = -4 #rverr in m/s
-opt_lcrvpars[-3] = -11 #lcerr in kep flux
-ndim = len(opt_lcrvpars)
-nwalkers = 64
-niter = 20000
-header = prefix+'lc_'
-footer = str(nwalkers)+'x'+str(niter/1000)+'k'
-mcfile = header+footer+'.mcmc'
-p0_scale = np.ones(ndim)*1e-4
-p0_scale[4] = 1e-7
-p0_scale[5] = 1e-6
-p0_scale[[1,3,9]] = 1e-5
-#p0 = [opt_lcrvpars + p0_scale*opt_lcrvpars*np.random.randn(ndim) for ii in range(nwalkers)]
-p0, sampler = run_emcee(opt_lcrvpars, mcfile, p0_scale=p0_scale, nwalkers=nwalkers, niter=niter)
-burnin=niter/2
-data=np.loadtxt(mcfile)
-isonames = parnames_dict['lcrv']
-iwalker = np.arange(nwalkers)
-afrac = np.empty((data.shape[0]/nwalkers, nwalkers))
-logli = afrac*0.
-params = np.empty((data.shape[0]/nwalkers, nwalkers, len(isonames)))
-for jj in iwalker:
-    afrac[:,jj] = data[jj::nwalkers,2]
-    logli[:,jj] = data[jj::nwalkers,3]
-    for ii in range(len(isonames)):
-        params[:, jj, ii] = data[jj::nwalkers, ii+4]
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-print("Making plots now.")
-fig = plt.figure(figsize=(16, 16))
-for ii in range(len(isonames)):
-    ax = fig.add_subplot(int(len(isonames)/2)+1, 2, ii+1)
-    ax.plot(params[:, :, ii])
-    ax.plot([burnin/10, burnin/10], plt.ylim(), 'y-', lw=2.0)
-    ax.set_xlabel('N/10 iteration')
-    ax.set_ylabel(isonames[ii])
-    divider = make_axes_locatable(ax)
-    axhist = divider.append_axes("right", size=1.2, pad=0.1, sharey=ax)
-    axhist.hist(params[:,:,ii], 100, histtype='step', alpha=0.6, normed=True,
-                orientation='horizontal')
-    axhist.hist(params[:,:,ii].ravel(), 100, histtype='step', color='k',
-                normed=True, orientation='horizontal')
-    plt.setp(axhist.get_yticklabels(), visible=False)
-plt.savefig(header+footer+'_parameters.png')
-
-mostlike = np.where(logli == np.max(logli))
-mlpars = params[:,:,:][mostlike][0]
-print("Max likelihood out of all samples: ", logli[:,:][mostlike])
-for kk in range(len(isonames)):
-    print("""{0} = {1}""".format(str(isonames[kk]), mlpars[kk]))
-if burnin/10>=params.shape[0]:
-    print("Burn-in shorter than length of MCMC run, adjusting...")
-    burnin = params.shape[0]*3/4*10
-afrac, logli = afrac[burnin/10:,:], logli[burnin/10:,:]
-params = params[burnin/10:,:,:]
-
-keep = iwalker
-
-bfpars = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
-             zip(*np.percentile(params[:,keep,:].reshape((-1, ndim)),
-                                [16, 50, 84], axis=0)))
-print("MCMC result: ")
-print("Accep. Frac = ", np.mean(afrac[:, keep]))
-for kk in range(len(isonames)):
-    print("""{0} = {1[0]} +{1[1]} -{1[2]}""".format(str(isonames[kk]),
-          bfpars[kk]))
-
-bfpars[-1] = np.exp(bfpars[-1])
-bfpars[-3] = np.exp(bfpars[-3])
-make_lcrv_plots(kic, mlpars, header+footer, suffix='', savefig=True)
-
-import corner
-#plt.figure(figsize=(14, 14))
-samples = params[:, :, :]
-post_inds = np.arange(len(isonames))
-post_inds = np.delete(post_inds, np.where(np.std(samples, axis=(0,1)) == 0)[0])
-try:
-    corner.corner(samples[:, keep,:][:,:,post_inds].reshape((-1, len(post_inds))),
-                    labels=np.array(isonames)[post_inds])
-    plt.savefig(header+footer+'_posteriors.png')
-except Exception, e:
-    print(str(e))
-
-
+#t, rv1, rv1err, rv2, rv2err = np.loadtxt('data/5285607_jm.rv.txt', usecols=(2, 3, 4, 5, 6), unpack=True)
+#m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3, rv1err*1e3, rv2err*1e3)
+#opt_lcrvpars = np.loadtxt(prefix+'lcrv.lmfit')
+#make_lcrv_plots(kic, opt_lcrvpars, prefix, savefig=False)
+#plt.close('all')
+#keblat.updatebounds('period', 'tpe')
+#
+#opt_lcrvpars[-1] = -4 #rverr in m/s
+#opt_lcrvpars[-3] = -11 #lcerr in kep flux
+#ndim = len(opt_lcrvpars)
+#nwalkers = 64
+#niter = 20000
+#header = prefix+'lc_'
+#footer = str(nwalkers)+'x'+str(niter/1000)+'k'
+#mcfile = header+footer+'.mcmc'
+#p0_scale = np.ones(ndim)*1e-4
+#p0_scale[4] = 1e-7
+#p0_scale[5] = 1e-6
+#p0_scale[[1,3,9]] = 1e-5
+##p0 = [opt_lcrvpars + p0_scale*opt_lcrvpars*np.random.randn(ndim) for ii in range(nwalkers)]
+#p0, sampler = run_emcee(opt_lcrvpars, mcfile, p0_scale=p0_scale, nwalkers=nwalkers, niter=niter)
+#burnin=niter/2
+#data=np.loadtxt(mcfile)
+#isonames = parnames_dict['lcrv']
+#iwalker = np.arange(nwalkers)
+#afrac = np.empty((data.shape[0]/nwalkers, nwalkers))
+#logli = afrac*0.
+#params = np.empty((data.shape[0]/nwalkers, nwalkers, len(isonames)))
+#for jj in iwalker:
+#    afrac[:,jj] = data[jj::nwalkers,2]
+#    logli[:,jj] = data[jj::nwalkers,3]
+#    for ii in range(len(isonames)):
+#        params[:, jj, ii] = data[jj::nwalkers, ii+4]
+#from mpl_toolkits.axes_grid1 import make_axes_locatable
+#print("Making plots now.")
+#fig = plt.figure(figsize=(16, 16))
+#for ii in range(len(isonames)):
+#    ax = fig.add_subplot(int(len(isonames)/2)+1, 2, ii+1)
+#    ax.plot(params[:, :, ii])
+#    ax.plot([burnin/10, burnin/10], plt.ylim(), 'y-', lw=2.0)
+#    ax.set_xlabel('N/10 iteration')
+#    ax.set_ylabel(isonames[ii])
+#    divider = make_axes_locatable(ax)
+#    axhist = divider.append_axes("right", size=1.2, pad=0.1, sharey=ax)
+#    axhist.hist(params[:,:,ii], 100, histtype='step', alpha=0.6, normed=True,
+#                orientation='horizontal')
+#    axhist.hist(params[:,:,ii].ravel(), 100, histtype='step', color='k',
+#                normed=True, orientation='horizontal')
+#    plt.setp(axhist.get_yticklabels(), visible=False)
+#plt.savefig(header+footer+'_parameters.png')
+#
+#mostlike = np.where(logli == np.max(logli))
+#mlpars = params[:,:,:][mostlike][0]
+#print("Max likelihood out of all samples: ", logli[:,:][mostlike])
+#for kk in range(len(isonames)):
+#    print("""{0} = {1}""".format(str(isonames[kk]), mlpars[kk]))
+#if burnin/10>=params.shape[0]:
+#    print("Burn-in shorter than length of MCMC run, adjusting...")
+#    burnin = params.shape[0]*3/4*10
+#afrac, logli = afrac[burnin/10:,:], logli[burnin/10:,:]
+#params = params[burnin/10:,:,:]
+#
+#keep = iwalker
+#
+#bfpars = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
+#             zip(*np.percentile(params[:,keep,:].reshape((-1, ndim)),
+#                                [16, 50, 84], axis=0)))
+#print("MCMC result: ")
+#print("Accep. Frac = ", np.mean(afrac[:, keep]))
+#for kk in range(len(isonames)):
+#    print("""{0} = {1[0]} +{1[1]} -{1[2]}""".format(str(isonames[kk]),
+#          bfpars[kk]))
+#
+#bfpars[-1] = np.exp(bfpars[-1])
+#bfpars[-3] = np.exp(bfpars[-3])
+#make_lcrv_plots(kic, mlpars, header+footer, suffix='', savefig=True)
+#
+#import corner
+##plt.figure(figsize=(14, 14))
+#samples = params[:, :, :]
+#post_inds = np.arange(len(isonames))
+#post_inds = np.delete(post_inds, np.where(np.std(samples, axis=(0,1)) == 0)[0])
+#try:
+#    corner.corner(samples[:, keep,:][:,:,post_inds].reshape((-1, len(post_inds))),
+#                    labels=np.array(isonames)[post_inds])
+#    plt.savefig(header+footer+'_posteriors.png')
+#except Exception as e:
+#    print(e)
+#
+#
 ############################################################################
 ################ implementation code below is commented out ################
 #################### uncomment them if want to run #########################
 ############################################################################
-
-#prefix = '/astro/store/gradscratch/tmp/windemut/kics/'+str(kic)+'/'
-#check_dir_exists(prefix)
-#keblat.start_errf(prefix+'lcfit.err')
-
 #
-#print blah
+##prefix = '/astro/store/gradscratch/tmp/windemut/kics/'+str(kic)+'/'
+##check_dir_exists(prefix)
+##keblat.start_errf(prefix+'lcfit.err')
+#
+#
+#print(blah)
 #if not os.path.isfile(prefix+'lcpars.lmfit') or clobber_lc:
 #
 #    # make initial guesses for rsum and f2/f1, assuming main sequence equal mass binary
@@ -1889,41 +1889,40 @@ except Exception, e:
 #    ########################### LC ONLY OPTIMIZATION FIRST ############################
 #    ###################################################################################
 #
-#    # for i_b, i_rrat, i_ew in list(itertools.product(b_trials, rrat_trials, ew_trials)):
-#    for i_b, i_rrat in list(itertools.product(b_trials, rrat_trials)):
+#     for i_b, i_rrat, i_ew in list(itertools.product(b_trials, rrat_trials, ew_trials)):
+##    for i_b, i_rrat in list(itertools.product(b_trials, rrat_trials)):
 #        # lcpars0 = np.array([rsum, rsum, i_rrat, period, tpe, ew[0], ew[1], i_b, i_rrat**(2.5),
 #        #                     q1, q2, q3, q4])
 #        upper_b = 2.*i_b if i_b==0.01 else 3.0
 #        keblat.parbounds['b'][1] = upper_b
-#        opt_lcpars0 = opt_lc(msum=rsum, rsum=rsum, rrat=i_rrat, period=period, tpe=tpe, esinw=ew[0],
-#                             ecosw=ew[1], b=i_b, frat=i_rrat**2.5, q1=q1, q2=q2, q3=q3, q4=q4)
+#        opt_lcpars0 = opt_lc(msum=rsum, rsum=rsum, rrat=i_rrat, period=period, tpe=tpe, esinw=i_ew[0],
+#                             ecosw=i_ew[1], b=i_b, frat=i_rrat**2.5, q1=q1, q2=q2, q3=q3, q4=q4)
 #
 #        lcchi2 = np.sum(rez(opt_lcpars0, polyorder=2)**2)/(np.sum(keblat.clip) - len(opt_lcpars0) - 1)
 #        if (lcchi2 < bestlcchi2) or (lc_search_counts < 1):
-#            print("Saving from this run:", lcchi2, bestlcchi2, lc_search_counts
+#            print("Saving from this run:", lcchi2, bestlcchi2, lc_search_counts)
 #            bestlcchi2 = lcchi2*1.0
 #            opt_lcpars = opt_lcpars0
 #        lc_search_counts+=1
 #
 #        if (bestlcchi2 <= 1.5) and opt_lcpars[2]<=1.0:
-#            print("These init b, rrat, esinw, ecosw lcpars are: ", i_b, i_rrat, ew
+#            print("These init b, rrat, esinw, ecosw lcpars are: ", i_b, i_rrat, ew)
 #            break
 #
 #    try:
 #        make_lc_plots(kic, opt_lcpars, prefix, polyorder=2, suffix='lc_opt2', savefig=True)
-#    except Exception, e:
-#        print str(e)
-#
+#    except Exception as e:
+#        print(e)
 #
 #    if bestlcchi2 < lcchi2_threshold:
-#        print("Saving lmfit lcpars..."
+#        print("Saving lmfit lcpars...")
 #        np.savetxt(prefix+'lcpars.lmfit', opt_lcpars)
 #    else:
 #        print("Bestlcchi2 = {0}, exiting.".format(bestlcchi2))
 #        np.savetxt(prefix+'lcpars.lmfit', opt_lcpars)
 #        exit()
 #else:
-#    print("Loading lcpars lmfit"
+#    print("Loading lcpars lmfit")
 #    opt_lcpars = np.loadtxt(prefix+'lcpars.lmfit')
 #
 ##############################################################################
@@ -1993,12 +1992,12 @@ except Exception, e:
 #
 #if not success or not os.path.isfile(mcfile) or clobber_lc:
 #    if not os.path.isfile(mcfile) or clobber_lc:
-#        print("MCMC file does not exist, creating..."
+#        print("MCMC file does not exist, creating...")
 #        outf = open(mcfile, "w")
 #        outf.close()
 #    else:
 #        if not success:
-#            print("MCMC file not complete, appending..."
+#            print("MCMC file not complete, appending...")
 #            #niter = niter-mlpars
 #            outf = open(mcfile, "a")
 #            outf.close()
@@ -2019,15 +2018,15 @@ except Exception, e:
 #                            " ".join([str(ii) for ii in position[k]])))
 #            outf.close()
 #        if sampler.iterations % 10000 == 0:
-#            print("Time Elapsed since niter = ", sampler.iterations, time.time()-start_time
+#            print("Time Elapsed since niter = {}, {}".format(sampler.iterations, time.time()-start_time))
 #
-#    print("Total Time Elapsed for MCMC Run = ", time.time()-start_time
+#    print("Total Time Elapsed for MCMC Run = {}".format(time.time()-start_time))
 #
-#    print("Tot. Acceptance Fraction = ", np.mean(sampler.acceptance_fraction)
+#    print("Tot. Acceptance Fraction = ", np.mean(sampler.acceptance_fraction))
 #    try:
-#        print("Tot autocorr time = ", np.mean(sampler.acor)
+#        print("Tot autocorr time = ", np.mean(sampler.acor))
 #    except:
-#        print("Could not compute autocorr time..."
+#        print("Could not compute autocorr time...")
 #
 #    params, r1, temp1, logg1, mlpars, success = plot_mc(mcfile, header, footer, nwalkers, ndim, niter,
 #                                                        burnin=niter*3/4, plot=True, posteriors=True,
@@ -2048,7 +2047,7 @@ except Exception, e:
 #    dist = 1500.
 #
 #lc_constraints = np.array([opt_lcpars[1]/opt_lcpars[0]**(1./3.), opt_lcpars[2], opt_lcpars[8]])
-#print("LC Constraints (rsum/msum^(1/3), rrat, frat) are: ", lc_constraints
+#print("LC Constraints (rsum/msum^(1/3), rrat, frat) are: ", lc_constraints)
 #
 #if os.path.isfile(prefix+'isopars.lmfit') and not clobber_sed:
 #    print("isopars lmfit file already exists, loading..."
