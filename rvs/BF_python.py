@@ -77,9 +77,14 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile = 'data/4075064/4075064outfile.txt'; bfoutfile = 'data/4075064/4075064BFdata.txt'
 
 #3848919
-infiles = 'data/3848919/3848919infiles.txt'; bjdinfile = 'data/3848919/3848919bjdinfile.txt'
-gausspars = 'data/3848919/3848919gausspars.txt'
-outfile = 'data/3848919/3848919outfile.txt'; bfoutfile = 'data/3848919/3848919BFdata.txt'
+#infiles = 'data/3848919/3848919infiles.txt'; bjdinfile = 'data/3848919/3848919bjdinfile.txt'
+#gausspars = 'data/3848919/3848919gausspars.txt'
+#outfile = 'data/3848919/3848919outfile.txt'; bfoutfile = 'data/3848919/3848919BFdata.txt'
+
+#6610219
+infiles = 'data/6610219/6610219infiles.txt'; bjdinfile = 'data/6610219/6610219bjdinfile.txt'
+gausspars = 'data/6610219/6610219gausspars.txt'
+outfile='data/6610219/6610219outfile.txt'; bfoutfile = 'data/6610219/6610219BFdata.txt'
 
 #6449358
 #infiles =   'data/6449358/6449358infiles2.txt'; bjdinfile = 'data/6449358/6449358bjdinfile1.txt'
@@ -115,7 +120,8 @@ outfile = 'data/3848919/3848919outfile.txt'; bfoutfile = 'data/3848919/3848919BF
 #period = 9.1220856; BJD0 = 2456557.733 #6781535
 #period = 40.8778427; BJD0 = 2454955.556300 #6864859
 #period = 61.4228063; BJD0 = 2455813.69734 #4075064
-period = 1.0472603; BJD0 = 2455811.61005 #3848919
+#period = 1.0472603; BJD0 = 2455811.61005 #3848919
+period = 11.3009948; BJD0 = 2456557.73097 #6610219
 
 # STUFF YOU NEED TO DEFINE CORRECTLY !!!
 isAPOGEE = True        # toggle to use near-IR stuff, or not
