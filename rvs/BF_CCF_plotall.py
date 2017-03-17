@@ -77,7 +77,7 @@ for idx, (rv, value, error) in enumerate(zip(BFrvaxis, BFvalues, BFerrors)):
         
     plt.plot(BFrvaxis[0:400] - 107, 10*BFvalues[0:400], color=colors[14], lw=1.5,ls='-', label='BF')
 
-for idx, visit in range zip(0,visit):
+for idx, visit in zip(0,visit):
     ax = fig.add_subplot(windowrows, windowcols, i) # out of range if windowcols x windowrows < visit
     ax.yaxis.set_major_locator(MultipleLocator(0.4))
     if windowcols == 4 and (i!=1 and i!=5 and i!=9 and i!=13 and i!=17 and i!=21 and i!=25):
