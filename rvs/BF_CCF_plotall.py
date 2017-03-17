@@ -55,24 +55,21 @@ BFerrors = bfdata[2]
 
 ###Reading this in so that the plot can have the appropriate number of subplots###
 infiles = 'data/4285087/4285087infiles.txt'
-specdata = bff.read_specfiles(infiles)
-nspec = specdata[0]; filenamelist = specdata[1]
+visit = infiles[0]
 windowcols = 3 # 4                             # how many columns the plot should have
 #windowrows = 6                                # manually set number of plot rows here, or automatically below
-windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
+windowrows = int([np.rint((visit-1)/windowcols) if (np.float(visit-1)/windowcols)%windowcols == 0 else np.rint((visit-1)/windowcols)+1][0])
 xmin = rvneg
 xmax = rvpos
 fig = plt.figure(1, figsize=(15,10))
 fig.text(0.5, 0.04, 'Arbitrary Radial Velocity (km s$^{-1}$)', ha='center', va='center', size='large')
-#########0.5, 0.04
 fig.text(0.07, 0.6, 'Broadening Function/Cross Correlation Function Amplitude', ha='center', va='center', size='large', rotation='vertical')
-#########0.07, 0.5
 
 # Starter loop, NOT FINISHED YET. Need to save the index of where each visit starts/ends.
 visitidx = 0
 for idx, (rv, value, error) in enumerate(zip(BFrvaxis, BFvalues, BFerrors)):
-    if np.abs(BFrvaxis[idx-1] - rv) > 100:
-   # if np.abs(BFrvaxis[idx-1] - rv) > 400:
+   # if np.abs(BFrvaxis[idx-1] - rv) > 100:
+    if np.abs(BFrvaxis[idx-1] - rv) > 400:
         visitidx = visitidx + 1
         print(visitidx, idx)
         # save idx at this point; e.g., it should be 400 on the first time through
@@ -80,15 +77,15 @@ for idx, (rv, value, error) in enumerate(zip(BFrvaxis, BFvalues, BFerrors)):
         
     plt.plot(BFrvaxis[0:400] - 107, 10*BFvalues[0:400], color=colors[14], lw=1.5,ls='-', label='BF')
 
-for i in range (1,nspec):
-    ax = fig.add_subplot(windowrows, windowcols, i) # out of range if windowcols x windowrows < nspec
+for idx, visit in range zip(0,visit):
+    ax = fig.add_subplot(windowrows, windowcols, i) # out of range if windowcols x windowrows < visit
     ax.yaxis.set_major_locator(MultipleLocator(0.4))
     if windowcols == 4 and (i!=1 and i!=5 and i!=9 and i!=13 and i!=17 and i!=21 and i!=25):
         ax.set_yticklabels(())
     if windowcols == 3 and (i!=1 and i!=4 and i!=7 and i!=10 and i!=13 and i!=16 and i!=19 and i!=22 and i!=25):
         ax.set_yticklabels(())
     #if i!=20 and i!=21 and i!=22 and i!=23 and i!=24 and i!=25:
-    if i < nspec-windowrows:
+    if i < visit-windowrows:
     #if i!=13 and i!=14 and i!=15 and i!=16:
         ax.set_xticklabels(())
     plt.subplots_adjust(wspace=0, hspace=0)
@@ -100,13 +97,13 @@ for i in range (1,nspec):
     
 ###########        This is where we tell it to plot the BF and CCF, but can they both be in the same for loop?      #####
     
-    plt.plot(CCF_rvaxis, CCFvalues[2] - 0.2, color=colors[0], lw=3, ls='-', label='CCF')
+    plt.plot(CCF_rvaxis, CCFvalues[idx+2], color=colors[0], lw=3, ls='-', label='CCF')
 
     # OPTION TO PLOT VERTICAL LINE AT ZERO
     #plt.axvline(x=0, color=colors[15])    
     # print legend
-    if i==nspec-1: ax.legend(bbox_to_anchor=(2.6,0.7), loc=1, borderaxespad=0., 
-                        frameon=False, handlelength=3, prop={'size':20})
+    #if i==visit-1: ax.legend(bbox_to_anchor=(2.6,0.7), loc=1, borderaxespad=0., 
+    #                    frameon=False, handlelength=3, prop={'size':20})
 plt.show()
 #######
 
