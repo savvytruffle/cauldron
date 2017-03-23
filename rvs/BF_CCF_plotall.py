@@ -54,8 +54,10 @@ BFerrors = bfdata[2]
 ######                    This is where the plotting happens                     ######
 
 ###Reading this in so that the plot can have the appropriate number of subplots###
-infiles = 'data/4285087/4285087infiles.txt'
-visit = infiles[0]
+visit = 'data/4285087/4285087infiles.txt'
+#visit = infiles[0]
+#int(visit)
+
 windowcols = 3 # 4                             # how many columns the plot should have
 #windowrows = 6                                # manually set number of plot rows here, or automatically below
 windowrows = int([np.rint((visit-1)/windowcols) if (np.float(visit-1)/windowcols)%windowcols == 0 else np.rint((visit-1)/windowcols)+1][0])
