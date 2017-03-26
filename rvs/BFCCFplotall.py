@@ -83,9 +83,10 @@ for idx, (rv, value, error) in enumerate(zip(BFrvaxis, BFvalues, BFerrors)):
 
 # Meanwhile, for just one visit, we can hardwire [0:400] as the start:end.
 # And we can also adjust the RV zeropoints and BF amplitudes arbitrarily.
-plt.plot(BFrvaxis[0:400] - 107, 10*BFvalues[0:400])
-plt.plot(BFrvaxis[401:801] - 107, 10*BFvalues[401:801])
-plt.plot(BFrvaxis[801:1201] - 107, 10*BFvalues[801:1201])
+fig.add_subplot(631).plot(BFrvaxis[0:400] - 107, 10*BFvalues[0:400])
+fig.add_subplot(632).plot(BFrvaxis[401:801] - 107, 10*BFvalues[401:801])
+fig.add_subplot(633).plot(BFrvaxis[801:1201] - 107, 10*BFvalues[801:1201])
+fig.add_subplot(634).plot(BFrvaxis[1201:1601] - 107, 10*BFvalues[1201:1601])
 plt.plot(CCF_rvaxis, CCFvalues[2] - 0.2)
 plt.axis([-150, 150, -0.1, 0.5])
 plt.xlabel('Arbitrary radial velocity')
