@@ -46,7 +46,8 @@ bffile = '6864859BFOut.txt'
 bfinfile = dir + bffile
 
 # Read in relevant BF info from the BF infile
-bfdata = np.loadtxt(bfinfile, comments='#', usecols=(0,1,2), unpack=True)
+bfdata = np.loadtxt(bfinfile, comments='#', usecols=(0,1,2), unpack=True) 
+#For ONE visit#
 BFrvaxis = bfdata[0]
 BFvalues = bfdata[1]
 BFerrors = bfdata[2]
@@ -54,7 +55,7 @@ BFerrors = bfdata[2]
 ######                    This is where the plotting happens                     ######
 
 ###Reading this in so that the plot can have the appropriate number of subplots###
-visit = 'data/4285087/4285087infiles.txt'
+#visit = 'data/4285087/4285087infiles.txt'
 #visit = infiles[0]
 #int(visit)
 
@@ -75,6 +76,7 @@ for idx, (rv, value, error) in enumerate(zip(BFrvaxis, BFvalues, BFerrors)):
         visitidx = visitidx + 1
         print(visitidx, idx)
         # save idx at this point; e.g., it should be 400 on the first time through
+        #This is where I'd tell it to continue to the next visit of data, in line 407
         # 408 is where "###" happens, but 414 is where the next pocket of data starts
         
     plt.plot(BFrvaxis[0:400] - 107, 10*BFvalues[0:400], color=colors[14], lw=1.5,ls='-', label='BF')

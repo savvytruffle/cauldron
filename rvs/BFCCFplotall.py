@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
 from astropy.io import fits
 '''
 This program makes awesome plots of APOGEE CCFs compared to our BFs.
@@ -51,17 +52,40 @@ BFrvaxis = bfdata[0]
 BFvalues = bfdata[1]
 BFerrors = bfdata[2]
 
+windowcols = 3 #The plot with all the subplots should have three columns
+windowrows = 6 #The number of rows the subplots take up, manually set for now.
+# CUSTOMIZED BF WIDTH AND PLOT LIMITS
+widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 100; ymin = -0.15; ymax = 1.19 # good starting default
+xmin = rvneg
+xmax = rvpos
+fig = plt.figure(1, figsize=(15,10))
+
 # Starter loop, NOT FINISHED YET. Need to save the index of where each visit starts/ends.
 visitidx = 0
 for idx, (rv, value, error) in enumerate(zip(BFrvaxis, BFvalues, BFerrors)):
-    if np.abs(BFrvaxis[idx-1] - rv) > 100:
+    ax = fig.add_subplot(windowrows, windowcols, 1) # removed "i"
+    ax.yaxis.set_major_locator(MultipleLocator(0.4))
+    #if windowcols == 4 and (i!=1 and i!=5 and i!=9 and i!=13 and i!=17 and i!=21 and i!=25):
+    #    ax.set_yticklabels(())
+    #if windowcols == 3 #and (i!=1 and i!=4 and i!=7 and i!=10 and i!=13 and i!=16 and i!=19 and i!=22 and i!=25):
+    #    ax.set_yticklabels(())
+    #if i!=20 and i!=21 and i!=22 and i!=23 and i!=24 and i!=25:
+    #if i < visit-windowrows:
+    #if i!=13 and i!=14 and i!=15 and i!=16:
+    #    ax.set_xticklabels(())
+    plt.subplots_adjust(wspace=0, hspace=0)
+    plt.axis([xmin, xmax, ymin, ymax])
+    plt.tick_params(axis='both', which='major')
+    if np.abs(BFrvaxis[idx-1] - rv) > 400:
         visitidx = visitidx + 1
-        #print(visitidx, idx)
+        print(visitidx, idx)
         # save idx at this point; e.g., it should be 400 on the first time through
 
 # Meanwhile, for just one visit, we can hardwire [0:400] as the start:end.
 # And we can also adjust the RV zeropoints and BF amplitudes arbitrarily.
 plt.plot(BFrvaxis[0:400] - 107, 10*BFvalues[0:400])
+plt.plot(BFrvaxis[401:801] - 107, 10*BFvalues[401:801])
+plt.plot(BFrvaxis[801:1201] - 107, 10*BFvalues[801:1201])
 plt.plot(CCF_rvaxis, CCFvalues[2] - 0.2)
 plt.axis([-150, 150, -0.1, 0.5])
 plt.xlabel('Arbitrary radial velocity')
