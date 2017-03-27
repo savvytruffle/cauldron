@@ -40,6 +40,13 @@ for rv in systemics:
 # for now, let's just use:
 CCF_rvaxis = CCFxaxis * 4.145
 
+# Get the timestamp for each CCF visit from the 0th HDU
+hdu0 = hdu[0].header
+ccftimes = []
+for idx in range(1, len(CCFvalues)-1):
+    headercard = 'HJD' + str(idx)
+    ccftimes.append(hdu0[headercard] + 2400000.)
+
 # Set up the main figure
 fig = plt.figure(1, figsize=(12,8))
 windowrows = 7
@@ -49,13 +56,16 @@ fig.text(0.07, 0.6, 'CCF or BF amplitude', ha='center', va='center', size='small
 
 # Loop over and plot CCF data
 for idx, CCFdata in enumerate(CCFvalues):
-    if idx >= 2: # only plot visits, not 0th and 1st columns (combined spectra)
-        ax = fig.add_subplot(windowrows, windowcols, idx-1)
-        plt.axis([-150, 150, -0.1, 0.5])
-        ax.set_xticklabels(()) # add some of these back in later for certain idx
-        ax.set_yticklabels(()) # add some of these back in later for certain idx
-        plt.plot(CCF_rvaxis, CCFvalues[idx] - 0.2) 
-        plt.subplots_adjust(wspace=0, hspace=0)   
+    ax = fig.add_subplot(windowrows, windowcols, idx+1)
+    plt.axis([-150, 150, -0.1, 0.5])
+    ax.set_xticklabels(()) # add some of these back in later for certain idx
+    ax.set_yticklabels(()) # add some of these back in later for certain idx
+    plt.plot(CCF_rvaxis, CCFvalues[idx] - 0.2)
+    if idx < 2:
+        plt.text(20, 0.4, 'combined', size='10', color='C0')
+    if idx >= 2:
+        plt.text(20, 0.4, '{0:.5f}'.format(ccftimes[idx-2]), size='10', color='C0')
+    plt.subplots_adjust(wspace=0, hspace=0)   
 
 # Read in relevant BF info for the same target
 bffile = '6864859BFOut.txt' # WARNING: we omitted some visits from this BF run!
@@ -67,6 +77,10 @@ BFrvaxis = bfdata[0]
 BFvalues = bfdata[1]
 BFerrors = bfdata[2]
 
+# Get the timestamp for each BF
+with open(bfinfile) as bfinfo:
+    bftimes = [float(line[13:]) for line in bfinfo if 'timestamp' in line]
+    
 # Save the indices that separate each BF's visit in the input file
 visitidx = 0
 BFindices = []
@@ -74,24 +88,22 @@ for idx, (rv, value, error) in enumerate(zip(BFrvaxis, BFvalues, BFerrors)):
     if np.abs(BFrvaxis[idx-1] - rv) > 100:
         visitidx = visitidx + 1
         BFindices.append(idx)
-print(BFindices)
 
 # Loop over and plot BF data
-## You will get several WARNING statements printed if there are fewer BFs than CCFs,
-## (and you will also notice that not every plot window has a BF on top of the CCF)
 xoffset = 100 # arbitrary systemic RV offset to make CCF and BF line up
 yamp = 8 # arbitrary factor to stretch BF values to make CCF and BF line up
-for idx in range(0, len(CCFvalues)-2):
-    ax = fig.add_subplot(windowrows, windowcols, idx+1)
+for idx in range(0, len(bftimes)):
+    ax = fig.add_subplot(windowrows, windowcols, idx+3)
     plt.axis([-150, 150, -0.1, 0.5])
     ax.set_xticklabels(())
     ax.set_yticklabels(())
     try:
         plt.plot(BFrvaxis[BFindices[idx]:BFindices[idx+1]] - xoffset, 
                  yamp*BFvalues[BFindices[idx]:BFindices[idx+1]])
+        plt.text(20, 0.28, bftimes[idx], size='10', color='C1')
     except:
-        print('WARNING: BF index {0} is out of range, skipping'.format(idx))
         continue
+        # gracefully skip the final case where idx+1 doesn't exist
 
 plt.show()
 
