@@ -8,10 +8,14 @@ The idea is for you to run it once for each target.
 
 # Where the apStar file lives
 #dir = 'data/6864859/'
-dir = 'data/5285607/'
+#dir = 'data/5285607/'
+#dir = 'data/6449358/'
+dir = 'data/6778289/'
 # The name of the apStar file for a single target
 #ccffile = 'apStar-r5-2M19292405+4223363.fits' #6864859
-ccffile = 'apStar-r5-2M19390532+4027346.fits' #5285607
+#ccffile = 'apStar-r5-2M19390532+4027346.fits' #5285607
+#ccffile = 'apStar-r5-2M19353513+4149543.fits' #6449358
+ccffile = 'apStar-r5-2M19282456+4215080.fits' #6778289
 ccfinfile = dir + ccffile
 
 # Read in relevant CCF info from apStar file
@@ -72,7 +76,9 @@ for idx, CCFdata in enumerate(CCFvalues):
 # Read in relevant BF info for the same target
 #bffile = '6864859BFOut.txt' # 6864859 WARNING: we omitted some visits from this BF run!
 #bffile = '6864859BFOutALL.txt' #6864859 ALL Visits!
-bffile = '5285607BFOut.txt'
+#bffile = '5285607BFOut.txt' 
+#bffile = '6449358BFOut.txt'
+bffile = '6778289BFOut.txt'
 bfinfile = dir + bffile
 
 # Read in relevant BF info from the BF infile
