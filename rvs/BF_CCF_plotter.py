@@ -7,9 +7,11 @@ The idea is for you to run it once for each target.
 '''
 
 # Where the apStar file lives
-dir = 'data/6864859/'
+#dir = 'data/6864859/'
+dir = 'data/5285607/'
 # The name of the apStar file for a single target
-ccffile = 'apStar-r5-2M19292405+4223363.fits'
+#ccffile = 'apStar-r5-2M19292405+4223363.fits' #6864859
+ccffile = 'apStar-r5-2M19390532+4027346.fits' #5285607
 ccfinfile = dir + ccffile
 
 # Read in relevant CCF info from apStar file
@@ -68,7 +70,9 @@ for idx, CCFdata in enumerate(CCFvalues):
     plt.subplots_adjust(wspace=0, hspace=0)   
 
 # Read in relevant BF info for the same target
-bffile = '6864859BFOut.txt' # WARNING: we omitted some visits from this BF run!
+#bffile = '6864859BFOut.txt' # 6864859 WARNING: we omitted some visits from this BF run!
+#bffile = '6864859BFOutALL.txt' #6864859 ALL Visits!
+bffile = '5285607BFOut.txt'
 bfinfile = dir + bffile
 
 # Read in relevant BF info from the BF infile
