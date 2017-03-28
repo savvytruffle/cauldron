@@ -97,13 +97,13 @@ for idx in range(0, len(bftimes)):
     plt.axis([-150, 150, -0.1, 0.5])
     ax.set_xticklabels(())
     ax.set_yticklabels(())
+    plt.text(20, 0.28, bftimes[idx], size='10', color='C1')
     try:
         plt.plot(BFrvaxis[BFindices[idx]:BFindices[idx+1]] - xoffset, 
                  yamp*BFvalues[BFindices[idx]:BFindices[idx+1]])
-        plt.text(20, 0.28, bftimes[idx], size='10', color='C1')
-    except:
-        continue
-        # gracefully skip the final case where idx+1 doesn't exist
+    except: # handle the final case where there is no idx+1
+        plt.plot(BFrvaxis[BFindices[idx]::] - xoffset, 
+                 yamp*BFvalues[BFindices[idx]::])
 
 plt.show()
 
