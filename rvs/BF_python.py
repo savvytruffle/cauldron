@@ -83,8 +83,8 @@ both in days, and the constant RV and BCV of whatever template you are using.
 
 #6610219
 #infiles = 'data/6610219/6610219infiles.txt'; bjdinfile = 'data/6610219/6610219bjdinfile.txt'
-#gausspars = 'data/6610219/6610219gausspars.txt'
-#outfile = 'data/6610219/6610219outfile.txt'; bfoutfile = 'data/6610219/6610219BFdata.txt'
+#gausspars = 'data/6610219/6610219gausspars1.txt'
+#outfile = 'data/6610219/6610219outfile.txt'; bfoutfile = 'data/6610219/6610219BFOut.txt'
 
 #4285087
 #infiles = 'data/4285087/4285087infiles.txt'; bjdinfile = 'data/4285087/4285087bjdinfile.txt'
@@ -92,7 +92,7 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BFdata.txt'
 
 #6449358
-infiles =   'data/6449358/6449358infiles.txt'; bjdinfile = 'data/6449358/6449358bjdinfile.txt'
+infiles =   'data/6449358/6449358infiles1.txt'; bjdinfile = 'data/6449358/6449358bjdinfile1.txt'
 gausspars = 'data/6449358/6449358gausspars.txt'
 outfile =   'data/6449358/6449358Outfile1.txt'; bfoutfile = 'data/6449358/6449358BFOut.txt'
 
@@ -153,11 +153,14 @@ w00 = 15170; n = 22000; stepV = 1.5 # all of APOGEE, still pretty high res
 #w00 = 15170; n = 2000; stepV = 4.0 # a little piece of APOGEE (lower res, apStar)
 
 # CUSTOMIZED BF WIDTH AND PLOT LIMITS
-#widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 100; ymin = -0.15; ymax = 1.19 # good starting default
+widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 100; ymin = -0.15; ymax = 1.19 # good starting default
 #widlimits = [0,15, 0,15]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
-widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6449358
+#widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6449358
 #widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6778289
 #widlimits = [0,9, 0,9]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
+#widlimits = [0,9, 0,9]; rvneg = -150; rvpos = 50; ymin = -0.15; ymax = 1.19 # 6610259a
+#widlimits = [0,15, 0,15]; rvneg = -50; rvpos = 10; ymin = -0.15; ymax = 1.19 # 6610219b
+
 
 colors = bff.user_rc()
 
