@@ -9,17 +9,21 @@ The idea is for you to run it once for each target.
 # Where the apStar file lives
 #dir = 'data/6864859/'
 #dir = 'data/5285607/'
+dir = 'data/5284133/'
 #dir = 'data/6449358/'
-dir = 'data/6781535/'
+#dir = 'data/6781535/'
 #dir = 'data/6778289/'
+#dir = 'data/4851217/'
 #dir = 'data/6610219/'
 # The name of the apStar file for a single target
 #ccffile = 'apStar-r5-2M19292405+4223363.fits' #6864859
 #ccffile = 'apStar-r5-2M19390532+4027346.fits' #5285607
-ccffile = 'apStar-r5-2M19321788+4216489.fits' #6781535
+ccffile = 'apStar-r5-2M19373173+4027078.fits' #5284133
+#ccffile = 'apStar-r5-2M19321788+4216489.fits' #6781535
 #ccffile = 'apStar-r5-2M19353513+4149543.fits' #6449358
 #ccffile = 'apStar-r5-2M19282456+4215080.fits' #6778289
 #ccffile = 'apStar-r5-2M19320615+4200049.fits' #6610219
+#ccffile = 'apStar-r5-2M19432016+3957081.fits' #4851217
 
 ccfinfile = dir + ccffile
 
@@ -82,8 +86,10 @@ for idx, CCFdata in enumerate(CCFvalues):
 #bffile = '6864859BFOut.txt' # 6864859 WARNING: we omitted some visits from this BF run!
 #bffile = '6864859BFOutALL.txt' #6864859 ALL Visits!
 #bffile = '5285607BFOut.txt' 
+bffile = '5284133BFOut.txt' 
 #bffile = '6449358BFOut.txt'
-bffile = '6781535BFOut.txt'
+#bffile = '6781535BFOut.txt'
+#bffile = '4851217BFOut.txt'
 #bffile = '6778289BFOut.txt'
 #bffile = '6610219BFOut.txt'
 bfinfile = dir + bffile

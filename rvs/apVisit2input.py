@@ -16,7 +16,7 @@ The model spectrum should have stellar parameters similar to the target star for
 All the final spectra are continuum normalized.
 '''
 ### define useful variables upfront here so they're easy to change in one place. ###
-KIC = 6449358
+KIC = 5284133
 #ApogeeID = '2M19432016+3957081'
 
 locIDs, mjds, fiberIDs = np.loadtxt('data/' + str(KIC) +'/' + str(KIC) + 'Visitlist.txt', 
