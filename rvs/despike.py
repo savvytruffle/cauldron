@@ -15,7 +15,8 @@ speclist = []
 #filelist = '/Users/revhalzoo/SDSS/DCA/DChoAinfiles.txt'
 #filelist = '/Users/revhalzoo/SDSS/A4851217/A4851217phx.txt'
 #filelist = 'data/4851217/A4851217infiles.txt'
-filelist = 'data/6449358/6449358infiles1.txt'
+#filelist = 'data/6449358/6449358infiles1.txt'
+filelist = 'data/5284133/5284133infiles.txt'
 f1 = open(filelist)
 infilelist = [] # for use later to make outfilelist
 

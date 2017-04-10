@@ -97,7 +97,7 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   'data/6449358/6449358Outfile1.txt'; bfoutfile = 'data/6449358/6449358BFOut.txt'
 
 #5284133
-infiles =   'data/5284133/5284133infiles.txt'; bjdinfile = 'data/5284133/5284133bjdinfile.txt'
+infiles =   'data/5284133/5284133infilesdespiked.txt'; bjdinfile = 'data/5284133/5284133bjdinfiledespiked.txt'
 gausspars = 'data/5284133/5284133gausspars.txt'
 outfile =   'data/5284133/5284133Outfile.txt'; bfoutfile = 'data/5284133/5284133BFOut.txt'
 
