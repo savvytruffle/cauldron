@@ -77,12 +77,12 @@ for wave, spec in zip(wavelist, speclist):
     newspeclist.append(newspec)
     
 # write out a set of two-column text files,
-# each containing one element of wavelist and one element of newspeclist
-for file, wave, newspec in zip(infilelist, wavelist, newspeclist):
+# each containing one element of newwavelist and one element of newspeclist
+for file, newwave, newspec in zip(infilelist, newwavelist, newspeclist):
     # create outfile based on infile name
     outfile = file[0:-4]+'_despiked.txt'
     print(outfile)
     f = open(outfile, 'w')
-    for wentry, sentry in zip(wave, newspec):
+    for wentry, sentry in zip(newwave, newspec):
         print(wentry, sentry, file=f)
 
