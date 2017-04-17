@@ -15,8 +15,10 @@ speclist = []
 #filelist = '/Users/revhalzoo/SDSS/DCA/DChoAinfiles.txt'
 #filelist = '/Users/revhalzoo/SDSS/A4851217/A4851217phx.txt'
 #filelist = 'data/4851217/A4851217infiles.txt'
-#filelist = 'data/6449358/6449358infiles1.txt'
+#filelist = 'data/6449358/6449358infiles.txt'
+#filelist = 'data/6778289/6778289infiles.txt'
 filelist = 'data/5284133/5284133infiles.txt'
+#filelist = 'data/4285087/4285087infiles.txt'
 f1 = open(filelist)
 infilelist = [] # for use later to make outfilelist
 
@@ -64,12 +66,17 @@ for wave, spec in zip(wavelist, speclist):
             #print(r[0], 'outliers found')
             newwave, newspec = np.delete(wave, r[1]), np.delete(spec, r[1])
         else: # simpleDespike == True
-            outliers = np.where(spec > 1.0 + threshold)
+        ###Add outliers for the bottom spikes!!!!####
+            outliers = np.where(spec > 1.0 + threshold) 
+            pointstodelete = []
+            for point in outliers:
+                pointstodelete.append(point, point+1, point+2, point+3, point+4, point+5)
             newwave, newspec = np.delete(wave, outliers), np.delete(spec, outliers)
     else: # doDespike == False
         newspec = spec
         newwave = wave
     # option to plot the result
+    print (pointstodelete)
     plt.plot(wave, spec)
     plt.plot(newwave, newspec, color='r')
     plt.show()
