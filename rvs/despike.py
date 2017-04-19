@@ -68,9 +68,9 @@ for wave, spec in zip(wavelist, speclist):
         else: # simpleDespike == True
         ###Add outliers for the bottom spikes!!!!####
             outliers = np.where(spec > 1.0 + threshold) 
-            pointstodelete = []
+            pointstodelete = [point, point+1, point+2, point+3, point+4, point+5]
             for point in outliers:
-                pointstodelete.append(point, point+1, point+2, point+3, point+4, point+5)
+                pointstodelete.append[pointstodelete]
             newwave, newspec = np.delete(wave, outliers), np.delete(spec, outliers)
     else: # doDespike == False
         newspec = spec
