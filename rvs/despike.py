@@ -57,6 +57,7 @@ else: # it's a text file
 # do something to 'spec' to cut out spikes, call it newspec
 newwavelist = []
 newspeclist = []
+pointstodelete = []
 for wave, spec in zip(wavelist, speclist):
     if doDespike == True:
         if simpleDespike == False:
@@ -69,7 +70,7 @@ for wave, spec in zip(wavelist, speclist):
         ###Add outliers for the bottom spikes!!!!####
             outliers = np.where(spec > 1.0 + threshold) 
             
-            pointstodelete = []
+            pointstodelete = [val for sublist in pointstodelete for val in sublist]
             for point in outliers:
                 pointstodelete.append([point, point+1, point-1, point+2, point-2, point+3, 
                 point-3, point+4, point-4, point+5, point-5, point+6, point-6, point+7, 
