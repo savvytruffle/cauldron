@@ -71,7 +71,12 @@ for wave, spec in zip(wavelist, speclist):
             
             pointstodelete = []
             for point in outliers:
-                pointstodelete.append([point, point+1, point+2, point+3, point+4, point+5])
+                pointstodelete.append([point, point+1, point-1, point+2, point-2, point+3, 
+                point-3, point+4, point-4, point+5, point-5, point+6, point-6, point+7, 
+                point-7, point+8, point-8, point+9, point-9, point+10, point-10, point +11,
+                point-11, point+12, point-12, point+13, point-13, point+14, point-14, point+15, 
+                point-15, point+16, point-16, point+17, point-17, point+18, point-18, point+19,
+                point-19, point+20, point-20])
             
             #pointstodelete = [point, point+1, point+2, point+3, point+4, point+5]
             #for point in outliers:
@@ -81,7 +86,7 @@ for wave, spec in zip(wavelist, speclist):
         newspec = spec
         newwave = wave
     # option to plot the result
-    # print (pointstodelete)
+    print (pointstodelete)
     plt.plot(wave, spec)
     plt.plot(newwave, newspec, color='r')
     plt.show()
