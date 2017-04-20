@@ -67,27 +67,17 @@ for wave, spec in zip(wavelist, speclist):
             #print(r[0], 'outliers found')
             newwave, newspec = np.delete(wave, r[1]), np.delete(spec, r[1])
         else: # simpleDespike == True
-        ###Add outliers for the bottom spikes!!!!####
-            outliers = np.where(spec > 1.0 + threshold) 
-            
-            pointstodelete = [val for sublist in pointstodelete for val in sublist]
-            for point in outliers:
+            outliers = np.where(spec > 1.0 + threshold)        
+            for point in outliers: # add points around each outlier to remove downward spikes too
                 pointstodelete.append([point, point+1, point-1, point+2, point-2, point+3, 
-                point-3, point+4, point-4, point+5, point-5, point+6, point-6, point+7, 
-                point-7, point+8, point-8, point+9, point-9, point+10, point-10, point +11,
-                point-11, point+12, point-12, point+13, point-13, point+14, point-14, point+15, 
-                point-15, point+16, point-16, point+17, point-17, point+18, point-18, point+19,
-                point-19, point+20, point-20])
-            
-            #pointstodelete = [point, point+1, point+2, point+3, point+4, point+5]
-            #for point in outliers:
-            #    pointstodelete.append[pointstodelete]
-            newwave, newspec = np.delete(wave, outliers), np.delete(spec, outliers)
+                point-3, point+4, point-4, point+5, point-5, point+6, point-6])
+            pointstodelete = [val for sublist in pointstodelete for val in sublist]
+            #print(pointstodelete)
+            newwave, newspec = np.delete(wave, pointstodelete), np.delete(spec, pointstodelete)
     else: # doDespike == False
         newspec = spec
         newwave = wave
     # option to plot the result
-    print (pointstodelete)
     plt.plot(wave, spec)
     plt.plot(newwave, newspec, color='r')
     plt.show()
