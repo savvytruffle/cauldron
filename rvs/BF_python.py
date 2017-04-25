@@ -69,7 +69,7 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #5285607
 #infiles =   'data/5285607/5285607infiles.txt'; bjdinfile = 'data/5285607/5285607bjdinfile.txt'
 #gausspars = 'data/5285607/5285607gausspars.txt'
-#outfile =   'data/5285607/5285607Outfile-Meredith.txt'; bfoutfile = 'data/5285607/5285607BFdata.txt'
+#outfile =   'data/5285607/5285607Outfile-.txt'; bfoutfile = 'data/5285607/5285607BFOut.txt'
 
 #4075064
 #infiles = 'data/4075064/4075064infiles.txt'; bjdinfile = 'data/4075064/4075064bjdinfile.txt'
@@ -87,14 +87,14 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile = 'data/6610219/6610219outfile.txt'; bfoutfile = 'data/6610219/6610219BFOut.txt'
 
 #4285087
-infiles = 'data/4285087/4285087infiles.txt'; bjdinfile = 'data/4285087/4285087bjdinfile.txt'
-gausspars = 'data/4285087/4285087gausspars.txt'
-outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BFOut.txt'
+#infiles = 'data/4285087/4285087infiles.txt'; bjdinfile = 'data/4285087/4285087bjdinfile.txt'
+#gausspars = 'data/4285087/4285087gausspars.txt'
+#outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BFOut.txt'
 
 #6449358
-#infiles =   'data/6449358/6449358infiles1.txt'; bjdinfile = 'data/6449358/6449358bjdinfile1.txt'
-#gausspars = 'data/6449358/6449358gausspars1.txt'
-#outfile =   'data/6449358/6449358Outfilenew1.txt'; bfoutfile = 'data/6449358/6449358BFOut.txt'
+infiles =   'data/6449358/6449358infiles.txt'; bjdinfile = 'data/6449358/6449358bjdinfile.txt'
+gausspars = 'data/6449358/6449358gausspars.txt'
+outfile =   'data/6449358/6449358Outfile.txt'; bfoutfile = 'data/6449358/6449358BFOut.txt'
 
 #5284133
 #infiles =   'data/5284133/5284133infilesdespiked.txt'; bjdinfile = 'data/5284133/5284133bjdinfiledespiked.txt'
@@ -112,14 +112,14 @@ outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BF
 #outfile =   'data/6781535/6781535Outfile.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
 
 #6864859
-#infiles =   'data/6864859/6864859infiles1.txt'; bjdinfile = 'data/6864859/6864859bjdinfile1.txt'
-#gausspars = 'data/6864859/6864859gausspars1.txt'
-#outfile =   'data/6864859/6864859Outfile-Meredith.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
+#infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
+#gausspars = 'data/6864859/6864859gausspars.txt'
+#outfile =   'data/6864859/6864859Outfile.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734 # 4851217
 #period = 3.8994011; BJD0 = 2454959.576010 # 5285607
-#period = 5.7767904; BJD0 = 2456760.90580 # 6449358
+period = 5.7767904; BJD0 = 2456760.90580 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
 #period = 30.13015; BJD0 = 2456557.73097 #6778289
 #period = 9.1220856; BJD0 = 2456557.733 #6781535
@@ -127,7 +127,7 @@ outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BF
 #period = 61.4228063; BJD0 = 2455813.69734 #4075064
 #period = 1.0472603; BJD0 = 2455811.61005 #3848919
 #period = 11.3009948; BJD0 = 2456557.73097 #6610219
-period = 4.4860312; BJD0 = 2455813.69734  #4285087
+#period = 4.4860312; BJD0 = 2455813.69734  #4285087
 
 
 # STUFF YOU NEED TO DEFINE CORRECTLY !!!
@@ -150,14 +150,15 @@ smoothstd = 1.5      # stdev of Gaussian to smooth BFs by (~slit width in pixels
 m = 401              # length of the BF (must be longer if RVs are far from 0)
 ## good values for APOGEE:
 #w00 = 15170; n = 32000; stepV = 1.0 # all of APOGEE, (too) high res
-w00 = 15170; n = 22000; stepV = 1.5 # all of APOGEE, still pretty high res
-#w00 = 15170; n = 2000; stepV = 4.0 # a little piece of APOGEE (lower res, apStar)
+#w00 = 15170; n = 10000; stepV = 1.5 # all of APOGEE, still pretty high res
+w00 = 15170; n = 9000; stepV = 2.0 # all of APOGEE, still pretty high res
+#w00 = 15170; n = 6000; stepV = 4.0 # a little piece of APOGEE (lower res, apStar)
 
-# CUSTOMIZED BF WIDTH AND PLOT LIMITS
+# CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
 widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 100; ymin = -0.15; ymax = 1.19 # good starting default
 #widlimits = [0,15, 0,15]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
-#widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6449358
-#widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6778289
+#widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 300; ymin = -0.15; ymax = 1.1 #6449358
+#widlimits = [0,15, 0,15]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6778289
 #widlimits = [0,9, 0,9]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
 #widlimits = [0,9, 0,9]; rvneg = -150; rvpos = 50; ymin = -0.15; ymax = 1.19 # 6610259a
 #widlimits = [0,15, 0,15]; rvneg = -50; rvpos = 10; ymin = -0.15; ymax = 1.19 # 6610219b
