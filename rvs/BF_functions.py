@@ -8,6 +8,7 @@ from PyAstronomy import pyasl
 from scipy import ndimage
 import pandas as pd
 import gaussfitter as gf
+from cycler import cycler
 '''
 Functions used in BF_python.py
 Read the damn comments
@@ -33,7 +34,8 @@ def user_rc(lw=1.5):
     plt.rc('font', size=14, weight='normal')
     plt.rc('xtick', labelsize=14)
     plt.rc('xtick.major', size=6, width=1)
-    plt.rc('axes', color_cycle=tableau20, lw=1, labelsize=18, titlesize=22)
+    plt.rc('axes', prop_cycle=cycler(c=tableau20), lw=1, labelsize=18, titlesize=22)
+    #plt.rc('axes', color_cycle=tableau20, lw=1, labelsize=18, titlesize=22)
     return tableau20
 
 def logify_spec(isAPOGEE=False, w00=5400, n=38750, stepV=1.7, m=171):
@@ -130,7 +132,7 @@ def read_specfiles(infiles = 'infiles_BF.txt', bjdinfile = 'bjds_baryvels.txt', 
         checkAPOGEE = True #notallinfiles are APOGEE, but let's check in case *some* are
     else:
         checkAPOGEE = False #all the infiles are APOGEE so we don't have to search
-    i = 0
+    i = 0 # keep track of which spectrum we're on
     for line in f1: # This loop happens once for each spectrum
         infile = line.rstrip()
         if checkAPOGEE == True: # check to see if a subset of infiles are from APOGEE or not
@@ -173,7 +175,10 @@ def read_specfiles(infiles = 'infiles_BF.txt', bjdinfile = 'bjds_baryvels.txt', 
                 #spec = spec / np.median(spec) # WARNING really basic, possibly bad normalization
         else: # treat it like a text file
             filenamelist.append(infile)
-            datetime = np.loadtxt(bjdinfile, comments='#', usecols=(1,), unpack=True)[i]
+            try:
+                datetime = np.loadtxt(bjdinfile, comments='#', usecols=(1,), unpack=True)[i]
+            except:
+                raise RuntimeError('Your bjdinfile {0} is not formatted correctly'.format(bjdinfile))
             datetimelist.append(Time(datetime, scale='utc', format='jd'))
             try:
                 wave, spec = np.loadtxt(open(infile), comments='#', usecols=(0,1), unpack=True)
@@ -189,7 +194,7 @@ def read_specfiles(infiles = 'infiles_BF.txt', bjdinfile = 'bjds_baryvels.txt', 
         # at the end of this mess, we have one file's WAVE and corresponding SPEC - save it!
         wavelist.append(wave)
         speclist.append(spec)
-        i = i + 1    
+        i = i + 1  # increment the spectrum counter
     # save the total number of spectra
     nspec = i
     f1.close()
