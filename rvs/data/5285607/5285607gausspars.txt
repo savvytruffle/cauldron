@@ -4,5 +4,5 @@
 0.99  120   10     0.80   0  10  # acceptable
 0.99  110   10     0.80   35  10  # annoying
 0.90  -5   10     0.80  180  10  # good
-0.90  170   10     0.80  -12  10  # acceptable
-0.90  15   10     0.80   135  10  # acceptable
+0.90  170   10     0.80  -15  10  # acceptable
+0.90  135   10     0.80   15  10  # acceptable
