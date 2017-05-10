@@ -67,9 +67,9 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   'data/4851217/4851217Outfile.txt'; bfoutfile = 'data/4851217/4851217BFOut.txt'
 
 #5285607
-infiles =   'data/5285607/5285607infiles.txt'; bjdinfile = 'data/5285607/5285607bjdinfile.txt'
-gausspars = 'data/5285607/5285607gausspars.txt'
-outfile =   'data/5285607/5285607OutfileJC.txt'; bfoutfile = 'data/5285607/5285607BFOut1.txt'
+#infiles =   'data/5285607/5285607infiles.txt'; bjdinfile = 'data/5285607/5285607bjdinfile.txt'
+#gausspars = 'data/5285607/5285607gausspars.txt'
+#outfile =   'data/5285607/5285607OutfileJC.txt'; bfoutfile = 'data/5285607/5285607BFOut1.txt'
 
 #4075064
 #infiles = 'data/4075064/4075064infiles.txt'; bjdinfile = 'data/4075064/4075064bjdinfile.txt'
@@ -102,9 +102,9 @@ outfile =   'data/5285607/5285607OutfileJC.txt'; bfoutfile = 'data/5285607/52856
 #outfile =   'data/5284133/5284133Outfile.txt'; bfoutfile = 'data/5284133/5284133BFOut.txt'
 
 #6778289
-#infiles =   'data/6778289/6778289infiles.txt'; bjdinfile = 'data/6778289/6778289bjdinfile.txt'
-#gausspars = 'data/6778289/6778289gausspars.txt'
-#outfile =   'data/6778289/6778289Outfile.txt'; bfoutfile = 'data/6778289/6778289BFOut.txt'
+infiles =   'data/6778289/6778289infilesA.txt'; bjdinfile = 'data/6778289/6778289bjdinfileA.txt'
+gausspars = 'data/6778289/6778289gaussparsA.txt'
+outfile =   'data/6778289/6778289OutfileJC.txt'; bfoutfile = 'data/6778289/6778289BFOutJC.txt'
 
 #6781535
 #infiles =   'data/6781535/6781535infiles.txt'; bjdinfile = 'data/6781535/6781535bjdinfile.txt'
@@ -112,18 +112,18 @@ outfile =   'data/5285607/5285607OutfileJC.txt'; bfoutfile = 'data/5285607/52856
 #outfile =   'data/6781535/6781535Outfile.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
 
 #6864859
-infiles =   'data/6864859/6864859infiles1.txt'; bjdinfile = 'data/6864859/6864859bjdinfile1.txt'
-gausspars = 'data/6864859/6864859gausspars1.txt'
-outfile =   'data/6864859/6864859OutfileJC1.txt'; bfoutfile = 'data/6864859/6864859BFOut1.txt'
+#infiles =   'data/6864859/6864859infiles1.txt'; bjdinfile = 'data/6864859/6864859bjdinfile1.txt'
+#gausspars = 'data/6864859/6864859gausspars1.txt'
+#outfile =   'data/6864859/6864859OutfileJC1.txt'; bfoutfile = 'data/6864859/6864859BFOut1.txt'
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734 # 4851217
 #period = 3.8994011; BJD0 = 2454959.576010 # 5285607
 #period = 5.7767904; BJD0 = 2456760.90580 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
-#period = 30.13015; BJD0 = 2456557.73097 #6778289
+period = 30.13015; BJD0 = 2456557.73097 #6778289
 #period = 9.1220856; BJD0 = 2456557.733 #6781535
-period = 40.8778427; BJD0 = 2454955.556300 #6864859
+#period = 40.8778427; BJD0 = 2454955.556300 #6864859
 #period = 61.4228063; BJD0 = 2455813.69734 #4075064
 #period = 1.0472603; BJD0 = 2455811.61005 #3848919
 #period = 11.3009948; BJD0 = 2456557.73097 #6610219
@@ -158,8 +158,8 @@ w00 = 15170; n = 9000; stepV = 2.0 # all of APOGEE, still pretty high res
 #widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 100; ymin = -0.15; ymax = 1.19 # good starting default
 #widlimits = [0,16, 0,16]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
 #widlimits = [0,5, 0,5]; rvneg = 100; rvpos = 300; ymin = -0.15; ymax = 1.1 #6449358
-#widlimits = [0,15, 0,15]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6778289
-widlimits = [0,11, 0,11]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
+widlimits = [0,15, 0,15]; rvneg = -50; rvpos = 150; ymin = -0.15; ymax = 1.1 #6778289
+#widlimits = [0,11, 0,11]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
 #widlimits = [0,9, 0,9]; rvneg = -150; rvpos = 50; ymin = -0.15; ymax = 1.19 # 6610259a
 #widlimits = [0,15, 0,15]; rvneg = -50; rvpos = 10; ymin = -0.15; ymax = 1.19 # 6610219b
 
