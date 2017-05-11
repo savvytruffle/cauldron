@@ -3,96 +3,166 @@ from astropy.io import fits
 import numpy as np
 import matplotlib.pyplot as plt
 from PyAstronomy import pyasl
+import argparse
+import os
+'''
+Removes spikes (tellurics) from continuum-normalized apVisit APOGEE spectra.
 
-# read in wavelengths and fluxes for a list of APOGEE spectra
-# this currently works for apVisit spectra only!!! (not apStar)
+Typically you will run this after apVisit2input.py, which finds the apVisit
+spectra downloaded via the python apogee module for one target and 
+continuum-normalizes them. If you somehow have an apVisit-style FITS file
+that is continuum-normalized already (or close), this can despike it too.
 
-wavelist = []
-speclist = []
-#filelist = '/Users/revhalzoo/SDSS/A4851217/A4851217infiles.txt'
-#filelist = '/Users/revhalzoo/SDSS/B5285607/B5285607infiles.txt'
-#filelist = '/Users/revhalzoo/SDSS/C6449358/C6449358infiles.txt'
-#filelist = '/Users/revhalzoo/SDSS/DCA/DChoAinfiles.txt'
-#filelist = '/Users/revhalzoo/SDSS/A4851217/A4851217phx.txt'
-filelist = 'data/5285607/5285607infiles.txt'
-#filelist = 'data/6864859/6864859infiles.txt'
-#filelist = 'data/4851217/A4851217infiles.txt'
-#filelist = 'data/6449358/6449358infiles.txt'
-#filelist = 'data/6778289/6778289infiles.txt'
-#filelist = 'data/5284133/5284133infiles.txt'
-#filelist = 'data/4285087/4285087infiles.txt'
-f1 = open(filelist)
-infilelist = [] # for use later to make outfilelist
+First, read_infiles to reads in wavelengths and fluxes for a list of spectra
+Then, despike_spectra despike the spectra with one of two techniques
 
-# option to just turn the fits file into a text file without any despiking
-doDespike = True
-isFits = False
-simpleDespike = True; threshold = 0.05
+A plot will pop up for each spectrum so you can inspect the before/after despiking
+(blue/red, respectivly) and the threshold levels selected (green dotted lines)
 
-if isFits == True: #it's a FITS file
-    for line in f1:
-        infile = line.rstrip()
-        infilelist.append(infile)
-        print (infile)
-        hdu = fits.open(infile)
-        # APOGEE! the data is in a funny place and backwards
-        wave = hdu[4].data
-        wave = wave.flatten()
-        wave = wave[::-1]
-        spec = hdu[1].data
-        spec = spec.flatten()
-        spec = spec[::-1]
-        spec = spec / np.median(spec) # put the continuum roughly near 1
-        wavelist.append(wave)
-        speclist.append(spec)
-    f1.close()
+The new, despiked spectra are written to two-column (wavelength, flux) files
+with similar names as the original, but they now end in '_despiked.txt'.
 
-else: # it's a text file
-    for line in f1:
-        infile = line.rstrip()
-        infilelist.append(infile)
-        wave, spec = np.loadtxt(infile, usecols=(0,1), unpack=True)
-        wavelist.append(wave)
-        speclist.append(spec)
-    f1.close()
+USAGE:
+python despike.py -d datapath -i infilelist
 
-# do something to 'spec' to cut out spikes, call it newspec
-newwavelist = []
-newspeclist = []
-for wave, spec in zip(wavelist, speclist):
-    if doDespike == True:
-        if simpleDespike == False:
-            r = pyasl.pointDistGESD(spec, maxOLs=1000, alpha=5000)
-            # r[0] is number of outliers found, r[i] is indices of outliers
-            # maxOLs is max number of outliers that may be identified; increase alpha to find more
-            #print(r[0], 'outliers found')
-            newwave, newspec = np.delete(wave, r[1]), np.delete(spec, r[1])
-        else: # simpleDespike == True
-            pointstodelete = []
-            outliers = np.where(spec > 1.0 + threshold)        
-            for point in outliers: # add points around each outlier to remove downward spikes too
-                pointstodelete.append([point, point+1, point-1, point+2, point-2, point+3, 
-                point-3, point+4, point-4, point+5, point-5, point+6, point-6])
-            pointstodelete = [val for sublist in pointstodelete for val in sublist]
-            #print(pointstodelete)
-            newwave, newspec = np.delete(wave, pointstodelete), np.delete(spec, pointstodelete)
-    else: # doDespike == False
-        newspec = spec
-        newwave = wave
-    # option to plot the result
-    plt.plot(wave, spec)
-    plt.plot(newwave, newspec, color='r')
-    plt.show()
-    newwavelist.append(newwave)
-    newspeclist.append(newspec)
+datapath: /path/to/infilelist/and/files/listed/in/infilelist
+
+infilelist: single-column text file with list of *continuum-normalized* single-visit
+            APOGEE files you want to despike
+            the files in this list can either be two-column text files (wave, flux)
+            or FITS files in the apVisit format
+'''
+
+
+def main():
+    '''
+    Read a list of files, do despiking, and write the result to outfiles
+    '''
+    infilelist, wavelist, speclist = read_infiles(datapath, filelist)
+    newwavelist, newspeclist = despike_spectra(wavelist, speclist)
+
+    # write out a set of two-column text files,
+    # each containing one element of newwavelist and one element of newspeclist
+    for file, newwave, newspec in zip(infilelist, newwavelist, newspeclist):
+        # create outfile based on infile name
+        outfile = os.path.splitext(file)[0] + '_despiked.txt'
+        with open (outfile, 'w') as f:
+            for wentry, sentry in zip(newwave, newspec):
+                print(wentry, sentry, file=f)
+    return
+
+
+def read_infiles(datapath, filelist, isFits=False):
+    '''
+    Read in filelist, a text file containing a list of continuum-normalized spectra
     
-# write out a set of two-column text files,
-# each containing one element of newwavelist and one element of newspeclist
-for file, newwave, newspec in zip(infilelist, newwavelist, newspeclist):
-    # create outfile based on infile name
-    outfile = file[0:-4]+'_despiked.txt'
-    print(outfile)
-    f = open(outfile, 'w')
-    for wentry, sentry in zip(newwave, newspec):
-        print(wentry, sentry, file=f)
+    The list file and the spectrum files must both live in datapath
+    '''
+    print(datapath, filelist)
+    wavelist = []; speclist = []
+    with open(os.path.join(datapath, filelist)) as f1:
+        infilelist = [] # for use later to make outfilelist
+        if isFits: #it's a FITS file
+            for line in f1:
+                infile = line.rstrip()
+                infile = datapath + infile
+                infilelist.append(infile)
+                with fits.open(infile) as hdu:
+                    # APOGEE! the data is in a funny place and backwards
+                    wave = hdu[4].data.flatten()
+                    wave = wave[::-1]
+                    spec = hdu[1].data
+                spec = spec.flatten()
+                spec = spec[::-1]
+                spec = spec / np.median(spec) # put the continuum roughly near 1
+                wavelist.append(wave)
+                speclist.append(spec)
+        else: # it's a text file
+            for line in f1:
+                infile = line.rstrip()
+                infile = datapath + infile
+                infilelist.append(infile)
+                wave, spec = np.loadtxt(infile, usecols=(0,1), unpack=True)
+                wavelist.append(wave)
+                speclist.append(spec)
+    return infilelist, wavelist, speclist
 
+
+def simpledespike(wave, spec, delwindow=6, stdfactorup=0.7, stdfactordown=3):
+    '''
+    Implement a simple despiking routine based on the stdev of 1D fluxes
+    
+    Outliers (spikes) are identified as exceeding stdfactorup*sigma above the continuum
+    Additional outliers (downward spikes) must exceed stdfactordown*sigma below the continuum
+    Around each outlier, adjacent points in a window of +/- delwindow are also flagged
+    
+    All of these points are deleted from input wave, spec to yield newwave, newspec
+    '''
+    pointstodelete = []
+    outliers = (np.where((spec > 1.0 + stdfactorup*np.std(spec)) | 
+                         (spec < 1.0 - stdfactordown*np.std(spec))))[0]
+    for point in outliers: # add +/- delwindow points around each outlier
+        pointstodelete.extend(range(point-delwindow, point+delwindow+1))
+    pointstodelete = [point for point in pointstodelete if point >= 0]
+    newwave, newspec = np.delete(wave, pointstodelete), np.delete(spec, pointstodelete)
+    return newwave, newspec
+
+
+def generalizedESDdespike(wave, spec, maxOLs=1000, alpha=5000):
+    '''
+    Implement a complicated despiking routine from PyAstronomy
+    
+    (this function is not tested)
+    '''
+    r = pyasl.pointDistGESD(spec, maxOLs, alpha)
+    # r[0] is number of outliers found, r[i] is indices of outliers
+    # maxOLs is max outliers that may be identified; increase alpha to find more
+    newwave, newspec = np.delete(wave, r[1]), np.delete(spec, r[1])
+    return newwave, newspec
+
+
+def despike_spectra(wavelist, speclist, type='simple', plot=True):
+    '''
+    Do one of two things to remove spikes
+    
+    type='simple' is recommended (see simpledespike)
+    type=<anything not 'simple'> will use generalizedESDdespike instead
+    
+    INPUT
+    wavelist: input list of wavelength arrays
+    speclist: input list of corresponding flux arrays (for 1D spectra)
+    
+    OUTPUT
+    newwavelist: output file of wavelength arrays without any spikes
+    newspeclist: output file of corresponding flux arrays without any spikes
+    '''
+    newwavelist = []; newspeclist = []
+    for wave, spec in zip(wavelist, speclist):
+        if type == 'simple':
+            newwave, newspec = simpledespike(wave, spec, delwindow=6, stdfactorup=0.7, stdfactordown=3)
+        else:
+            newwave, newspec = generalizedESDdespike(wave, spec, maxOLs=1000, alpha=5000)
+        if plot:
+            plt.plot(wave, spec)
+            plt.plot(newwave, newspec, color='r')
+            plt.axhline(y = (1 + stdfactorup*np.std(spec)), ls=':', color='g')
+            plt.axhline(y = (1 - stdfactordown*np.std(spec)), ls=':', color='g')
+            plt.show()
+        newwavelist.append(newwave)
+        newspeclist.append(newspec)
+    return newwavelist, newspeclist
+
+
+if __name__ == '__main__':
+    # parse command line arguments with argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', dest='filelist', required=True,
+                        help='text file containing a list of spectra')
+    parser.add_argument('-d', dest='datapath', required=True,
+                        help='path to where filelist and files in filelist live')
+    args = parser.parse_args()
+    filelist = args.filelist
+    datapath = args.datapath
+    if not os.path.exists(os.path.join(datapath, filelist)):
+            raise argparse.ArgumentTypeError("{0} does not exist".format(filelist))
+    main()
