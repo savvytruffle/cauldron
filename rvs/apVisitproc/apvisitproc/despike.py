@@ -139,14 +139,23 @@ def despike_spectra(wavelist, speclist, type='simple', plot=True):
     newwavelist = []; newspeclist = []
     for wave, spec in zip(wavelist, speclist):
         if type == 'simple':
-            newwave, newspec = simpledespike(wave, spec, delwindow=6, stdfactorup=0.7, stdfactordown=3)
+            delwindow = 6
+            stdfactorup = 0.7
+            stdfactordown = 3
+            newwave, newspec = simpledespike(wave, spec, 
+                                             delwindow=delwindow, 
+                                             stdfactorup=stdfactorup, 
+                                             stdfactordown=stdfactordown)
         else:
             newwave, newspec = generalizedESDdespike(wave, spec, maxOLs=1000, alpha=5000)
         if plot:
             plt.plot(wave, spec)
             plt.plot(newwave, newspec, color='r')
-            plt.axhline(y = (1 + stdfactorup*np.std(spec)), ls=':', color='g')
-            plt.axhline(y = (1 - stdfactordown*np.std(spec)), ls=':', color='g')
+            plt.xlabel('Wavelength ({\AA})')
+            plt.ylabel('Normalized flux')
+            if type == 'simple':
+                plt.axhline(y = (1 + stdfactorup*np.std(spec)), ls=':', color='g')
+                plt.axhline(y = (1 - stdfactordown*np.std(spec)), ls=':', color='g')
             plt.show()
         newwavelist.append(newwave)
         newspeclist.append(newspec)
