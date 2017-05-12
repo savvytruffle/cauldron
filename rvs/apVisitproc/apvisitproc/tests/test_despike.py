@@ -1,11 +1,11 @@
 import numpy as np
 from apvisitproc import despike
 import pytest
-import matplotlib.pyplot as plt
+import os
 
-DATAPATH = ''
-FILELIST1 = 'list_of_txt_spectra.txt'
-FILELIST2 = 'list_of_fits_spectra.txt'
+DATAPATH = os.path.dirname(__file__)
+FILELIST1 = os.path.join(DATAPATH, 'list_of_txt_spectra.txt')
+FILELIST2 = os.path.join(DATAPATH, 'list_of_fits_spectra.txt')
 
 @pytest.fixture
 def wave_spec_generate():
@@ -18,9 +18,9 @@ def wave_spec_generate():
     wave1, spec1 are a single chunk of 1d spectrum
     wavelist, speclist are lists of three chunks of 1d spectrum
     '''
-    wave1, spec1 = np.loadtxt('spec1test.txt', unpack=True)
-    wave2, spec2 = np.loadtxt('spec2test.txt', unpack=True)
-    wave3, spec3 = np.loadtxt('spec3test.txt', unpack=True)
+    wave1, spec1 = np.loadtxt(os.path.join(DATAPATH, 'spec1test.txt'), unpack=True)
+    wave2, spec2 = np.loadtxt(os.path.join(DATAPATH, 'spec2test.txt'), unpack=True)
+    wave3, spec3 = np.loadtxt(os.path.join(DATAPATH, 'spec3test.txt'), unpack=True)
     wavelist = [wave1, wave2, wave3]
     speclist = [spec1, spec2, spec3]
     return wave1, spec1, wavelist, speclist
@@ -52,7 +52,7 @@ def test_simpledespike(wave_spec_generate):
     so indices 9 through 24, inclusive, should be removed
     '''
     wave, spec = wave_spec_generate[0], wave_spec_generate[1]
-    newwave, newspec = despike.simpledespike(wave, spec, delwindow=6, stdfactorup=0.7, stdfactordown=3)
+    newwave, newspec = despike.simpledespike(wave, spec, delwindow=6, stdfactorup=0.7, stdfactordown=3, plot=False)
     assert len(newwave) == len(newspec)
     assert len(newwave) <= len(wave)
     assert len(newspec) <= len(spec)

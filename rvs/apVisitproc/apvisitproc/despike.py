@@ -65,7 +65,7 @@ def read_infiles(datapath, filelist, isFits=False):
         if isFits: #it's a FITS file
             for line in f1:
                 infile = line.rstrip()
-                infile = datapath + infile
+                infile = os.path.join(datapath, infile)
                 infilelist.append(infile)
                 with fits.open(infile) as hdu:
                     # APOGEE! the data is in a funny place and backwards
@@ -80,7 +80,7 @@ def read_infiles(datapath, filelist, isFits=False):
         else: # it's a text file
             for line in f1:
                 infile = line.rstrip()
-                infile = datapath + infile
+                infile = os.path.join(datapath, infile)
                 infilelist.append(infile)
                 wave, spec = np.loadtxt(infile, usecols=(0,1), unpack=True)
                 wavelist.append(wave)
@@ -88,15 +88,21 @@ def read_infiles(datapath, filelist, isFits=False):
     return infilelist, wavelist, speclist
 
 
-def simpledespike(wave, spec, delwindow=6, stdfactorup=0.7, stdfactordown=3):
+def simpledespike(wave, spec, delwindow=6, stdfactorup=0.7, stdfactordown=3, plot=True):
     '''
     Implement a simple despiking routine based on the stdev of 1D fluxes
     
-    Outliers (spikes) are identified as exceeding stdfactorup*sigma above the continuum
-    Additional outliers (downward spikes) must exceed stdfactordown*sigma below the continuum
-    Around each outlier, adjacent points in a window of +/- delwindow are also flagged
+    This function is called by despike_spectra, which is where you can adjust the
+    values of these arguments as desired:
     
-    All of these points are deleted from input wave, spec to yield newwave, newspec
+    stdfactorup: Outliers (spikes) are identified as exceeding 
+                 stdfactorup*sigma above the continuum
+    stdfactordown: Additional outliers (downward spikes) must exceed 
+                   stdfactordown*sigma below the continuum
+    delwindow: Around each outlier, adjacent points in a window 
+               of +/- delwindow are also flagged as outliers
+    
+    All the outlier points are deleted from input wave, spec to yield newwave, newspec
     '''
     pointstodelete = []
     outliers = (np.where((spec > 1.0 + stdfactorup*np.std(spec)) | 
@@ -105,6 +111,14 @@ def simpledespike(wave, spec, delwindow=6, stdfactorup=0.7, stdfactordown=3):
         pointstodelete.extend(range(point-delwindow, point+delwindow+1))
     pointstodelete = [point for point in pointstodelete if point >= 0]
     newwave, newspec = np.delete(wave, pointstodelete), np.delete(spec, pointstodelete)
+    if plot:
+        plt.plot(wave, spec)
+        plt.plot(newwave, newspec, color='r')
+        plt.xlabel('Wavelength ({\AA})')
+        plt.ylabel('Normalized flux')
+        plt.axhline(y = (1 + stdfactorup*np.std(spec)), ls=':', color='g')
+        plt.axhline(y = (1 - stdfactordown*np.std(spec)), ls=':', color='g')
+        plt.show()
     return newwave, newspec
 
 
@@ -145,18 +159,10 @@ def despike_spectra(wavelist, speclist, type='simple', plot=True):
             newwave, newspec = simpledespike(wave, spec, 
                                              delwindow=delwindow, 
                                              stdfactorup=stdfactorup, 
-                                             stdfactordown=stdfactordown)
+                                             stdfactordown=stdfactordown,
+                                             plot=plot)
         else:
             newwave, newspec = generalizedESDdespike(wave, spec, maxOLs=1000, alpha=5000)
-        if plot:
-            plt.plot(wave, spec)
-            plt.plot(newwave, newspec, color='r')
-            plt.xlabel('Wavelength ({\AA})')
-            plt.ylabel('Normalized flux')
-            if type == 'simple':
-                plt.axhline(y = (1 + stdfactorup*np.std(spec)), ls=':', color='g')
-                plt.axhline(y = (1 - stdfactordown*np.std(spec)), ls=':', color='g')
-            plt.show()
         newwavelist.append(newwave)
         newspeclist.append(newspec)
     return newwavelist, newspeclist
