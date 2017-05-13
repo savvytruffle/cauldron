@@ -45,9 +45,9 @@ timestart = 1720; timeend = 1990
 phasemin = 0.5; phasemax = 1.12
 RVmin = -50; RVmax = 150 # 6778289
 
-#sysname = '6864859'; filename = 'data/6864859/6864859Outfile-Meredith.txt'
+#sysname = '6864859'; filename = 'data/6864859/6864859OutfileJC.txt'
 #timestart = 1720; timeend = 1990
-#phasemin = 0.5; phasemax = 1.5
+#phasemin = 0.53; phasemax = 1.53
 #RVmin = 40; RVmax = 140 # 6864859
 
 # Other useful definitions
