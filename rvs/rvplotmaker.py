@@ -35,15 +35,15 @@ dateoffset = 2454833. # this value will be subtracted from bjds in pane vs. time
 
 colors = user_rc()
 
-#sysname = '5285607'; filename = 'data/5285607/5285607OutfileJC.txt'
-#timestart = 975; timeend = 1040
-#phasemin = 0.5; phasemax = 1.5
-#RVmin = -50; RVmax = 200 # 5285607
+sysname = '5285607'; filename = 'data/5285607/5285607OutfileJC.txt'
+timestart = 975; timeend = 1040
+phasemin = 0.5; phasemax = 1.5
+RVmin = -50; RVmax = 200 # 5285607
 
-sysname = '6778289'; filename = 'data/6778289/6778289OutfileJC.txt'
-timestart = 1720; timeend = 1990
-phasemin = 0.5; phasemax = 1.12
-RVmin = -50; RVmax = 150 # 6778289
+#sysname = '6778289'; filename = 'data/6778289/6778289OutfileJC.txt'
+#timestart = 1720; timeend = 1990
+#phasemin = 0.5; phasemax = 1.12
+#RVmin = -50; RVmax = 150 # 6778289
 
 #sysname = '6864859'; filename = 'data/6864859/6864859OutfileJC.txt'
 #timestart = 1720; timeend = 1990

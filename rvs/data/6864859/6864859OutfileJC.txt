@@ -6,9 +6,9 @@
 # Template spectrum (line 0 of infiles):  data/PHOENIX/Z-0.0/lte06800-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes_apogee_norm.txt
 # RV of template, BCV of template (km/s): 0, 0
 #
-# List of all input spectra (infiles): data/6864859/6864859infiles1.txt
-# Target BJD and BCV info (bjdinfile): data/6864859/6864859bjdinfile1.txt
-# Gaussian fit guesses (gausspars):    data/6864859/6864859gausspars1.txt
+# List of all input spectra (infiles): data/6864859/6864859infiles.txt
+# Target BJD and BCV info (bjdinfile): data/6864859/6864859bjdinfile.txt
+# Gaussian fit guesses (gausspars):    data/6864859/6864859gausspars.txt
 #
 # BF parameters: w00 = 15170; n = 10000; stepV = 2.0
 # BF parameters: smoothstd = 1.5; m = 401
