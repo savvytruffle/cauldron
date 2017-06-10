@@ -7,8 +7,8 @@ The idea is for you to run it once for each target.
 '''
 
 # Where the apStar file lives
-#dir = 'data/6864859/'
-dir = 'data/5285607/'
+dir = 'data/6864859/'
+#dir = 'data/5285607/'
 #dir = 'data/5284133/'
 #dir = 'data/4285087/'
 #dir = 'data/6449358/'
@@ -17,8 +17,8 @@ dir = 'data/5285607/'
 #dir = 'data/4851217/'
 #dir = 'data/6610219/'
 # The name of the apStar file for a single target
-#ccffile = 'apStar-r5-2M19292405+4223363.fits' #6864859
-ccffile = 'apStar-r5-2M19390532+4027346.fits' #5285607
+ccffile = 'apStar-r5-2M19292405+4223363.fits' #6864859
+#ccffile = 'apStar-r5-2M19390532+4027346.fits' #5285607
 #ccffile = 'apStar-r5-2M19373173+4027078.fits' #5284133
 #ccffile = 'apStar-r5-2M19321788+4216489.fits' #6781535
 #ccffile = 'apStar-r5-2M19353513+4149543.fits' #6449358
@@ -87,8 +87,8 @@ for idx, CCFdata in enumerate(CCFvalues):
 
 # Read in relevant BF info for the same target
 #bffile = '6864859BFOut.txt' # 6864859 WARNING: we omitted some visits from this BF run!
-#bffile = '6864859BFOutALL.txt' #6864859 ALL Visits!
-bffile = '5285607BFOut.txt' 
+bffile = '6864859BFOutALL.txt' #6864859 ALL Visits!
+#bffile = '5285607BFOut.txt' 
 #bffile = '5284133BFOut.txt' 
 #bffile = '6449358BFOut.txt'
 #bffile = '6781535BFOut.txt'
@@ -103,6 +103,12 @@ bfdata = np.loadtxt(bfinfile, comments='#', usecols=(0,1,2), unpack=True)
 BFrvaxis = bfdata[0]
 BFvalues = bfdata[1]
 BFerrors = bfdata[2]
+
+# Read in relevant BF info from the BF infile and add barycentric velocity correction
+#bfdata = np.loadtxt(bfinfile, comments='#', usecols=(0,1,2), unpack=True)
+#BFrvaxis = bfdata[0]
+#BFvalues = bfdata[1]
+#BFerrors = bfdata[2]
 
 # Get the timestamp for each BF
 with open(bfinfile) as bfinfo:

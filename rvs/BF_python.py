@@ -67,9 +67,9 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   'data/4851217/4851217Outfile.txt'; bfoutfile = 'data/4851217/4851217BFOut.txt'
 
 #5285607
-infiles =   'data/5285607/5285607infiles.txt'; bjdinfile = 'data/5285607/5285607bjdinfile.txt'
-gausspars = 'data/5285607/5285607gausspars.txt'
-outfile =   'data/5285607/5285607OutfileJC.txt'; bfoutfile = 'data/5285607/5285607BFOut1.txt'
+#infiles =   'data/5285607/5285607infiles.txt'; bjdinfile = 'data/5285607/5285607bjdinfile.txt'
+#gausspars = 'data/5285607/5285607gausspars.txt'
+#outfile =   'data/5285607/5285607OutfileJC.txt'; bfoutfile = 'data/5285607/5285607BFOut1.txt'
 
 #4075064
 #infiles = 'data/4075064/4075064infiles.txt'; bjdinfile = 'data/4075064/4075064bjdinfile.txt'
