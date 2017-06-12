@@ -5,9 +5,7 @@ data/6778289/apVisitnorm-7125-56560-285_despiked.txt
 data/6778289/apVisitnorm-7125-56584-285_despiked.txt
 data/6778289/apVisitnorm-7125-56585-285_despiked.txt
 data/6778289/apVisitnorm-7439-56757-188_despiked.txt
-data/6778289/apVisitnorm-7439-56758-188_despiked.txt
 data/6778289/apVisitnorm-7439-56760-188_despiked.txt
-data/6778289/apVisitnorm-7439-56761-188_despiked.txt
 data/6778289/apVisitnorm-7439-56762-188_despiked.txt
 data/6778289/apVisitnorm-7439-56763-188_despiked.txt
 data/6778289/apVisitnorm-7440-56783-188_despiked.txt
@@ -16,11 +14,9 @@ data/6778289/apVisitnorm-7440-56785-188_despiked.txt
 data/6778289/apVisitnorm-7440-56786-188_despiked.txt
 data/6778289/apVisitnorm-7440-56787-188_despiked.txt
 data/6778289/apVisitnorm-7440-56788-188_despiked.txt
-data/6778289/apVisitnorm-7441-56812-182_despiked.txt
 data/6778289/apVisitnorm-7441-56814-182_despiked.txt
 data/6778289/apVisitnorm-7441-56815-182_despiked.txt
 data/6778289/apVisitnorm-7441-56816-182_despiked.txt
-data/6778289/apVisitnorm-7441-56817-182_despiked.txt
 data/6778289/apVisitnorm-7441-56818-182_despiked.txt
 data/6778289/apVisitnorm-7441-56819-182_despiked.txt
 data/6778289/apVisitnorm-7441-56820-182_despiked.txt
