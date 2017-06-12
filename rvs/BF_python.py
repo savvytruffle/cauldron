@@ -323,48 +323,49 @@ def gaussian(x, amp, mu, sig): # i.e., (xarray, amp, rv, width)
 
 # PLOT THE FINAL SMOOTHED BFS + GAUSSIAN FITS IN INDIVIDUAL PANELS
 # manually adjust this multi-panel plot based on how many spectra you have
-#plt.figure(4)
 windowcols = 3 # 4                             # how many columns the plot should have
-windowrows = 8                                #6864859 manually set number of plot rows here, or automatically below
-#windowrows = 7                                 #6778289
-#windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
+#windowrows = 9                                #6864859 manually set number of plot rows here, or automatically below
+windowrows = 7                                 #6778289
 #windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
 xmin = rvneg
 xmax = rvpos
-fig = plt.figure(1, figsize=(15,10)) 
+fig = plt.figure(1, figsize=(15,12)) 
 fig.text(0.5, 0.04, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size='large')
-#fig.text(0.5, 0.3, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size='large') #5285607
-#########0.5, 0.04
-#fig.text(0.07, 0.6, 'Broadening Function', ha='center', va='center', size='large', rotation='vertical')
 fig.text(0.07, 0.5, 'Broadening Function', ha='center', va='center', size='large', rotation='vertical')
-
-#########0.07, 0.5
-for i in range (1,nspec):
+for i in range (1, nspec):
     ax = fig.add_subplot(windowrows, windowcols, i) # out of range if windowcols x windowrows < nspec
     ax.yaxis.set_major_locator(MultipleLocator(0.5)) #increments of y axis tic marks
     if windowcols == 4 and (i!=1 and i!=5 and i!=9 and i!=13 and i!=17 and i!=21 and i!=25):
         ax.set_yticklabels(())
     if windowcols == 3 and (i!=1 and i!=4 and i!=7 and i!=10 and i!=13 and i!=16 and i!=19 and i!=22 and i!=25):
         ax.set_yticklabels(())
-    #if i!=20 and i!=21 and i!=22 and i!=23 and i!=24 and i!=25:
-    if i < nspec-windowrows:
-    #if i!=13 and i!=14 and i!=15 and i!=16:
+    if i < nspec-windowcols:
         ax.set_xticklabels(())
     plt.subplots_adjust(wspace=0, hspace=0)
     plt.axis([xmin, xmax, ymin, ymax])
     plt.tick_params(axis='both', which='major')
-    plt.text(xmax - 0.16*(np.abs(xmax-xmin)), 0.60*ymax, '%.3f $\phi$' % (phase[i]), size='small')
+    plt.text(xmax - 0.19*(np.abs(xmax-xmin)), 0.60*ymax, '%.3f $\phi$' % (phase[i]), size='small')
     plt.text(xmax - 0.26*(np.abs(xmax-xmin)), 0.35*ymax, '%s' % (datetimelist[i].iso[0:10]), size='small')
     #plt.plot(bf_ind, bfsmoothlist[i], color=colors[14], lw=1.5, ls='-', label='Smoothed BF')
-    plt.plot(bf_ind, bfnormlist[i], color=colors[14], lw=1.5, ls='-', label='Normalized Smoothed BF')
-    plt.plot(bf_ind, bffitlist[i][1], color=colors[0], lw=3, ls='-', label='Two Gaussian fit')
+    plt.plot(bf_ind, bfnormlist[i], color=colors[14], lw=2, ls='-', label='Normalized Smoothed BF')
+    plt.plot(bf_ind, bffitlist[i][1], color=colors[0], lw=2, ls='-', label='Two Gaussian fit')
     gauss1 = gaussian(bf_ind, bffitlist[i][0][0], bffitlist[i][0][1], bffitlist[i][0][2])
     gauss2 = gaussian(bf_ind, bffitlist[i][0][3], bffitlist[i][0][4], bffitlist[i][0][5])
-    plt.plot(bf_ind, gauss1, color=colors[6], lw=3, ls='--')#, label='Gaussian fit 1')
-    plt.plot(bf_ind, gauss2, color=colors[2], lw=3, ls='--')#, label='Gaussian fit 2')
+    plt.plot(rvraw1[i], 0.1, color=colors[6], marker='|', ms=15)#, label='RV 1')
+    plt.plot(rvraw2[i], 0.1, color=colors[2], marker='|', ms=15)#, label='RV 2')
+    #plt.plot(bf_ind, gauss1, color=colors[6], lw=3, ls='--')#, label='Gaussian fit 1')
+    #plt.plot(bf_ind, gauss2, color=colors[2], lw=3, ls='--')#, label='Gaussian fit 2')
     # OPTION TO PLOT VERTICAL LINE AT ZERO
     #plt.axvline(x=0, color=colors[15])    
-    # print legend
-    if i==nspec-1: ax.legend(bbox_to_anchor=(2.6,0.7), loc=1, borderaxespad=0., 
-                        frameon=False, handlelength=3, prop={'size':20})
+    # MAKE A LEGEND
+    if nspec - 1 == windowcols * (windowrows - 1): # square plot
+        # in this situation, the legend is printed below the final subplot
+        if i==nspec-1:
+            ax.legend(bbox_to_anchor=(0.5,-1.2), loc=4, borderaxespad=0., 
+                      frameon=False, handlelength=3, prop={'size':18})
+    else:
+        # in this situation, the legend is printed to the right of the final subplot
+        if i==nspec-1: 
+            ax.legend(bbox_to_anchor=(2.1,0.7), loc=1, borderaxespad=0., 
+                      frameon=False, handlelength=3, prop={'size':18})
 plt.show()
