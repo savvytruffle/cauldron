@@ -67,9 +67,9 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   'data/4851217/4851217Outfile.txt'; bfoutfile = 'data/4851217/4851217BFOut.txt'
 
 #5285607
-#infiles =   'data/5285607/5285607infiles.txt'; bjdinfile = 'data/5285607/5285607bjdinfile.txt'
-#gausspars = 'data/5285607/5285607gausspars.txt'
-#outfile =   'data/5285607/5285607OutfileJC.txt'; bfoutfile = 'data/5285607/5285607BFOut1.txt'
+infiles =   'data/5285607/5285607infiles.txt'; bjdinfile = 'data/5285607/5285607bjdinfile.txt'
+gausspars = 'data/5285607/5285607gausspars.txt'
+outfile =   'data/5285607/5285607OutfileJC.txt'; bfoutfile = 'data/5285607/5285607BFOut1.txt'
 
 #4075064
 #infiles = 'data/4075064/4075064infiles.txt'; bjdinfile = 'data/4075064/4075064bjdinfile.txt'
@@ -102,11 +102,11 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   'data/5284133/5284133Outfile.txt'; bfoutfile = 'data/5284133/5284133BFOut.txt'
 
 #6778289 (despiked (DS) , some visits removed)
-infiles =   'data/6778289/6778289infilesDS.txt'; bjdinfile = 'data/6778289/6778289bjdinfileDS.txt'
-gausspars = 'data/6778289/6778289gausspars.txt'
-outfile =   'data/6778289/6778289OutfileJC.txt'; bfoutfile = 'data/6778289/6778289BFOutJC.txt'
+#infiles =   'data/6778289/6778289infiles.txt'; bjdinfile = 'data/6778289/6778289bjdinfiles.txt'
+#gausspars = 'data/6778289/6778289gausspars.txt'
+#outfile =   'data/6778289/6778289OutfileJC.txt'; bfoutfile = 'data/6778289/6778289BFOutJC.txt'
 
-#6778289 (despiked (DS) , all visits included (AV))
+#6778289 
 #infiles =   'data/6778289/6778289infiles.txt'; bjdinfile = 'data/6778289/6778289bjdinfiles.txt'
 #gausspars = 'data/6778289/6778289gausspars.txt'
 #outfile =   'data/6778289/6778289OutfileNEW.txt'; bfoutfile = 'data/6778289/6778289BFOutNEW.txt'
@@ -123,10 +123,10 @@ outfile =   'data/6778289/6778289OutfileJC.txt'; bfoutfile = 'data/6778289/67782
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734 # 4851217
-#period = 3.8994011; BJD0 = 2454959.576010 # 5285607
+period = 3.8994011; BJD0 = 2454959.576010 # 5285607
 #period = 5.7767904; BJD0 = 2456760.90580 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
-period = 30.13015; BJD0 = 2456557.73097 #6778289
+#period = 30.13015; BJD0 = 2456557.73097 #6778289
 #period = 9.1220856; BJD0 = 2456557.733 #6781535
 #period = 40.8778427; BJD0 = 2454955.556300 #6864859
 #period = 61.4228063; BJD0 = 2455813.69734 #4075064
@@ -161,10 +161,10 @@ w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 
 # CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
 #widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 100; ymin = -0.15; ymax = 1.19 # good starting default
-#widlimits = [0,16, 0,16]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
+widlimits = [0,16, 0,16]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
 #widlimits = [0,5, 0,5]; rvneg = 100; rvpos = 300; ymin = -0.15; ymax = 1.1 #6449358
-widlimits = [0,15, 0,8]; rvneg = -45; rvpos = 199; ymin = -0.15; ymax = 1.1 #6778289
-#widlimits = [0,12, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
+#widlimits = [0,15, 0,8]; rvneg = -45; rvpos = 199; ymin = -0.15; ymax = 1.1 #6778289
+#widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
 #widlimits = [0,9, 0,9]; rvneg = -150; rvpos = 50; ymin = -0.15; ymax = 1.19 # 6610259a
 #widlimits = [0,15, 0,15]; rvneg = -50; rvpos = 10; ymin = -0.15; ymax = 1.19 # 6610219b
 
@@ -324,17 +324,18 @@ def gaussian(x, amp, mu, sig): # i.e., (xarray, amp, rv, width)
 # PLOT THE FINAL SMOOTHED BFS + GAUSSIAN FITS IN INDIVIDUAL PANELS
 # manually adjust this multi-panel plot based on how many spectra you have
 windowcols = 3 # 4                             # how many columns the plot should have
-#windowrows = 9                                #6864859 manually set number of plot rows here, or automatically below
-windowrows = 7                                 #6778289
+windowrows = 3                                #6864859 manually set number of plot rows here, or automatically below
+#windowrows = 8                                 #6778289
 #windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
 xmin = rvneg
 xmax = rvpos
-fig = plt.figure(1, figsize=(15,12)) 
+#fig = plt.figure(1, figsize=(15,12)) 
+fig = plt.figure(1, figsize=(15,4)) 
 fig.text(0.5, 0.04, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size='large')
 fig.text(0.07, 0.5, 'Broadening Function', ha='center', va='center', size='large', rotation='vertical')
 for i in range (1, nspec):
     ax = fig.add_subplot(windowrows, windowcols, i) # out of range if windowcols x windowrows < nspec
-    ax.yaxis.set_major_locator(MultipleLocator(0.5)) #increments of y axis tic marks
+    ax.yaxis.set_major_locator(MultipleLocator(0.4)) #increments of y axis tic marks
     if windowcols == 4 and (i!=1 and i!=5 and i!=9 and i!=13 and i!=17 and i!=21 and i!=25):
         ax.set_yticklabels(())
     if windowcols == 3 and (i!=1 and i!=4 and i!=7 and i!=10 and i!=13 and i!=16 and i!=19 and i!=22 and i!=25):
@@ -357,15 +358,17 @@ for i in range (1, nspec):
     #plt.plot(bf_ind, gauss2, color=colors[2], lw=3, ls='--')#, label='Gaussian fit 2')
     # OPTION TO PLOT VERTICAL LINE AT ZERO
     #plt.axvline(x=0, color=colors[15])    
+
     # MAKE A LEGEND
-    if nspec - 1 == windowcols * (windowrows - 1): # square plot
+    if nspec - 1 == windowcols * (windowrows - 1): # square plot, you must adjust the rows for room
         # in this situation, the legend is printed below the final subplot
         if i==nspec-1:
             ax.legend(bbox_to_anchor=(0.5,-1.2), loc=4, borderaxespad=0., 
-                      frameon=False, handlelength=3, prop={'size':18})
+                      frameon=False, handlelength=3, prop={'size':16})
     else:
         # in this situation, the legend is printed to the right of the final subplot
         if i==nspec-1: 
             ax.legend(bbox_to_anchor=(2.1,0.7), loc=1, borderaxespad=0., 
                       frameon=False, handlelength=3, prop={'size':18})
-plt.show()
+#plt.show()
+fig.savefig('5285607bfrv.png')
