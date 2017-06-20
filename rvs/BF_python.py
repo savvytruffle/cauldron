@@ -104,17 +104,17 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #6778289 
 #infiles =   'data/6778289/6778289infiles.txt'; bjdinfile = 'data/6778289/6778289bjdinfiles.txt'
 #gausspars = 'data/6778289/6778289gausspars.txt'
-#outfile =   'data/6778289/6778289OutfileNEW.txt'; bfoutfile = 'data/6778289/6778289BFOutNEW.txt'
+#outfile =   'data/6778289/6778289Outfile.txt'; bfoutfile = 'data/6778289/6778289BFOut.txt'
 
 #6781535
-infiles =   'data/6781535/6781535infiles.txt'; bjdinfile = 'data/6781535/6781535bjdinfile.txt'
-gausspars = 'data/6781535/6781535gausspars.txt'
-outfile =   'data/6781535/6781535Outfile.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
+#infiles =   'data/6781535/6781535infiles.txt'; bjdinfile = 'data/6781535/6781535bjdinfile.txt'
+#gausspars = 'data/6781535/6781535gausspars.txt'
+#outfile =   'data/6781535/6781535Outfile.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
 
 #6864859
-#infiles =   'data/6864859/6864859infilesALL1.txt'; bjdinfile = 'data/6864859/6864859bjdinfileALL1.txt'
-#gausspars = 'data/6864859/6864859gaussparsALL1.txt'
-#outfile =   'data/6864859/6864859OutfileJCALL1.txt'; bfoutfile = 'data/6864859/6864859BFOutALL1.txt'
+infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
+gausspars = 'data/6864859/6864859gausspars.txt'
+outfile =   'data/6864859/6864859Outfile.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734 # 4851217
@@ -122,8 +122,8 @@ outfile =   'data/6781535/6781535Outfile.txt'; bfoutfile = 'data/6781535/6781535
 #period = 5.7767904; BJD0 = 2456760.90580 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
 #period = 30.13015; BJD0 = 2456557.73097 #6778289
-period = 9.1220856; BJD0 = 2456557.733 #6781535
-#period = 40.8778427; BJD0 = 2454955.556300 #6864859
+#period = 9.1220856; BJD0 = 2456557.733 #6781535
+period = 40.8778427; BJD0 = 2454955.556300 #6864859
 #period = 61.4228063; BJD0 = 2455813.69734 #4075064
 #period = 1.0472603; BJD0 = 2455811.61005 #3848919
 #period = 11.3009948; BJD0 = 2456557.73097 #6610219
@@ -155,11 +155,11 @@ w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 #w00 = 15170; n = 6000; stepV = 4.0 # a little piece of APOGEE (lower res, apStar)
 
 # CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
-widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 100; ymin = -0.15; ymax = 1.19 # good starting default
+#widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 200; ymin = -0.15; ymax = 1.19 # good starting default
 #widlimits = [0,16, 0,16]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
 #widlimits = [0,5, 0,5]; rvneg = 100; rvpos = 300; ymin = -0.15; ymax = 1.1 #6449358
-#widlimits = [0,15, 0,8]; rvneg = -45; rvpos = 199; ymin = -0.15; ymax = 1.1 #6778289
-#widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
+#widlimits = [0,12, 0,8]; rvneg = -45; rvpos = 199; ymin = -0.15; ymax = 1.4 #6778289
+widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
 #widlimits = [0,9, 0,9]; rvneg = -150; rvpos = 50; ymin = -0.15; ymax = 1.19 # 6610259a
 #widlimits = [0,15, 0,15]; rvneg = -50; rvpos = 10; ymin = -0.15; ymax = 1.19 # 6610219b
 
@@ -319,7 +319,7 @@ def gaussian(x, amp, mu, sig): # i.e., (xarray, amp, rv, width)
 # PLOT THE FINAL SMOOTHED BFS + GAUSSIAN FITS IN INDIVIDUAL PANELS
 # manually adjust this multi-panel plot based on how many spectra you have
 windowcols = 3 # 4                             # how many columns the plot should have
-#windowrows = 3                                #6864859 manually set number of plot rows here, or automatically below
+#windowrows = 9                                #6864859 manually set number of plot rows here, or automatically below
 #windowrows = 8                                 #6778289
 windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
 xmin = rvneg
@@ -366,4 +366,4 @@ for i in range (1, nspec):
             ax.legend(bbox_to_anchor=(2.1,0.7), loc=1, borderaxespad=0., 
                       frameon=False, handlelength=3, prop={'size':18})
 plt.show()
-#fig.savefig('6449358bfrv.eps')
+#fig.savefig('6778289bfrv.eps')
