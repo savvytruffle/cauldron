@@ -5,7 +5,6 @@ data/6449358/apVisitnorm-7125-56560-071_despiked.txt
 data/6449358/apVisitnorm-7125-56584-071_despiked.txt
 data/6449358/apVisitnorm-7125-56585-071_despiked.txt
 data/6449358/apVisitnorm-7439-56757-064_despiked.txt
-data/6449358/apVisitnorm-7439-56758-064_despiked.txt
 data/6449358/apVisitnorm-7439-56760-064_despiked.txt
 data/6449358/apVisitnorm-7439-56761-064_despiked.txt
 data/6449358/apVisitnorm-7439-56762-064_despiked.txt
