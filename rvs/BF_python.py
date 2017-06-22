@@ -365,5 +365,5 @@ for i in range (1, nspec):
         if i==nspec-1: 
             ax.legend(bbox_to_anchor=(2.1,0.7), loc=1, borderaxespad=0., 
                       frameon=False, handlelength=3, prop={'size':18})
-plt.show()
-#fig.savefig('6449358bfrv.png')
+#plt.show()
+fig.savefig('6449358bfrv.png')
