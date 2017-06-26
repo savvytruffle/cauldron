@@ -29,8 +29,7 @@ dateoffset = 2454833. # this value will be subtracted from bjds in pane vs. time
 #RVmin = -45; RVmax = 180
 
 sysname = '6449358'; filename = 'data/6449358/6449358Outfile.txt'
-timestart = 1900; timeend = 2000
-#timestart = 980; timeend = 1020
+timestart = 1700; timeend = 2000
 phasemin = 0.5; phasemax = 1.5
 RVmin = 0; RVmax = 140
 
