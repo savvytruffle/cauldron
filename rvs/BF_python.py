@@ -157,7 +157,7 @@ w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 # CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
 #widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 300; ymin = -0.15; ymax = 1.19 # good starting default
 #widlimits = [0,16, 0,16]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
-widlimits = [0,15, 0,12]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.2 #6449358
+widlimits = [0,16, 0,11]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.2 #6449358
 #widlimits = [0,12, 0,8]; rvneg = -45; rvpos = 199; ymin = -0.15; ymax = 1.4 #6778289
 #widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
 #widlimits = [0,9, 0,9]; rvneg = -150; rvpos = 50; ymin = -0.15; ymax = 1.19 # 6610259a
@@ -365,5 +365,5 @@ for i in range (1, nspec):
         if i==nspec-1: 
             ax.legend(bbox_to_anchor=(2.1,0.7), loc=1, borderaxespad=0., 
                       frameon=False, handlelength=3, prop={'size':18})
-#plt.show()
-fig.savefig('6449358bfrv.png')
+plt.show()
+#fig.savefig('6449358bfrv.png')
