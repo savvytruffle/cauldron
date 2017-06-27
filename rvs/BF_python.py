@@ -71,6 +71,11 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #gausspars = 'data/5285607/5285607gausspars.txt'
 #outfile =   'data/5285607/5285607OutfileJC.txt'; bfoutfile = 'data/5285607/5285607BFOut1.txt'
 
+#5285607 APSTAR ORDER
+infiles =   'data/5285607/5285607infilesApstar.txt'; bjdinfile = 'data/5285607/5285607bjdinfileApstar.txt'
+gausspars = 'data/5285607/5285607gaussparsApstar.txt'
+outfile =   'data/5285607/5285607OutfileApstar.txt'; bfoutfile = 'data/5285607/5285607BFOutApstar.txt'
+
 #4075064
 #infiles = 'data/4075064/4075064infiles.txt'; bjdinfile = 'data/4075064/4075064bjdinfile.txt'
 #gausspars = 'data/4075064/4075064gausspars.txt'
@@ -92,9 +97,9 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BFOut.txt'
 
 #6449358
-infiles =   'data/6449358/6449358infiles.txt'; bjdinfile = 'data/6449358/6449358bjdinfile.txt'
-gausspars = 'data/6449358/6449358gausspars.txt'
-outfile =   'data/6449358/6449358Outfile.txt'; bfoutfile = 'data/6449358/6449358BFOut.txt'
+#infiles =   'data/6449358/6449358infiles.txt'; bjdinfile = 'data/6449358/6449358bjdinfile.txt'
+#gausspars = 'data/6449358/6449358gausspars.txt'
+#outfile =   'data/6449358/6449358Outfile.txt'; bfoutfile = 'data/6449358/6449358BFOut.txt'
 
 #5284133
 #infiles =   'data/5284133/5284133infiles.txt'; bjdinfile = 'data/5284133/5284133bjdinfile.txt'
@@ -118,8 +123,8 @@ outfile =   'data/6449358/6449358Outfile.txt'; bfoutfile = 'data/6449358/6449358
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734 # 4851217
-#period = 3.8994011; BJD0 = 2454959.576010 # 5285607
-period = 5.7767904; BJD0 = 2454955.073410 # 6449358
+period = 3.8994011; BJD0 = 2454959.576010 # 5285607
+#period = 5.7767904; BJD0 = 2454955.073410 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
 #period = 30.13015; BJD0 = 2456557.73097 #6778289
 #period = 9.1220856; BJD0 = 2456557.733 #6781535
@@ -156,8 +161,8 @@ w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 
 # CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
 #widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 300; ymin = -0.15; ymax = 1.19 # good starting default
-#widlimits = [0,16, 0,16]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
-widlimits = [0,16, 0,11]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.2 #6449358
+widlimits = [0,18, 0,19]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
+#widlimits = [0,16, 0,11]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.2 #6449358
 #widlimits = [0,12, 0,8]; rvneg = -45; rvpos = 199; ymin = -0.15; ymax = 1.4 #6778289
 #widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
 #widlimits = [0,9, 0,9]; rvneg = -150; rvpos = 50; ymin = -0.15; ymax = 1.19 # 6610259a
@@ -366,4 +371,4 @@ for i in range (1, nspec):
             ax.legend(bbox_to_anchor=(2.1,0.7), loc=1, borderaxespad=0., 
                       frameon=False, handlelength=3, prop={'size':18})
 plt.show()
-#fig.savefig('6449358bfrv.png')
+#fig.savefig('6449358bfrv.eps')

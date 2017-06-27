@@ -1,8 +1,8 @@
 #amp1, shift1, width1, amp2, shift2, width2
 0 0 0 0 0 0 # template placeholder
 0.99   55   10     0.80   95  10  # annoying
-0.99  0   10     0.80   175  10  # acceptable
-0.99  115   10     0.80   30  10  # annoying
-0.90  130   10     0.80  -5  10  # good
+0.99  0   5     0.80   175  10  # acceptable
+0.99  117   10     0.80   29  10  # annoying
+0.90  130   10     0.80  -2  10  # good
 0.90  100   10     0.80  50  10  # acceptable
-0.90  175   10     0.80   -15  10  # acceptable
+0.90  175   5     0.80   -15  10  # acceptable

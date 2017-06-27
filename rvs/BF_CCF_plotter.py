@@ -7,8 +7,8 @@ The idea is for you to run it once for each target.
 '''
 
 # Where the apStar file lives
-dir = 'data/6864859/'
-#dir = 'data/5285607/'
+#dir = 'data/6864859/'
+dir = 'data/5285607/'
 #dir = 'data/5284133/'
 #dir = 'data/4285087/'
 #dir = 'data/6449358/'
@@ -17,8 +17,8 @@ dir = 'data/6864859/'
 #dir = 'data/4851217/'
 #dir = 'data/6610219/'
 # The name of the apStar file for a single target
-ccffile = 'apStar-r5-2M19292405+4223363.fits' #6864859
-#ccffile = 'apStar-r5-2M19390532+4027346.fits' #5285607
+#ccffile = 'apStar-r5-2M19245882+4714573.fits' #6864859
+ccffile = 'apStar-r5-2M19390532+4027346.fits' #5285607
 #ccffile = 'apStar-r5-2M19373173+4027078.fits' #5284133
 #ccffile = 'apStar-r5-2M19321788+4216489.fits' #6781535
 #ccffile = 'apStar-r5-2M19353513+4149543.fits' #6449358
@@ -87,8 +87,8 @@ for idx, CCFdata in enumerate(CCFvalues):
 
 # Read in relevant BF info for the same target
 #bffile = '6864859BFOut.txt' # 6864859 WARNING: we omitted some visits from this BF run!
-bffile = '6864859BFOutALL.txt' #6864859 ALL Visits!
-#bffile = '5285607BFOut.txt' 
+#bffile = '6864859BFOutALL.txt' #6864859 ALL Visits!
+bffile = '5285607BFOutAPstar.txt' 
 #bffile = '5284133BFOut.txt' 
 #bffile = '6449358BFOut.txt'
 #bffile = '6781535BFOut.txt'
@@ -98,6 +98,12 @@ bffile = '6864859BFOutALL.txt' #6864859 ALL Visits!
 #bffile = '4285087BFOut.txt'
 bfinfile = dir + bffile
 
+#Read in heliocentric/barycentric velocities for the same target
+HCV = '5285607bjdinfile.txt'
+#HCV = '6864859bjdinfile.txt
+
+bjdinfile = dir + HCV
+
 # Read in relevant BF info from the BF infile
 bfdata = np.loadtxt(bfinfile, comments='#', usecols=(0,1,2), unpack=True)
 BFrvaxis = bfdata[0]
@@ -105,10 +111,8 @@ BFvalues = bfdata[1]
 BFerrors = bfdata[2]
 
 # Read in relevant BF info from the BF infile and add barycentric velocity correction
-#bfdata = np.loadtxt(bfinfile, comments='#', usecols=(0,1,2), unpack=True)
-#BFrvaxis = bfdata[0]
-#BFvalues = bfdata[1]
-#BFerrors = bfdata[2]
+HCVdata = np.loadtxt(bjdinfile, comments='#', usecols=(3), unpack=True)
+HCVx = HCVdata[3]
 
 # Get the timestamp for each BF
 with open(bfinfile) as bfinfo:
@@ -123,7 +127,7 @@ for idx, (rv, value, error) in enumerate(zip(BFrvaxis, BFvalues, BFerrors)):
         BFindices.append(idx)
 
 # Loop over and plot BF data
-xoffset = 100 # arbitrary systemic RV offset to make CCF and BF line up
+#xoffset = 100 # arbitrary systemic RV offset to make CCF and BF line up
 #xoffset = 61.7 #5285607
 #xoffset = 97.4 #6864859
 yamp = 8 # arbitrary factor to stretch BF values to make CCF and BF line up
@@ -134,11 +138,13 @@ for idx in range(0, len(bftimes)):
     ax.set_yticklabels(())
     plt.text(20, 0.28, bftimes[idx], size='10', color='C1')
     try:
-        plt.plot(BFrvaxis[BFindices[idx]:BFindices[idx+1]] - xoffset, 
+        #plt.plot(BFrvaxis[BFindices[idx]:BFindices[idx+1]] - xoffset, 
+        #         yamp*BFvalues[BFindices[idx]:BFindices[idx+1]])
+        plt.plot(BFrvaxis[BFindices[idx]:BFindices[idx+1]] - HCVx[idx+1], 
                  yamp*BFvalues[BFindices[idx]:BFindices[idx+1]])
     except: # handle the final case where there is no idx+1
         plt.plot(BFrvaxis[BFindices[idx]::] - xoffset, 
                  yamp*BFvalues[BFindices[idx]::])
 
 plt.show()
-
+#fig.savefig('5286507BFCCF.png')
