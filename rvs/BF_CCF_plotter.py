@@ -99,7 +99,7 @@ bffile = '5285607BFOutAPstar.txt'
 bfinfile = dir + bffile
 
 #Read in heliocentric/barycentric velocities for the same target
-HCV = '5285607bjdinfile.txt'
+HCV = '5285607bjdinfileApstar.txt'
 #HCV = '6864859bjdinfile.txt
 
 bjdinfile = dir + HCV
@@ -111,7 +111,7 @@ BFvalues = bfdata[1]
 BFerrors = bfdata[2]
 
 # Read in relevant BF info from the BF infile and add barycentric velocity correction
-HCVdata = np.loadtxt(bjdinfile, comments='#', usecols=(3), unpack=True)
+HCVdata = np.loadtxt(bjdinfile, comments='#', usecols=(2,), unpack=True)
 HCVx = HCVdata[3]
 
 # Get the timestamp for each BF
@@ -143,7 +143,7 @@ for idx in range(0, len(bftimes)):
         plt.plot(BFrvaxis[BFindices[idx]:BFindices[idx+1]] - HCVx[idx+1], 
                  yamp*BFvalues[BFindices[idx]:BFindices[idx+1]])
     except: # handle the final case where there is no idx+1
-        plt.plot(BFrvaxis[BFindices[idx]::] - xoffset, 
+        plt.plot(BFrvaxis[BFindices[idx]::] - HCVx[idx+1], 
                  yamp*BFvalues[BFindices[idx]::])
 
 plt.show()
