@@ -99,10 +99,10 @@ bffile = '5285607BFOutAPstar.txt'
 bfinfile = dir + bffile
 
 #Read in heliocentric/barycentric velocities for the same target
-HCV = '5285607bjdinfileApstar.txt'
-#HCV = '6864859bjdinfile.txt
+BCV = '5285607bjdinfileApstar.txt'
+#BCV = '6864859bjdinfileALL.txt
 
-bjdinfile = dir + HCV
+bjdinfile = dir + BCV
 
 # Read in relevant BF info from the BF infile
 bfdata = np.loadtxt(bfinfile, comments='#', usecols=(0,1,2), unpack=True)
