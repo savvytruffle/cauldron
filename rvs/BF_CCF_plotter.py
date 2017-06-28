@@ -111,8 +111,8 @@ BFvalues = bfdata[1]
 BFerrors = bfdata[2]
 
 # Read in relevant BF info from the BF infile and add barycentric velocity correction
-HCVdata = np.loadtxt(bjdinfile, comments='#', usecols=(2,), unpack=True)
-HCVx = HCVdata[3]
+BCVdata = np.loadtxt(bjdinfile, comments='#', usecols=(2,), unpack=True)
+#BCVx = HCVdata[3]
 
 # Get the timestamp for each BF
 with open(bfinfile) as bfinfo:
@@ -140,11 +140,11 @@ for idx in range(0, len(bftimes)):
     try:
         #plt.plot(BFrvaxis[BFindices[idx]:BFindices[idx+1]] - xoffset, 
         #         yamp*BFvalues[BFindices[idx]:BFindices[idx+1]])
-        plt.plot(BFrvaxis[BFindices[idx]:BFindices[idx+1]] - HCVx[idx+1], 
+        plt.plot(BFrvaxis[BFindices[idx]:BFindices[idx+1]] - BCVdata[idx], 
                  yamp*BFvalues[BFindices[idx]:BFindices[idx+1]])
     except: # handle the final case where there is no idx+1
-        plt.plot(BFrvaxis[BFindices[idx]::] - HCVx[idx+1], 
+        plt.plot(BFrvaxis[BFindices[idx]::] - BCVdata[idx], 
                  yamp*BFvalues[BFindices[idx]::])
 
-plt.show()
-#fig.savefig('5286507BFCCF.png')
+#plt.show()
+fig.savefig('5286507BFCCFminus.png')
