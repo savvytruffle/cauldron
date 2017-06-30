@@ -385,6 +385,106 @@ def make_lcrv_plots(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, 
 
     return True
 
+def make_lcrv_plots_poster(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, ooe=True, thresh=10.):
+    plt.rc('font', size=14, weight='normal')
+    plt.rc('xtick', labelsize=14)
+    plt.rc('xtick.major', size=6, width=1)
+    plt.rc('axes', labelsize=18, titlesize=22)
+    plt.rc('figure', titlesize=22)
+    lp = lnprob_lcrv(allpars, qua=np.unique(keblat.quarter))
+    lcpars = keblat.getpars(partype='lc')[:13]
+    lcmod, lcpol = keblat.lcfit(lcpars, keblat.jd[keblat.clip], keblat.quarter[keblat.clip],
+    				keblat.flux[keblat.clip], keblat.fluxerr[keblat.clip],
+    				keblat.crowd[keblat.clip], polyorder=2, ooe=ooe)
+
+    phase = ((keblat.jd[keblat.clip]-lcpars[4]) % lcpars[3])/lcpars[3]
+    phase[phase<-np.clip(keblat.pwidth*3., 0., 0.2)]+=1.
+    phase[phase>np.clip(keblat.sep+keblat.swidth*3., keblat.sep, 1.0)]-=1.
+
+    lcres = keblat.flux[keblat.clip] - lcmod*lcpol
+    lcMAD = np.nanpercentile(abs(keblat.flux[keblat.clip] - lcmod*lcpol), 67)
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(121)
+
+    ax.errorbar(phase, keblat.flux[keblat.clip]/lcpol,
+                 keblat.fluxerr[keblat.clip], fmt='C7.', ecolor='gray', zorder=1)
+    ax.plot(phase, lcmod, 'C0.')
+    ax.set_xlim((-1.2*keblat.pwidth, 1.2*keblat.pwidth))
+    ax.set_ylim((np.min(lcmod)*0.98, np.max(lcmod)*1.02))
+    ax.set_ylabel('Kepler Flux')
+
+    divider = make_axes_locatable(ax)
+    axb = divider.append_axes("bottom", size=2.0, pad=0, sharex=ax)
+
+    axb.errorbar(phase, lcres,
+                 np.sqrt(keblat.fluxerr[keblat.clip]**2 + keblat.pars['lcerr']**2), fmt='C7.', ecolor='gray', zorder=1)
+
+    axb.set_xlim((-1.2*keblat.pwidth, 1.2*keblat.pwidth))
+    axb.set_ylim((-thresh*lcMAD, thresh*lcMAD))
+    axb.set_ylabel('Data - Model')
+    axb.set_xlabel('Phase (Primary Eclipse)')
+    #axb.set_yticklabels(axb.yaxis.get_majorticklabels()[1:])
+
+    ax2 = fig.add_subplot(122)
+
+    ax2.errorbar(phase, keblat.flux[keblat.clip]/lcpol,
+                 keblat.fluxerr[keblat.clip], fmt='C7.', ecolor='gray', zorder=1)
+    ax2.plot(phase, lcmod, 'C0.')
+    ax2.set_xlim((-1.2*keblat.swidth+keblat.sep, 1.2*keblat.swidth+keblat.sep))
+    ax2.set_ylim((np.min(lcmod)*0.98, np.max(lcmod)*1.02))
+
+    divider2 = make_axes_locatable(ax2)
+    ax2b = divider2.append_axes("bottom", size=2.0, pad=0, sharex=ax2)
+
+    ax2b.errorbar(phase, lcres,
+                 np.sqrt(keblat.fluxerr[keblat.clip]**2 + keblat.pars['lcerr']**2), fmt='C7.', ecolor='gray')
+
+    ax2b.set_xlim((-1.2*keblat.swidth+keblat.sep, 1.2*keblat.swidth+keblat.sep))
+    ax2b.set_ylim((-thresh*lcMAD, thresh*lcMAD))
+    ax2b.set_xlabel('Phase (Secondary Eclipse)')
+
+    #ax2b.set_yticklabels(ax2b.yaxis.get_majorticklabels()[1:])
+
+
+    plt.setp(ax.get_xticklabels(), visible=False)
+    plt.setp(ax2.get_xticklabels(), visible=False)
+    plt.suptitle('KIC '+str(kic)+' LC (simultaneous)')
+    if savefig:
+        plt.savefig(prefix+suffix+'_LC.png', dpi=300)
+
+    # rvpars = keblat.getpars(partype='rv')
+    rvpars = np.array([keblat.pars['msum'], keblat.pars['mrat'], keblat.pars['period'], keblat.pars['tpe'],
+                       keblat.pars['esinw'], keblat.pars['ecosw'], keblat.pars['inc'], keblat.pars['k0'], keblat.pars['rverr']])
+
+    rv_fit = keblat.rvfit(rvpars, keblat.rv_t)
+    fig = plt.figure(figsize=(10,8))
+    ax = fig.add_subplot(111)
+    rvphase = (keblat.rv_t - keblat.pars['tpe'])%keblat.pars['period']/keblat.pars['period']
+    ax.errorbar(rvphase[~keblat.bad1], keblat.rv1_obs[~keblat.bad1], np.sqrt(keblat.rv1_err_obs**2+rvpars[-1]**2)[~keblat.bad1], fmt='k.', ecolor='gray')
+    ax.errorbar(rvphase[~keblat.bad2], keblat.rv2_obs[~keblat.bad2], np.sqrt(keblat.rv2_err_obs**2+rvpars[-1]**2)[~keblat.bad2], fmt='k.', ecolor='gray')
+    rvt = np.linspace(0, 1, 100)*keblat.pars['period']+keblat.pars['tpe']
+    rvmod = keblat.rvfit(rvpars, rvt)
+    ax.plot(np.linspace(0, 1, 100), rvmod[0], 'C1-', lw=2)
+    ax.plot(np.linspace(0, 1, 100), rvmod[1], 'C3-', lw=2)
+    ax.set_ylabel('RV [m/s]')
+    #ax.set_yticklabels(ax.yaxis.get_majorticklabels()[:-1])
+
+    divider = make_axes_locatable(ax)
+    ax2 = divider.append_axes("bottom", size=1.5, pad=0, sharex=ax)
+    ax2.errorbar(rvphase[~keblat.bad1], (keblat.rv1_obs-rv_fit[0])[~keblat.bad1], np.sqrt(keblat.rv1_err_obs**2+rvpars[-1]**2)[~keblat.bad1], fmt='C1.')
+    ax2.errorbar(rvphase[~keblat.bad2], (keblat.rv2_obs-rv_fit[1])[~keblat.bad2], np.sqrt(keblat.rv2_err_obs**2+rvpars[-1]**2)[~keblat.bad2], fmt='C3.')
+
+    ax2.set_xlabel('Phase')
+    ax2.set_ylabel('Data - Model')
+    plt.setp(ax.get_xticklabels(), visible=False)
+    #plt.setp(ax2.get_yticklabels()[-1], visible=False)
+
+    plt.suptitle('KIC '+str(kic)+' RV (simultaneous)')
+    if savefig:
+        plt.savefig(prefix+suffix+'_RV.png', dpi=300)
+
+    return True
+
 def make_sedlcrv_plots(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, ooe=True):
     residuals = keblat.lnlike_all(allpars, lc_constraints=None, qua=np.unique(keblat.quarter),
                               polyorder=polyorder, residual=True)
@@ -1753,7 +1853,70 @@ def run_emcee(pars, mcfile, p0_scale=None, nwalkers=64, niter=40000):
     except:
         print("Could not compute autocorr time...")
     return p0, sampler
-    
+
+def lnprob_lcrv(lcrvpars, qua=[1]):
+    lcrvpars0 = lcrvpars.copy()
+    lp = keblat.lnprior_lcrv(lcrvpars0)
+    if np.isinf(lp):
+        return -np.inf
+    lcrvpars0[-1] = np.exp(lcrvpars0[-1])
+    lcrvpars0[-3] = np.exp(lcrvpars0[-3])
+    ll = keblat.lnlike_lcrv(lcrvpars0, qua=qua)
+    if (np.isnan(ll) or np.isinf(ll)):
+        return -np.inf
+    return lp + ll
+
+def run_emcee(pars, mcfile, p0_scale=None, nwalkers=64, niter=40000, clobber=True):
+    assert keblat.rv_t is not None, "no rv data found"
+    assert keblat.jd is not None, "no lc data found"
+    if pars.ndim == 1:
+        ndim = len(pars)
+        print(ndim)
+        if p0_scale is None:
+            p0_scale = np.ones(ndim)*1e-4
+        p0 = [pars + p0_scale*pars*np.random.randn(ndim) for ii in range(nwalkers)]
+        p0 = np.array(p0)
+    elif pars.ndim == 2:
+        print(pars.ndim)
+        p0 = pars.copy()   
+        ndim = pars.shape[1]
+    ll0 = np.zeros(nwalkers)
+    for ii in range(nwalkers):
+        ll0[ii] = lnprob_lcrv(p0[ii,:], qua=np.unique(keblat.quarter))
+    if np.any(np.isinf(ll0)):
+        print("Initial Gaussian ball of parameters yield -inf lnprob, check bounds")
+        return p0, ll0
+    if os.path.isfile(mcfile) and not clobber:
+        print("File {0} already exists... do you want to clobber?".format(mcfile))
+        return
+    outf=open(mcfile, "w")
+    outf.close()
+
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_lcrv, threads=4,
+                                         args=[np.unique(keblat.quarter)])
+    start_time = time.time()
+    print("Running {0}k MCMC chain".format(niter/1000))
+    for res in sampler.sample(p0, iterations=niter, storechain=False):
+        if sampler.iterations % 10 == 0:
+            position = res[0]
+            outf = open(mcfile, "a")
+            for k in range(position.shape[0]):
+                outf.write("{0} {1} {2} {3} {4}\n".format(sampler.iterations,
+                           k, sampler.acceptance_fraction[k], res[1][k],
+                            " ".join([str(ii) for ii in position[k]])))
+            outf.close()
+        if sampler.iterations % 10000 == 0:
+            print("Time elapsed since niter={0}:{1}".format(sampler.iterations, 
+                  time.time()-start_time))
+    print("Total time elapsed for MCMC run:{0}".format(time.time()-start_time))
+    print("Total acceptance fraction:{0}".format(np.mean(sampler.acceptance_fraction)))
+    try:
+        print("Total autocorr time:{0}".format(np.mean(sampler.acor)))
+    except:
+        print("Could not compute autocorr time...")
+    return p0, sampler
+
+
 q1, q2, q3, q4 = 0.01, 0.01, 0.01, 0.01
 age, h0, dist = 9.2, 119., 850.
 chunks = identify_gaps(keblat.cadnum, retbounds_inds=True)
@@ -1765,6 +1928,139 @@ lcchi2_threshold = 3/np.nanmedian(np.array([np.nanmedian(abs(keblat.flux[chunks[
 
 prefix = 'kics/{0}/'.format(kic)
 print(blah)
+niter=50000
+nwalkers=128
+ndim=len(opt_lcrvpars)
+
+header = prefix+'lcrv_'
+footer = str(nwalkers)+'x'+str(niter/1000)+'k'
+mcfile = header+footer+'.mcmc'
+
+opt_lcrvpars = opt_lcrvpars.copy()
+# the lcrv lnprob and lnprior functions take in rverr and lcerr in natural log space,
+# so setting them to small log values
+opt_lcrvpars[-1] = 1 #rverr in m/s
+opt_lcrvpars[-3] = -11 #lcerr in kep flux
+
+p0_scale = np.ones(ndim)*1e-4
+p0_scale[4] = 1e-7
+p0_scale[5] = 1e-6
+p0_scale[[1,3,9]] = 1e-5
+p0, sampler = run_emcee(opt_lcrvpars, mcfile, p0_scale=p0_scale, nwalkers=nwalkers, niter=niter)
+
+
+burnin=niter/2
+data=np.loadtxt(mcfile)
+isonames = parnames_dict['lcrv']
+iwalker = np.arange(nwalkers)
+afrac = np.empty((data.shape[0]/nwalkers, nwalkers))
+logli = afrac*0.
+params = np.empty((data.shape[0]/nwalkers, nwalkers, len(isonames)))
+strays = []
+
+for jj in iwalker:
+    afrac[:,jj] = data[jj::nwalkers,2]
+    logli[:,jj] = data[jj::nwalkers,3]
+    if len(afrac[:,jj][(afrac[:,jj]<0.1)])>=0.66*len(afrac[:,jj]):
+        strays.append(jj)
+    for ii in range(len(isonames)):
+        params[:, jj, ii] = data[jj::nwalkers, ii+4]
+
+
+
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+print("Making plots now.")
+fig = plt.figure(figsize=(16, 16))
+for ii in range(len(isonames)):
+    ax = fig.add_subplot(int(len(isonames)/2)+1, 2, ii+1)
+    ax.plot(params[:, :, ii])
+    ax.plot([burnin/10, burnin/10], plt.ylim(), 'y-', lw=2.0)
+    ax.set_xlabel('N/10 iteration')
+    ax.set_ylabel(isonames[ii])
+    divider = make_axes_locatable(ax)
+    axhist = divider.append_axes("right", size=1.2, pad=0.1, sharey=ax)
+    axhist.hist(params[:,:,ii], 100, histtype='step', alpha=0.6, normed=True,
+        orientation='horizontal')
+    axhist.hist(params[:,:,ii].ravel(), 100, histtype='step', color='k',
+        normed=True, orientation='horizontal')
+    plt.setp(axhist.get_yticklabels(), visible=False)
+plt.savefig(header+footer+'_parameters.png')
+
+mostlike = np.where(logli == np.max(logli))
+mlpars = params[:,:,:][mostlike][0]
+print("Max likelihood out of all samples: ", logli[:,:][mostlike])
+for kk in range(len(isonames)):
+    print("""{0} = {1}""".format(str(isonames[kk]), mlpars[kk]))
+if burnin/10>=params.shape[0]:
+    print("Burn-in shorter than length of MCMC run, adjusting...")
+    burnin = params.shape[0]*3/4*10
+afrac, logli = afrac[burnin/10:,:], logli[burnin/10:,:]
+params = params[burnin/10:,:,:]
+
+keep = iwalker
+
+
+bfpars = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
+             zip(*np.percentile(params[:,keep,:].reshape((-1, ndim)),
+                                [16, 50, 84], axis=0)))
+print("MCMC result: ")
+print("Accep. Frac = ", np.mean(afrac[:, keep]))
+bffile = open(prefix+'mcmc.pars', "w")
+bffile.write("""{}\n""".format(" ".join([str(mp) for mp in mlpars])))
+for kk in range(len(isonames)):
+    print("""{0} = {1[0]} +{1[1]} -{1[2]}""".format(str(isonames[kk]),
+          bfpars[kk]))
+    bffile.write("""#{0} = {1[0]} +{1[1]} -{1[2]}\n""".format(str(isonames[kk]),
+          bfpars[kk]))
+
+changeofvar_names = ['m1', 'm2', 'r1', 'r2', 'inc', 'e']
+params_changeofvar = np.zeros((params.shape[0], params.shape[1], len(changeofvar_names)))
+params_changeofvar[:,:,0], params_changeofvar[:,:,1] = keblat.sumrat_to_12(params[:,:,0], params[:,:,1])
+params_changeofvar[:,:,2], params_changeofvar[:,:,3] = keblat.sumrat_to_12(params[:,:,2], params[:,:,3])
+params_changeofvar[:,:,4] = keblat.get_inc(params[:,:,8], params_changeofvar[:,:,2], keblat.get_a(params[:,:,4], params[:,:,0]))
+params_changeofvar[:,:,5] = np.sqrt(params[:,:,6]**2 + params[:,:,7]**2)
+
+bfpars_changeofvar = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
+             zip(*np.percentile(params_changeofvar.reshape((-1, len(changeofvar_names))),
+                                [16, 50, 84], axis=0)))
+for kk in range(len(changeofvar_names)):
+    print("""{0} = {1[0]} +{1[1]} -{1[2]}""".format(str(changeofvar_names[kk]),
+          bfpars_changeofvar[kk]))
+    bffile.write("""#{0} = {1[0]} +{1[1]} -{1[2]}\n""".format(str(changeofvar_names[kk]),
+          bfpars_changeofvar[kk]))
+bffile.close()
+
+bfpars[-1] = np.exp(bfpars[-1])
+bfpars[-3] = np.exp(bfpars[-3])
+make_lcrv_plots_poster(kic, mlpars, header+footer, suffix='', savefig=True)
+
+import corner
+#plt.figure(figsize=(14, 14))
+samples = params[:, :, :]
+post_inds = np.arange(len(isonames))
+post_inds = np.delete(post_inds, np.where(np.std(samples, axis=(0,1)) == 0)[0])
+try:
+    corner.corner(samples[:, keep,:][:,:,post_inds].reshape((-1, len(post_inds))),
+                    labels=np.array(isonames)[post_inds])
+    plt.savefig(header+footer+'_posteriors.png')
+except Exception, e:
+    print(str(e))
+
+
+
+pruned = np.arange(nwalkers)[(abs(params[-1,:,-1]-6.82) > 5*0.28)]
+p0_new = params[-1,:,:]
+#print(p0_new.shape, mlpars)
+
+meanpars = [bfpars[ii][0] for ii in range(ndim)]
+cov = [bfpars[ii][1] for ii in range(ndim)]
+test = np.array([np.random.normal(meanpars[ii], cov[ii], len(pruned)) for ii in range(ndim)]).T
+#print test.shape, p0_new.shape
+p0_new[pruned, :] = test
+
+for ii in range(nwalkers):
+    print(lnprob_lcrv(p0_new[ii,:], qua=np.unique(keblat.quarter)))
+
 #t, rv1, rv1err, rv2, rv2err = np.loadtxt('data/5285607_jm.rv.txt', usecols=(2, 3, 4, 5, 6), unpack=True)
 #m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3, rv1err*1e3, rv2err*1e3)
 #opt_lcrvpars = np.loadtxt(prefix+'lcrv.lmfit')
