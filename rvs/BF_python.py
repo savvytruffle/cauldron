@@ -101,10 +101,15 @@ outfile =   'data/5285607/5285607OutfileJC.txt'; bfoutfile = 'data/5285607/52856
 #gausspars = 'data/5284133/5284133gausspars.txt'
 #outfile =   'data/5284133/5284133Outfile.txt'; bfoutfile = 'data/5284133/5284133BFOut.txt'
 
-#6778289
-#infiles =   'data/6778289/6778289infiles.txt'; bjdinfile = 'data/6778289/6778289bjdinfile.txt'
+#6778289 (despiked (DS) , some visits removed)
+#infiles =   'data/6778289/6778289infilesDS.txt'; bjdinfile = 'data/6778289/6778289bjdinfileDS.txt'
 #gausspars = 'data/6778289/6778289gausspars.txt'
-#outfile =   'data/6778289/6778289Outfile.txt'; bfoutfile = 'data/6778289/6778289BFOut.txt'
+#outfile =   'data/6778289/6778289OutfileJC.txt'; bfoutfile = 'data/6778289/6778289BFOutJC.txt'
+
+#6778289 (despiked (DS) , all visits included (AV))
+#infiles =   'data/6778289/6778289infilesDSAV.txt'; bjdinfile = 'data/6778289/6778289bjdinfileDSAV.txt'
+#gausspars = 'data/6778289/6778289gaussparsAV.txt'
+#outfile =   'data/6778289/6778289OutfileJCAllVisits.txt'; bfoutfile = 'data/6778289/6778289BFOutJCAllVisits.txt'
 
 #6781535
 #infiles =   'data/6781535/6781535infiles.txt'; bjdinfile = 'data/6781535/6781535bjdinfile.txt'
@@ -112,9 +117,9 @@ outfile =   'data/5285607/5285607OutfileJC.txt'; bfoutfile = 'data/5285607/52856
 #outfile =   'data/6781535/6781535Outfile.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
 
 #6864859
-infiles =   'data/6864859/6864859infiles1.txt'; bjdinfile = 'data/6864859/6864859bjdinfile1.txt'
-gausspars = 'data/6864859/6864859gausspars1.txt'
-outfile =   'data/6864859/6864859OutfileJC1.txt'; bfoutfile = 'data/6864859/6864859BFOut1.txt'
+infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
+gausspars = 'data/6864859/6864859gausspars.txt'
+outfile =   'data/6864859/6864859OutfileJC.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734 # 4851217
@@ -151,15 +156,15 @@ m = 401              # length of the BF (must be longer if RVs are far from 0)
 ## good values for APOGEE:
 #w00 = 15170; n = 32000; stepV = 1.0 # all of APOGEE, (too) high res
 #w00 = 15170; n = 10000; stepV = 1.5 # all of APOGEE, still pretty high res
-w00 = 15170; n = 9000; stepV = 2.0 # all of APOGEE, still pretty high res
+w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 #w00 = 15170; n = 6000; stepV = 4.0 # a little piece of APOGEE (lower res, apStar)
 
 # CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
 #widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 100; ymin = -0.15; ymax = 1.19 # good starting default
 #widlimits = [0,16, 0,16]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
 #widlimits = [0,5, 0,5]; rvneg = 100; rvpos = 300; ymin = -0.15; ymax = 1.1 #6449358
-#widlimits = [0,15, 0,15]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6778289
-widlimits = [0,11, 0,11]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
+#widlimits = [0,20, 0,12]; rvneg = -50; rvpos = 200; ymin = -0.15; ymax = 1.1 #6778289
+widlimits = [0,12, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
 #widlimits = [0,9, 0,9]; rvneg = -150; rvpos = 50; ymin = -0.15; ymax = 1.19 # 6610259a
 #widlimits = [0,15, 0,15]; rvneg = -50; rvpos = 10; ymin = -0.15; ymax = 1.19 # 6610219b
 
@@ -326,6 +331,7 @@ xmin = rvneg
 xmax = rvpos
 fig = plt.figure(1, figsize=(15,10))
 fig.text(0.5, 0.04, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size='large')
+#fig.text(0.5, 0.3, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size='large') #5285607
 #########0.5, 0.04
 fig.text(0.07, 0.6, 'Broadening Function', ha='center', va='center', size='large', rotation='vertical')
 #########0.07, 0.5
