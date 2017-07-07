@@ -72,9 +72,9 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   'data/5285607/5285607OutfileJC.txt'; bfoutfile = 'data/5285607/5285607BFOut1.txt'
 
 #5285607 APSTAR ORDER
-infiles =   'data/5285607/5285607infilesApstar.txt'; bjdinfile = 'data/5285607/5285607bjdinfileApstar.txt'
-gausspars = 'data/5285607/5285607gaussparsApstar.txt'
-outfile =   'data/5285607/5285607OutfileApstar.txt'; bfoutfile = 'data/5285607/5285607BFOutApstar.txt'
+#infiles =   'data/5285607/5285607infilesApstar.txt'; bjdinfile = 'data/5285607/5285607bjdinfileApstar.txt'
+#gausspars = 'data/5285607/5285607gaussparsApstar.txt'
+#outfile =   'data/5285607/5285607OutfileApstar.txt'; bfoutfile = 'data/5285607/5285607BFOutApstar.txt'
 
 #4075064
 #infiles = 'data/4075064/4075064infiles.txt'; bjdinfile = 'data/4075064/4075064bjdinfile.txt'
@@ -92,9 +92,14 @@ outfile =   'data/5285607/5285607OutfileApstar.txt'; bfoutfile = 'data/5285607/5
 #outfile = 'data/6610219/6610219outfile.txt'; bfoutfile = 'data/6610219/6610219BFOut.txt'
 
 #4285087
-#infiles = 'data/4285087/4285087infiles.txt'; bjdinfile = 'data/4285087/4285087bjdinfile.txt'
-#gausspars = 'data/4285087/4285087gausspars.txt'
-#outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BFOut.txt'
+infiles = 'data/4285087/4285087infiles.txt'; bjdinfile = 'data/4285087/4285087bjdinfile.txt'
+gausspars = 'data/4285087/4285087gausspars.txt'
+outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BFOut.txt'
+
+#6131659
+#infiles = 'data/6131659/6131659infiles.txt'; bjdinfile = 'data/6131659/6131659bjdinfile.txt'
+#gausspars = 'data/6131659/6131659gausspars.txt'
+#outfile = 'data/6131659/4285087outfile.txt'; bfoutfile = 'data/6131659/6131659BFOut.txt'
 
 #6449358
 #infiles =   'data/6449358/6449358infiles.txt'; bjdinfile = 'data/6449358/6449358bjdinfile.txt'
@@ -123,7 +128,7 @@ outfile =   'data/5285607/5285607OutfileApstar.txt'; bfoutfile = 'data/5285607/5
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734 # 4851217
-period = 3.8994011; BJD0 = 2454959.576010 # 5285607
+#period = 3.8994011; BJD0 = 2454959.576010 # 5285607
 #period = 5.7767904; BJD0 = 2454955.073410 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
 #period = 30.13015; BJD0 = 2456557.73097 #6778289
@@ -132,7 +137,9 @@ period = 3.8994011; BJD0 = 2454959.576010 # 5285607
 #period = 61.4228063; BJD0 = 2455813.69734 #4075064
 #period = 1.0472603; BJD0 = 2455811.61005 #3848919
 #period = 11.3009948; BJD0 = 2456557.73097 #6610219
-#period = 4.4860312; BJD0 = 2455813.69734  #4285087
+period = 4.4860312; BJD0 = 2454966.450124 #4285087 
+#period = 17.5278303; BJD0 = 2454960.041397  #6131659
+
 
 
 # STUFF YOU NEED TO DEFINE CORRECTLY !!!
@@ -161,7 +168,9 @@ w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 
 # CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
 #widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 300; ymin = -0.15; ymax = 1.19 # good starting default
-widlimits = [0,18, 0,19]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
+#widlimits = [0,18, 0,18]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.19 # 6131659
+widlimits = [0,13, 0,13]; rvneg = -50; rvpos = 249; ymin = -0.15; ymax = 1.19 # 4285607
+#widlimits = [0,18, 0,19]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
 #widlimits = [0,16, 0,11]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.2 #6449358
 #widlimits = [0,12, 0,8]; rvneg = -45; rvpos = 199; ymin = -0.15; ymax = 1.4 #6778289
 #widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
@@ -324,6 +333,7 @@ def gaussian(x, amp, mu, sig): # i.e., (xarray, amp, rv, width)
 # PLOT THE FINAL SMOOTHED BFS + GAUSSIAN FITS IN INDIVIDUAL PANELS
 # manually adjust this multi-panel plot based on how many spectra you have
 windowcols = 3 # 4                             # how many columns the plot should have
+#windowrows = 3
 #windowrows = 9                                #6864859 manually set number of plot rows here, or automatically below
 #windowrows = 8                                 #6778289
 windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
@@ -370,5 +380,6 @@ for i in range (1, nspec):
         if i==nspec-1: 
             ax.legend(bbox_to_anchor=(2.1,0.7), loc=1, borderaxespad=0., 
                       frameon=False, handlelength=3, prop={'size':18})
+                      
 plt.show()
-#fig.savefig('6449358bfrv.eps')
+#fig.savefig('6131659bfrv.eps')

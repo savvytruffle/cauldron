@@ -8,33 +8,37 @@ The idea is for you to run it once for each target.
 
 # Where the apStar file lives
 #dir = 'data/5285607/'
-dir = 'data/6864859/'
+#dir = 'data/6864859/'
 #dir = 'data/6778289/'
 #dir = 'data/6449358/'
 #dir = 'data/4285087/'
 #dir = 'data/6781535/'
+dir = 'data/6131659/'
 
 # The name of the apStar file for a single target
 #ccffile = 'apStar-r5-2M19390532+4027346.fits' #5285607
-ccffile = 'apStar-r6-2M19292405+4223363.fits' #6864859
+#ccffile = 'apStar-r6-2M19292405+4223363.fits' #6864859
 #ccffile = 'apStar-r5-2M19282456+4215080.fits' #6778289
 #ccffile = 'apStar-r5-2M19353513+4149543.fits' #6449358
 #ccffile = 'apStar-r5-2M19463571+3919069.fits' #4285087
 #ccffile = 'apStar-r5-2M19321788+4216489.fits' #6781535
+ccffile = 'apStar-r5-2M19370697+4126128.fits' #6131659
 
 # The name of the file with relevant BF info for the same target
 #bffile = '5285607BFOutAPstar.txt' # in the same order as APOGEE even though it's not chronologic
 #bffile = '6864859BFOut.txt' # WARNING: we omitted some visits from this BF run
-bffile = '6864859BFOutALL.txt' # ALL Visits
+#bffile = '6864859BFOutALL.txt' # ALL Visits
 #bffile = '6778289BFOut.txt'
 #bffile = '6449358BFOut.txt'
 #bffile = '4285087BFOut.txt'
 #bffile = '6781535BFOut.txt'
+bffile = '6131659BFOut.txt'
 
 # The name of the bjdinfile used with BF_python
 # (heliocentric/barycentric velocities in col=(2,); note the top row is for the template)
 #BCVfile = '5285607bjdinfile.txt'
-BCVfile = '6864859bjdinfileALL.txt'
+#BCVfile = '6864859bjdinfileALL.txt'
+BCVfile = '6131659bjdinfile.txt'
 
 ccfinfile = dir + ccffile
 bfinfile = dir + bffile
@@ -138,4 +142,4 @@ for idx in range(0, len(bftimes)):
                  bfyamp*BFvalues[BFindices[idx]::])
 
 plt.show()
-#fig.savefig('5286507BFCCFminus.png')
+#fig.savefig('6136159BFCCF.png')
