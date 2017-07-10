@@ -7,7 +7,13 @@ data/6131659/apVisitnorm-7125-56560-123.txt
 data/6131659/apVisitnorm-7125-56584-129.txt
 data/6131659/apVisitnorm-7125-56585-129.txt
 data/6131659/apVisitnorm-7439-56757-070.txt
+data/6131659/apVisitnorm-7439-56758-070.txt
+data/6131659/apVisitnorm-7439-56760-070.txt
+data/6131659/apVisitnorm-7439-56761-070.txt
+data/6131659/apVisitnorm-7439-56762-070.txt
 data/6131659/apVisitnorm-7439-56763-070.txt
+data/6131659/apVisitnorm-7440-56783-063.txt
+data/6131659/apVisitnorm-7440-56784-063.txt
 data/6131659/apVisitnorm-7440-56785-063.txt
 data/6131659/apVisitnorm-7440-56786-063.txt
 data/6131659/apVisitnorm-7440-56787-063.txt
@@ -15,6 +21,7 @@ data/6131659/apVisitnorm-7440-56788-070.txt
 data/6131659/apVisitnorm-7441-56812-074.txt
 data/6131659/apVisitnorm-7441-56814-074.txt
 data/6131659/apVisitnorm-7441-56815-074.txt
+data/6131659/apVisitnorm-7441-56816-074.txt
 data/6131659/apVisitnorm-7441-56817-074.txt
 data/6131659/apVisitnorm-7441-56818-074.txt
 data/6131659/apVisitnorm-7441-56819-074.txt
