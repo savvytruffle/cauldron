@@ -132,7 +132,7 @@ outfile =   'data/6781535/6781535Outfile.txt'; bfoutfile = 'data/6781535/6781535
 #period = 5.7767904; BJD0 = 2454955.073410 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
 #period = 30.13015; BJD0 = 2456557.73097 #6778289
-period = 9.1220856; BJD0 = 2456557.733 #6781535
+period = 9.1220856; BJD0 = 2454971.834534 #6781535
 #period = 40.8778427; BJD0 = 2454955.556300 #6864859
 #period = 61.4228063; BJD0 = 2455813.69734 #4075064
 #period = 1.0472603; BJD0 = 2455811.61005 #3848919
@@ -168,7 +168,7 @@ w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 
 # CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
 #widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 300; ymin = -0.15; ymax = 1.19 # good starting default
-widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 300; ymin = -0.15; ymax = 1.19 # 6781535
+widlimits = [0,9, 0,10]; rvneg = -75; rvpos = 175; ymin = -0.15; ymax = 1.19 # 6781535
 #widlimits = [0,9, 0,7]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.19 # 6131659
 #widlimits = [0,13, 0,13]; rvneg = -50; rvpos = 249; ymin = -0.15; ymax = 1.19 # 4285607
 #widlimits = [0,18, 0,19]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
