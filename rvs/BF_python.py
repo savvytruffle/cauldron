@@ -92,14 +92,14 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile = 'data/6610219/6610219outfile.txt'; bfoutfile = 'data/6610219/6610219BFOut.txt'
 
 #4285087
-infiles = 'data/4285087/4285087infiles.txt'; bjdinfile = 'data/4285087/4285087bjdinfile.txt'
-gausspars = 'data/4285087/4285087gausspars.txt'
-outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BFOut.txt'
+#infiles = 'data/4285087/4285087infiles.txt'; bjdinfile = 'data/4285087/4285087bjdinfile.txt'
+#gausspars = 'data/4285087/4285087gausspars.txt'
+#outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BFOut.txt'
 
 #6131659
 #infiles = 'data/6131659/6131659infiles.txt'; bjdinfile = 'data/6131659/6131659bjdinfile.txt'
 #gausspars = 'data/6131659/6131659gausspars.txt'
-#outfile = 'data/6131659/4285087outfile.txt'; bfoutfile = 'data/6131659/6131659BFOut.txt'
+#outfile = 'data/6131659/6131659outfile.txt'; bfoutfile = 'data/6131659/6131659BFOut.txt'
 
 #6449358
 #infiles =   'data/6449358/6449358infiles.txt'; bjdinfile = 'data/6449358/6449358bjdinfile.txt'
@@ -116,10 +116,10 @@ outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BF
 #gausspars = 'data/6778289/6778289gausspars.txt'
 #outfile =   'data/6778289/6778289Outfile.txt'; bfoutfile = 'data/6778289/6778289BFOut.txt'
 
-#6781535
-#infiles =   'data/6781535/6781535infiles.txt'; bjdinfile = 'data/6781535/6781535bjdinfile.txt'
-#gausspars = 'data/6781535/6781535gausspars.txt'
-#outfile =   'data/6781535/6781535Outfile.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
+#6781535 (Suspected Triple System)
+infiles =   'data/6781535/6781535infiles.txt'; bjdinfile = 'data/6781535/6781535bjdinfile.txt'
+gausspars = 'data/6781535/6781535gausspars.txt'
+outfile =   'data/6781535/6781535Outfile.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
 
 #6864859
 #infiles =   'data/6864859/6864859infilesA.txt'; bjdinfile = 'data/6864859/6864859bjdinfileA.txt'
@@ -132,12 +132,12 @@ outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BF
 #period = 5.7767904; BJD0 = 2454955.073410 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
 #period = 30.13015; BJD0 = 2456557.73097 #6778289
-#period = 9.1220856; BJD0 = 2456557.733 #6781535
+period = 9.1220856; BJD0 = 2456557.733 #6781535
 #period = 40.8778427; BJD0 = 2454955.556300 #6864859
 #period = 61.4228063; BJD0 = 2455813.69734 #4075064
 #period = 1.0472603; BJD0 = 2455811.61005 #3848919
 #period = 11.3009948; BJD0 = 2456557.73097 #6610219
-period = 4.4860312; BJD0 = 2454966.450124 #4285087 
+#period = 4.4860312; BJD0 = 2454966.450124 #4285087 
 #period = 17.5278303; BJD0 = 2454960.041397  #6131659
 
 
@@ -168,8 +168,9 @@ w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 
 # CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
 #widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 300; ymin = -0.15; ymax = 1.19 # good starting default
-#widlimits = [0,14, 0,14]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.19 # 6131659
-widlimits = [0,13, 0,13]; rvneg = -50; rvpos = 249; ymin = -0.15; ymax = 1.19 # 4285607
+widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 300; ymin = -0.15; ymax = 1.19 # 6781535
+#widlimits = [0,9, 0,7]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.19 # 6131659
+#widlimits = [0,13, 0,13]; rvneg = -50; rvpos = 249; ymin = -0.15; ymax = 1.19 # 4285607
 #widlimits = [0,18, 0,19]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
 #widlimits = [0,16, 0,11]; rvneg = -300; rvpos = 500; ymin = -0.15; ymax = 1.2 #6449358 extra wide 
 #widlimits = [0,16, 0,11]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.2 #6449358
@@ -334,13 +335,14 @@ def gaussian(x, amp, mu, sig): # i.e., (xarray, amp, rv, width)
 # PLOT THE FINAL SMOOTHED BFS + GAUSSIAN FITS IN INDIVIDUAL PANELS
 # manually adjust this multi-panel plot based on how many spectra you have
 windowcols = 3 # 4                             # how many columns the plot should have
-windowrows = 3
+#windowrows = 3
 #windowrows = 9                                #6864859 manually set number of plot rows here, or automatically below
 #windowrows = 8                                 #6778289
-#windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
+windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
 xmin = rvneg
 xmax = rvpos
-fig = plt.figure(1, figsize=(15,12)) 
+#fig = plt.figure(1, figsize=(15,12)) 
+fig = plt.figure(1, figsize=(15,7)) 
 #fig = plt.figure(1, figsize=(15,3.5)) #5285607 (6 Visits)
 fig.text(0.5, 0.04, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size='large')
 fig.text(0.07, 0.5, 'Broadening Function', ha='center', va='center', size='large', rotation='vertical')
@@ -374,7 +376,7 @@ for i in range (1, nspec):
     if nspec - 1 == windowcols * (windowrows - 1): # square plot, you must adjust the rows for room
         # in this situation, the legend is printed below the final subplot
         if i==nspec-1:
-            ax.legend(bbox_to_anchor=(0.5,-1.2), loc=4, borderaxespad=0., 
+            ax.legend(bbox_to_anchor=(0.5,-0.7), loc=4, borderaxespad=0., 
                       frameon=False, handlelength=3, prop={'size':16})
     else:
         # in this situation, the legend is printed to the right of the final subplot
@@ -382,5 +384,6 @@ for i in range (1, nspec):
             ax.legend(bbox_to_anchor=(2.1,0.7), loc=1, borderaxespad=0., 
                       frameon=False, handlelength=3, prop={'size':18})
                       
-#plt.show()
-fig.savefig('4285607bfrv.eps')
+plt.show()
+#fig.savefig('6781659bfrv.png')
+#fig.savefig('6781659bfrv.eps')

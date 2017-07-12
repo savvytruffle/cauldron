@@ -40,10 +40,15 @@ colors = user_rc()
 #phasemin = 0.5; phasemax = 1.5
 #RVmin = -50; RVmax = 200 # 5285607
 
-sysname = '4285087'; filename = 'data/4285087/4285087Outfile.txt'
+sysname = '6131659'; filename = 'data/6131659/6131659Outfile.txt'
 timestart = 1700; timeend = 2000
 phasemin = -0.1; phasemax = 1.0
 RVmin = 0; RVmax = 200
+
+#sysname = '4285087'; filename = 'data/4285087/4285087Outfile.txt'
+#timestart = 1700; timeend = 2000
+#phasemin = -0.1; phasemax = 1.0
+#RVmin = 0; RVmax = 200
 
 #sysname = '6778289'; filename = 'data/6778289/6778289OutfileJC.txt'
 #timestart = 1720; timeend = 1990
@@ -128,4 +133,4 @@ fig.text(0.14, 0.55, 'Unfolded')
 fig.text(0.14, 0.9, sysname, size='large')
 
 plt.show()
-#fig.savefig('6449358rv.png')
+fig.savefig('6131659rv.png')
