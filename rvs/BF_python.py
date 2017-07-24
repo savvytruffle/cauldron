@@ -368,6 +368,7 @@ for i in range (1, nspec):
     gauss2 = gaussian(bf_ind, bffitlist[i][0][3], bffitlist[i][0][4], bffitlist[i][0][5])
     plt.plot(rvraw1[i], 0.1, color=colors[6], marker='|', ms=15)#, label='RV 1')
     plt.plot(rvraw2[i], 0.1, color=colors[2], marker='|', ms=15)#, label='RV 2')
+    #plt.plot(rvraw3[i], 0.1, color=colors[1], marker='|', ms=15)#, label='RV 3')
     #plt.plot(bf_ind, gauss1, color=colors[6], lw=3, ls='--')#, label='Gaussian fit 1')
     #plt.plot(bf_ind, gauss2, color=colors[2], lw=3, ls='--')#, label='Gaussian fit 2')
     # OPTION TO PLOT VERTICAL LINE AT ZERO

@@ -146,7 +146,7 @@ period = 17.5278303; BJD0 = 2454960.041397  #6131659
 isAPOGEE = True        # toggle to use near-IR stuff, or not
 SpecPlot = False         # toggle to plot spectra before BFs, or not
 bjdoffset = 2454833.    # difference between real BJDs and 'bjdfunny' (truncated BJDs)
-amplimits = [0,1.2, 0,1.2 0,1.2] # limits for gaussian normalized amplitude [min1,max1,min2,max2]
+amplimits = [0,1.2, 0,1.2, 0,1.2] # limits for gaussian normalized amplitude [min1,max1,min2,max2,min3,max3]
 threshold = 10             # margin for gaussian position (raw RV in km/s)
 #widlimits = [0,25, 0,22]   # limits for gaussian width (km/s) [min1,max1,min2,max2]
 # ^^^ widlimits IS NOW SPECIFIED ON A PER-STAR BASIS BELOW
@@ -169,7 +169,7 @@ w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 # CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
 #widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 300; ymin = -0.15; ymax = 1.19 # good starting default
 #widlimits = [0,9, 0,10]; rvneg = -75; rvpos = 175; ymin = -0.15; ymax = 1.19 # 6781535
-widlimits = [0,8, 0,7 0,7]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.19 # 6131659 
+widlimits = [0,8, 0,7, 0,7]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.19 # 6131659 
 #widlimits = [0,9, 0,7]; rvneg = -300; rvpos = 300; ymin = -0.15; ymax = 1.19 # 6131659 Xtra large
 #widlimits = [0,13, 0,13]; rvneg = -50; rvpos = 249; ymin = -0.15; ymax = 1.19 # 4285607
 #widlimits = [0,18, 0,19]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
@@ -275,7 +275,7 @@ plt.show()
 # FIT THE SMOOTHED BF PEAKS WITH TWO GAUSSIANS
 # you have to have pretty decent guesses in the gausspars file for this to work.
 bffitlist = bff.gaussparty(gausspars, nspec, filenamelist, bfnormlist, bf_ind, amplimits, threshold, widlimits)
-rvraw1 = []; rvraw2 = []; rvraw3 = []; rvraw1_err = []; rvraw2_err = [] rvraw3_err = []
+rvraw1 = []; rvraw2 = []; rvraw3 = []; rvraw1_err = []; rvraw2_err = []; rvraw3_err = []
 rvraw1.append(0), rvraw2.append(0), rvraw3.append(0), rvraw1_err.append(0), rvraw2_err.append(0), rvraw3_err.append(0)
 for i in range(1, len(bffitlist)):
     rvraw1.append(bffitlist[i][0][1]) # [0,1,2] = [amp, rv, width] for star 1; 
