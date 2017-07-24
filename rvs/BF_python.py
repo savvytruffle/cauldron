@@ -143,10 +143,11 @@ period = 17.5278303; BJD0 = 2454960.041397  #6131659
 
 
 # STUFF YOU NEED TO DEFINE CORRECTLY !!!
+# if you are fitting three gaussians, you had better give 3 sets of amplimits and widlimits
 isAPOGEE = True        # toggle to use near-IR stuff, or not
 SpecPlot = False         # toggle to plot spectra before BFs, or not
 bjdoffset = 2454833.    # difference between real BJDs and 'bjdfunny' (truncated BJDs)
-amplimits = [0,1.2, 0,1.2] # limits for gaussian normalized amplitude [min1,max1,min2,max2]
+amplimits = [0,1.2, 0,1.2, 0,1.2] # limits for gaussian normalized amplitude [min1,max1,min2,max2]
 threshold = 10             # margin for gaussian position (raw RV in km/s)
 #widlimits = [0,25, 0,22]   # limits for gaussian width (km/s) [min1,max1,min2,max2]
 # ^^^ widlimits IS NOW SPECIFIED ON A PER-STAR BASIS BELOW
@@ -169,7 +170,7 @@ w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 # CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
 #widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 300; ymin = -0.15; ymax = 1.19 # good starting default
 #widlimits = [0,9, 0,10]; rvneg = -75; rvpos = 175; ymin = -0.15; ymax = 1.19 # 6781535
-widlimits = [0,8, 0,7]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.19 # 6131659 
+widlimits = [0,9, 0,9, 0,11]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.19 # 6131659 
 #widlimits = [0,9, 0,7]; rvneg = -300; rvpos = 300; ymin = -0.15; ymax = 1.19 # 6131659 Xtra large
 #widlimits = [0,13, 0,13]; rvneg = -50; rvpos = 249; ymin = -0.15; ymax = 1.19 # 4285607
 #widlimits = [0,18, 0,19]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
@@ -275,19 +276,28 @@ plt.show()
 # FIT THE SMOOTHED BF PEAKS WITH TWO GAUSSIANS
 # you have to have pretty decent guesses in the gausspars file for this to work.
 bffitlist = bff.gaussparty(gausspars, nspec, filenamelist, bfnormlist, bf_ind, amplimits, threshold, widlimits)
-rvraw1 = []; rvraw2 = []; rvraw1_err = []; rvraw2_err = []
-rvraw1.append(0), rvraw2.append(0), rvraw1_err.append(0), rvraw2_err.append(0)
+rvraw1 = []; rvraw2 = []; rvraw1_err = []; rvraw2_err = []; rvraw3 = []; rvraw3_err = []
+rvraw1.append(0); rvraw2.append(0); rvraw3.append(0)
+rvraw1_err.append(0); rvraw2_err.append(0), rvraw3_err.append(0)
 for i in range(1, len(bffitlist)):
-    rvraw1.append(bffitlist[i][0][1]) # [0,1,2] is amp,rv,width for star 1; [4,5,6] is same for star2
-    rvraw2.append(bffitlist[i][0][4])
+    rvraw1.append(bffitlist[i][0][1]) # indices are [visit][parameter, BF, error array][amp,rv,width x N]
+    rvraw2.append(bffitlist[i][0][4]) # [0,1,2] is amp,rv,width for star1; [3,4,5] is same for star2, etc.
+    if len(bffitlist[i][0]) == 9:
+        rvraw3.append(bffitlist[i][0][7])
+    else:
+        rvraw3.append(None)
     rvraw1_err.append(bffitlist[i][2][1])
     rvraw2_err.append(bffitlist[i][2][4])
+    if len(bffitlist[i][2]) == 9:
+        rvraw3_err.append(bffitlist[i][2][7])
+    else:
+        rvraw3_err.append(None)
+rvrawlist = [rvraw1, rvraw1_err, rvraw2, rvraw2_err, rvraw3, rvraw3_err]  
 
 # CALCULATE ORBITAL PHASES AND FINAL RV CURVE
-rvdata = bff.rvphasecalc(bjdinfile, bjdoffset, nspec, period, BJD0, rvraw1, rvraw1_err, rvraw2, rvraw2_err, rvstd, bcvstd)
+rvdata = bff.rvphasecalc(bjdinfile, bjdoffset, nspec, period, BJD0, rvrawlist, rvstd, bcvstd)
 phase = rvdata[0]; bjdfunny = rvdata[1]
-rv1 = rvdata[2]; rv2 = rvdata[3]
-rv1_err = rvdata[4]; rv2_err = rvdata[5]
+rvfinals = rvdata[2]
 g2 = open(outfile, 'w')
 print('# RVs calculated with BF_python.py', file=g2)
 print('#', file=g2)
@@ -308,8 +318,12 @@ print('#', file=g2)
 print('# time, phase, adjusted_time, RV1 [km/s], error1 [km/s], RV2 [km/s], error2 [km/s]', file=g2)
 print('#', file=g2)
 for i in range(1, nspec):
-    print ('%.9f %.9f %.9f %.5f %.5f %.5f %.5f' % (bjdfunny[i] + bjdoffset, phase[i], bjdfunny[i], 
-            rv1[i], rv1_err[i], rv2[i], rv2_err[i]), file=g2)
+    if rvfinals[4][i] and rvfinals[5][i]:
+        print ('%.9f %.9f %.9f %.5f %.5f %.5f %.5f %.5f %.5f' % (bjdfunny[i] + bjdoffset, phase[i], bjdfunny[i], 
+                rvfinals[0][i], rvfinals[1][i], rvfinals[2][i], rvfinals[3][i], rvfinals[4][i], rvfinals[5][i]), file=g2)
+    else:
+        print ('%.9f %.9f %.9f %.5f %.5f %.5f %.5f %s %s' % (bjdfunny[i] + bjdoffset, phase[i], bjdfunny[i], 
+                rvfinals[0][i], rvfinals[1][i], rvfinals[2][i], rvfinals[3][i], 'nan', 'nan'), file=g2)
 g2.close()
 print('BJD, phase, and RVs written to %s.' % outfile)
 print('Use rvplotmaker.py to plot the RV curve.')
@@ -338,12 +352,13 @@ def gaussian(x, amp, mu, sig): # i.e., (xarray, amp, rv, width)
 windowcols = 3 # 4                             # how many columns the plot should have
 #windowrows = 3
 #windowrows = 9                                #6864859 manually set number of plot rows here, or automatically below
-#windowrows = 8                                 #6778289
-windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
+#windowrows = 8                                #6778289
+windowrows = 10
+#windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
 xmin = rvneg
 xmax = rvpos
-#fig = plt.figure(1, figsize=(15,12)) 
-fig = plt.figure(1, figsize=(15,7)) 
+fig = plt.figure(1, figsize=(15,12)) 
+#fig = plt.figure(1, figsize=(15,7)) 
 #fig = plt.figure(1, figsize=(15,3.5)) #5285607 (6 Visits)
 fig.text(0.5, 0.04, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size='large')
 fig.text(0.07, 0.5, 'Broadening Function', ha='center', va='center', size='large', rotation='vertical')
@@ -363,12 +378,13 @@ for i in range (1, nspec):
     plt.text(xmax - 0.26*(np.abs(xmax-xmin)), 0.35*ymax, '%s' % (datetimelist[i].iso[0:10]), size='small')
     #plt.plot(bf_ind, bfsmoothlist[i], color=colors[14], lw=1.5, ls='-', label='Smoothed BF')
     plt.plot(bf_ind, bfnormlist[i], color=colors[14], lw=2, ls='-', label='Normalized Smoothed BF')
-    plt.plot(bf_ind, bffitlist[i][1], color=colors[0], lw=2, ls='-', label='Two Gaussian fit')
-    gauss1 = gaussian(bf_ind, bffitlist[i][0][0], bffitlist[i][0][1], bffitlist[i][0][2])
-    gauss2 = gaussian(bf_ind, bffitlist[i][0][3], bffitlist[i][0][4], bffitlist[i][0][5])
+    plt.plot(bf_ind, bffitlist[i][1], color=colors[0], lw=2, ls='-', label='Two or Three Gaussian fit')
+    #gauss1 = gaussian(bf_ind, bffitlist[i][0][0], bffitlist[i][0][1], bffitlist[i][0][2])
+    #gauss2 = gaussian(bf_ind, bffitlist[i][0][3], bffitlist[i][0][4], bffitlist[i][0][5])
     plt.plot(rvraw1[i], 0.1, color=colors[6], marker='|', ms=15)#, label='RV 1')
     plt.plot(rvraw2[i], 0.1, color=colors[2], marker='|', ms=15)#, label='RV 2')
-    #plt.plot(rvraw3[i], 0.1, color=colors[1], marker='|', ms=15)#, label='RV 3')
+    if rvraw3[i] is not None:
+        plt.plot(rvraw3[i], 0.1, color=colors[8], marker='|', ms=15)#, label='RV 3')
     #plt.plot(bf_ind, gauss1, color=colors[6], lw=3, ls='--')#, label='Gaussian fit 1')
     #plt.plot(bf_ind, gauss2, color=colors[2], lw=3, ls='--')#, label='Gaussian fit 2')
     # OPTION TO PLOT VERTICAL LINE AT ZERO
@@ -378,7 +394,7 @@ for i in range (1, nspec):
     if nspec - 1 == windowcols * (windowrows - 1): # square plot, you must adjust the rows for room
         # in this situation, the legend is printed below the final subplot
         if i==nspec-1:
-            ax.legend(bbox_to_anchor=(0.5,-0.7), loc=4, borderaxespad=0., 
+            ax.legend(bbox_to_anchor=(0.5,-1.3), loc=4, borderaxespad=0., 
                       frameon=False, handlelength=3, prop={'size':16})
     else:
         # in this situation, the legend is printed to the right of the final subplot
