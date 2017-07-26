@@ -387,10 +387,14 @@ def make_lcrv_plots(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, 
 
 def make_lcrv_plots_poster(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, ooe=True, thresh=10.):
     plt.rc('font', size=14, weight='normal')
+    plt.rc('text', usetex=True)
     plt.rc('xtick', labelsize=14)
     plt.rc('xtick.major', size=6, width=1)
     plt.rc('axes', labelsize=18, titlesize=22)
     plt.rc('figure', titlesize=22)
+    from matplotlib.ticker import MaxNLocator
+
+
     lp = lnprob_lcrv(allpars, qua=np.unique(keblat.quarter))
     lcpars = keblat.getpars(partype='lc')[:13]
     lcmod, lcpol = keblat.lcfit(lcpars, keblat.jd[keblat.clip], keblat.quarter[keblat.clip],
@@ -466,7 +470,10 @@ def make_lcrv_plots_poster(kic, allpars, prefix, suffix='', savefig=True, polyor
     rvmod = keblat.rvfit(rvpars, rvt)
     ax.plot(np.linspace(0, 1, 100), rvmod[0], 'C1-', lw=2)
     ax.plot(np.linspace(0, 1, 100), rvmod[1], 'C3-', lw=2)
-    ax.set_ylabel('RV [m/s]')
+    ax.set_ylabel('RV (m/s)')
+    
+    locator=MaxNLocator(prune='both',nbins=5)
+    ax.yaxis.set_major_locator(locator)
     #ax.set_yticklabels(ax.yaxis.get_majorticklabels()[:-1])
 
     divider = make_axes_locatable(ax)
