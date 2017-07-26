@@ -64,27 +64,52 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #4851217
 #infiles =   'data/4851217/4851217infiles.txt'; bjdinfile = 'data/4851217/4851217bjdinfile.txt'
 #gausspars = 'data/4851217/4851217gausspars.txt'
-#outfile =   'data/4851217/4851217Outfile.txt'
+#outfile =   'data/4851217/4851217Outfile.txt'; bfoutfile = 'data/4851217/4851217BFOut.txt'
 
 #5285607
 infiles =   'data/5285607/5285607infiles.txt'; bjdinfile = 'data/5285607/5285607bjdinfile.txt'
 gausspars = 'data/5285607/5285607gausspars.txt'
-outfile =   'data/5285607/5285607Outfile-Meredith.txt'; bfoutfile = 'data/5285607/5285607BFdata.txt'
+outfile =   'data/5285607/5285607OutfileJC.txt'; bfoutfile = 'data/5285607/5285607BFOut1.txt'
+
+#4075064
+#infiles = 'data/4075064/4075064infiles.txt'; bjdinfile = 'data/4075064/4075064bjdinfile.txt'
+#gausspars = 'data/4075064/4075064gausspars.txt'
+#outfile = 'data/4075064/4075064outfile.txt'; bfoutfile = 'data/4075064/4075064BFdata.txt'
+
+#3848919
+#infiles = 'data/3848919/3848919infiles.txt'; bjdinfile = 'data/3848919/3848919bjdinfile.txt'
+#gausspars = 'data/3848919/3848919gausspars.txt'
+#outfile = 'data/3848919/3848919outfile.txt'; bfoutfile = 'data/3848919/3848919BFdata.txt'
+
+#6610219
+#infiles = 'data/6610219/6610219infiles.txt'; bjdinfile = 'data/6610219/6610219bjdinfile.txt'
+#gausspars = 'data/6610219/6610219gausspars1.txt'
+#outfile = 'data/6610219/6610219outfile.txt'; bfoutfile = 'data/6610219/6610219BFOut.txt'
+
+#4285087
+#infiles = 'data/4285087/4285087infiles.txt'; bjdinfile = 'data/4285087/4285087bjdinfile.txt'
+#gausspars = 'data/4285087/4285087gausspars.txt'
+#outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BFOut.txt'
 
 #6449358
-#infiles =   'data/6449358/6449358infiles2.txt'; bjdinfile = 'data/6449358/6449358bjdinfile1.txt'
-#gausspars = 'data/6449358/6449358gausspars1.txt'
-#outfile =   'data/6449358/6449358Outfile1.txt'; bfoutfile = 'data/6449358/6449358BFdata1.txt'
+#infiles =   'data/6449358/6449358infiles.txt'; bjdinfile = 'data/6449358/6449358bjdinfile.txt'
+#gausspars = 'data/6449358/6449358gausspars.txt'
+#outfile =   'data/6449358/6449358Outfile.txt'; bfoutfile = 'data/6449358/6449358BFOut.txt'
 
 #5284133
 #infiles =   'data/5284133/5284133infiles.txt'; bjdinfile = 'data/5284133/5284133bjdinfile.txt'
 #gausspars = 'data/5284133/5284133gausspars.txt'
 #outfile =   'data/5284133/5284133Outfile.txt'; bfoutfile = 'data/5284133/5284133BFOut.txt'
 
-#6778289
-#infiles =   'data/6778289/6778289infiles.txt'; bjdinfile = 'data/6778289/6778289bjdinfile.txt'
+#6778289 (despiked (DS) , some visits removed)
+#infiles =   'data/6778289/6778289infilesDS.txt'; bjdinfile = 'data/6778289/6778289bjdinfileDS.txt'
 #gausspars = 'data/6778289/6778289gausspars.txt'
-#outfile =   'data/6778289/6778289Outfile.txt'; bfoutfile = 'data/6778289/6778289BFOut.txt'
+#outfile =   'data/6778289/6778289OutfileJC.txt'; bfoutfile = 'data/6778289/6778289BFOutJC.txt'
+
+#6778289 (despiked (DS) , all visits included (AV))
+#infiles =   'data/6778289/6778289infilesDSAV.txt'; bjdinfile = 'data/6778289/6778289bjdinfileDSAV.txt'
+#gausspars = 'data/6778289/6778289gaussparsAV.txt'
+#outfile =   'data/6778289/6778289OutfileJCAllVisits.txt'; bfoutfile = 'data/6778289/6778289BFOutJCAllVisits.txt'
 
 #6781535
 #infiles =   'data/6781535/6781535infiles.txt'; bjdinfile = 'data/6781535/6781535bjdinfile.txt'
@@ -92,18 +117,23 @@ outfile =   'data/5285607/5285607Outfile-Meredith.txt'; bfoutfile = 'data/528560
 #outfile =   'data/6781535/6781535Outfile.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
 
 #6864859
-#infiles =   'data/6864859/6864859infiles1.txt'; bjdinfile = 'data/6864859/6864859bjdinfile1.txt'
-#gausspars = 'data/6864859/6864859gausspars1.txt'
-#outfile =   'data/6864859/6864859Outfile-Meredith.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
+infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
+gausspars = 'data/6864859/6864859gausspars.txt'
+outfile =   'data/6864859/6864859OutfileJC.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734 # 4851217
-period = 3.8994011; BJD0 = 2454959.576010 # 5285607
+#period = 3.8994011; BJD0 = 2454959.576010 # 5285607
 #period = 5.7767904; BJD0 = 2456760.90580 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
 #period = 30.13015; BJD0 = 2456557.73097 #6778289
 #period = 9.1220856; BJD0 = 2456557.733 #6781535
-#period = 40.8778427; BJD0 = 2454955.556300 #6864859
+period = 40.8778427; BJD0 = 2454955.556300 #6864859
+#period = 61.4228063; BJD0 = 2455813.69734 #4075064
+#period = 1.0472603; BJD0 = 2455811.61005 #3848919
+#period = 11.3009948; BJD0 = 2456557.73097 #6610219
+#period = 4.4860312; BJD0 = 2455813.69734  #4285087
+
 
 # STUFF YOU NEED TO DEFINE CORRECTLY !!!
 isAPOGEE = True        # toggle to use near-IR stuff, or not
@@ -125,14 +155,19 @@ smoothstd = 1.5      # stdev of Gaussian to smooth BFs by (~slit width in pixels
 m = 401              # length of the BF (must be longer if RVs are far from 0)
 ## good values for APOGEE:
 #w00 = 15170; n = 32000; stepV = 1.0 # all of APOGEE, (too) high res
-w00 = 15170; n = 22000; stepV = 1.5 # all of APOGEE, still pretty high res
-#w00 = 15170; n = 2000; stepV = 4.0 # a little piece of APOGEE (lower res, apStar)
+#w00 = 15170; n = 10000; stepV = 1.5 # all of APOGEE, still pretty high res
+w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
+#w00 = 15170; n = 6000; stepV = 4.0 # a little piece of APOGEE (lower res, apStar)
 
-# CUSTOMIZED BF WIDTH AND PLOT LIMITS
-widlimits = [0,15, 0,15]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
-#widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6449358
-#widlimits = [0,5, 0,5]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.1 #6778289
-#widlimits = [0,9, 0,9]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
+# CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
+#widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 100; ymin = -0.15; ymax = 1.19 # good starting default
+#widlimits = [0,16, 0,16]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
+#widlimits = [0,5, 0,5]; rvneg = 100; rvpos = 300; ymin = -0.15; ymax = 1.1 #6449358
+#widlimits = [0,20, 0,12]; rvneg = -50; rvpos = 200; ymin = -0.15; ymax = 1.1 #6778289
+widlimits = [0,12, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
+#widlimits = [0,9, 0,9]; rvneg = -150; rvpos = 50; ymin = -0.15; ymax = 1.19 # 6610259a
+#widlimits = [0,15, 0,15]; rvneg = -50; rvpos = 10; ymin = -0.15; ymax = 1.19 # 6610219b
+
 
 colors = bff.user_rc()
 
@@ -295,9 +330,10 @@ windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols
 xmin = rvneg
 xmax = rvpos
 fig = plt.figure(1, figsize=(15,10))
-fig.text(0.5, 0.04, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size=26)
+fig.text(0.5, 0.04, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size='large')
+#fig.text(0.5, 0.3, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size='large') #5285607
 #########0.5, 0.04
-fig.text(0.07, 0.6, 'Broadening Function', ha='center', va='center', size=26, rotation='vertical')
+fig.text(0.07, 0.6, 'Broadening Function', ha='center', va='center', size='large', rotation='vertical')
 #########0.07, 0.5
 for i in range (1,nspec):
     ax = fig.add_subplot(windowrows, windowcols, i) # out of range if windowcols x windowrows < nspec
@@ -312,9 +348,9 @@ for i in range (1,nspec):
         ax.set_xticklabels(())
     plt.subplots_adjust(wspace=0, hspace=0)
     plt.axis([xmin, xmax, ymin, ymax])
-    plt.tick_params(axis='both', which='major', labelsize=14)
-    plt.text(xmax - 0.16*(np.abs(xmax-xmin)), 0.75*ymax, '%.3f $\phi$' % (phase[i]), size=12)
-    plt.text(xmax - 0.26*(np.abs(xmax-xmin)), 0.55*ymax, '%s' % (datetimelist[i].iso[0:10]), size=12)
+    plt.tick_params(axis='both', which='major')
+    plt.text(xmax - 0.16*(np.abs(xmax-xmin)), 0.75*ymax, '%.3f $\phi$' % (phase[i]), size='small')
+    plt.text(xmax - 0.26*(np.abs(xmax-xmin)), 0.55*ymax, '%s' % (datetimelist[i].iso[0:10]), size='small')
     #plt.plot(bf_ind, bfsmoothlist[i], color=colors[14], lw=1.5, ls='-', label='Smoothed BF')
     plt.plot(bf_ind, bfnormlist[i], color=colors[14], lw=1.5, ls='-', label='Normalized Smoothed BF')
     plt.plot(bf_ind, bffitlist[i][1], color=colors[0], lw=3, ls='-', label='Two Gaussian fit')
