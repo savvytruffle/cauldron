@@ -1707,15 +1707,16 @@ def lcpars_guess_init(x, y, period, sep, swidth, pwidth, sdep, pdep):
     return msum, rsum, rrat, b, frat
 
 def lnprob_lcrv(lcrvpars, qua=[1]):
-    lp = keblat.lnprior_lcrv(lcrvpars)
-    if np.isinf(lp):
-        return -np.inf
-    lcrvpars[-1] = np.exp(lcrvpars[-1])
-    lcrvpars[-3] = np.exp(lcrvpars[-3])
-    ll = keblat.lnlike_lcrv(lcrvpars, qua=qua)
-    if (np.isnan(ll) or np.isinf(ll)):
-        return -np.inf
-    return lp + ll
+	lcrvpars0 = lcrvpars.copy()
+	lp = keblat.lnprior_lcrv(lcrvpars0)
+	if np.isinf(lp):
+		return -np.inf
+	lcrvpars0[-1] = np.exp(lcrvpars0[-1])
+	lcrvpars0[-3] = np.exp(lcrvpars0[-3])
+	ll = keblat.lnlike_lcrv(lcrvpars0, qua=qua)
+	if (np.isnan(ll) or np.isinf(ll)):
+		return -np.inf
+	return lp + ll
 
 def run_emcee(pars, mcfile, p0_scale=None, nwalkers=64, niter=40000):
     assert keblat.rv_t is not None, "no rv data found"
