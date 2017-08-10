@@ -404,4 +404,4 @@ for i in range (1, nspec):
                       
 plt.show()
 fig.savefig('6781659bfrv.png')
-#fig.savefig('6781659bfrv.eps')
+fig.savefig('6781659bfrv.eps')
