@@ -7,14 +7,15 @@ DATAPATH = os.path.dirname(__file__)
 FILELIST1 = os.path.join(DATAPATH, 'list_of_txt_spectra.txt')
 FILELIST2 = os.path.join(DATAPATH, 'list_of_fits_spectra.txt')
 
+
 @pytest.fixture
 def wave_spec_generate():
     '''
     Read in three small chunks of spectra for testing purposes
-    
+
     'wavelist_speclist_generate' can be used as input to any other test function
     that needs access to the variables it returns!
-    
+
     wave1, spec1 are a single chunk of 1d spectrum
     wavelist, speclist are lists of three chunks of 1d spectrum
     '''
@@ -30,10 +31,10 @@ def wave_spec_generate():
     (FILELIST1, False),
     (FILELIST2, True),
     ])
-def test_read_infiles(filelist, cond):  
+def test_read_infiles(filelist, cond):
     '''
     Test reading in both text and fits files
-    
+
     Each resulting wavelength array should be sorted in ascending order
     '''
     infilelist, wavelist, speclist = despike.read_infiles(DATAPATH, filelist, cond)
@@ -52,13 +53,15 @@ def test_simpledespike(wave_spec_generate):
     so indices 9 through 24, inclusive, should be removed
     '''
     wave, spec = wave_spec_generate[0], wave_spec_generate[1]
-    newwave, newspec = despike.simpledespike(wave, spec, delwindow=6, stdfactorup=0.7, stdfactordown=3, plot=False)
+    newwave, newspec = despike.simpledespike(wave, spec, delwindow=6,
+                                             stdfactorup=0.7, stdfactordown=3,
+                                             plot=False)
     assert len(newwave) == len(newspec)
     assert len(newwave) <= len(wave)
     assert len(newspec) <= len(spec)
     assert all(np.equal(np.hstack((wave[0:9], wave[25:])), newwave))
     assert all(np.equal(np.hstack((spec[0:9], spec[25:])), newspec))
-    
+
 
 def test_despike_spectra(wave_spec_generate):
     '''
@@ -68,5 +71,3 @@ def test_despike_spectra(wave_spec_generate):
     newwavelist, newspeclist = despike.despike_spectra(wavelist, speclist, type='simple', plot=False)
     assert len(newwavelist) == len(wavelist)
     assert len(newspeclist) == len(speclist)
-        
-        
