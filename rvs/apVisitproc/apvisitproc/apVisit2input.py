@@ -1,30 +1,47 @@
 from __future__ import print_function
+
+import argparse
+import os
+
 import numpy as np
+import matplotlib.pyplot as plt
+
+from astropy.io import fits
 import apogee.tools.read as apread
 from apogee.spec import continuum
-import matplotlib.pyplot as plt
-import os
-from astropy.io import fits
-import argparse
-'''
-This program uses jobovy/apogee to make text files for APOGEE visit spectra and a model spectrum.
-The model spectrum should have stellar parameters similar to the target star for use with BF_python.
-All the final spectra are continuum normalized.
 
-USAGE:
+'''
+Create continuum-normalized text file spectra from a set of APOGEE visit spectra.
+
+This program assumes you are planning to do a broadening function analysis on
+the spectra to measure radial velocities, and thus refers to a single "model"
+spectrum and a time series of "target" spectra.
+
+Written by Meredith Rawls
+
+Usage
+------
 $ python apVisit2input.py -d datadir -k KIC
-This assumes that the apVisit metadata file is datadir/KIC/KICVisitlist.txt
-e.g.,
+This assumes the apVisit metadata file is datadir/KIC/KICVisitlist.txt, e.g.,
 $ python apVisit2input.py -d data -k 1234567
+
+Result
+------
+A list of the new text file spectra created is printed to the terminal.
+Each spectrum's date of observation (HJD) and barycentric velocity (BCV) is
+also printed out for easy reference.
 '''
 
 
 def main():
     '''
-    Read datadir and KIC from command line
-    Load data for all the visits for the target specified
-    Loop over all the visits, normalize the spectra, and save to file
-    Print the names of the new files with their HJDs and BCVs
+    Parse arguments, create new spectrum text files, and print useful info.
+
+    More specifically...
+    - Read datadir and KIC from command line arguments
+    - Load data for all the visits for the target specified
+    - Loop over all the visits, normalize the spectra, and save to file
+    - Print the names of the new files with their HJDs and BCVs
     '''
     # parse command line arguments with argparse
     parser = argparse.ArgumentParser(description='Run with python apVisit2input.py -d datadir -k KIC')
@@ -53,8 +70,27 @@ def main():
 
 def load_allvisitinfo(datadir, KIC):
     '''
-    runs on a list of visit spectra
-    returns lists of fits files on disk, locIDs, mjds, and fiberIDs for each visit
+    Retrieve necessary metadata from an apVisit metadata file for a target
+
+    NOTE: the user must have an apVisit metadata file already (see README)
+    An example file of the correct format is in sample_Visitlist.txt
+
+    Parameters
+    ----------
+    datadir: `str`
+        The directory which must contain 'KIC/KICVisitlist.txt'
+    KIC: `str`
+        The ID or name of the target. Suggested to be the 7-8 digit Kepler
+        identifier, but may be any string that is part of datadir
+
+    Returns
+    -------
+    locIDs: `list`
+        The location IDs for each spectrum, typically 4 digits
+    mjds: `list`
+        The date of observation in MJD of each spectrum, typically 5 digits
+    fiberIDs: `list`
+        The ID of the fiber used for each spectrum, typically 3 digits
     '''
     visitlist = os.path.join(datadir, KIC, KIC + 'Visitlist.txt')
     if not os.path.exists(visitlist):
@@ -66,8 +102,36 @@ def load_allvisitinfo(datadir, KIC):
 
 def load_apVisit(datadir, KIC, locID, mjd, fiberID):
     '''
-    runs on a single visit spectrum
-    returns the new outfile name and the raw data from the visit spectrum
+    Returns original and new filenames plus raw data for one apVisit spectrum
+
+    NOTE: currently only works for data releases DR12 and DR13
+
+    Parameters
+    ----------
+    datadir: `str`
+        The directory which must contain 'KIC/KICVisitlist.txt'
+    KIC: `str`
+        The ID or name of the target. Suggested to be the 7-8 digit Kepler
+        identifier, but may be any string that is part of datadir
+    locID: `float`
+        The location IDs for one spectrum, typically 4 digits
+    mjd: `float`
+        The date of observation in MJD of one spectrum, typically 5 digits
+    fiberID: `float`
+        The ID of the fiber used of one spectrum, typically 3 digits
+
+    Returns
+    -------
+    fitsfilepath: `str`
+        The path to the original apVisit file, as determined by the apogee module
+    specfileout: `str`
+        The path to the new spectrum text file that will be created
+    wave: `list`
+        A 1D list of wavelength values for one spectrum
+    flux: `list`
+        A 1D list of flux values for the same spectrum
+    fluxerr: `list`
+        A 1D list of flux error values for the same spectrum
     '''
     locID = str(int('{:04d}'.format(int(locID))))
     mjd = str('{:05d}'.format(int(mjd)))
@@ -96,8 +160,26 @@ def load_apVisit(datadir, KIC, locID, mjd, fiberID):
 
 def normalize_spec(wave, flux, fluxerr, plot=True):
     '''
-    runs on a single visit spectrum
-    returns a continuum-normalized spectrum
+    Continuum normalize a single spectrum using the apogee module normalizer
+
+    Parameters
+    ----------
+    wave: `list`
+        A 1D list of wavelength values for one spectrum
+    flux: `list`
+        A 1D list of flux values for the same spectrum
+    fluxerr: `list`
+        A 1D list of flux error values for the same spectrum
+    plot: `bool`
+        Choose whether to show an interactive plot of the continuum
+        normalization process for visual inspection
+
+    Returns
+    -------
+    specnorm: `list`
+        A 1D list of new normalized flux values for a spectrum (goes with wave)
+    specnormerr: `list`
+        A 1D list of normalized flux errors for the same spectrum
     '''
     contspec = continuum.fitApvisit(flux, fluxerr, wave)
     specnorm = flux/contspec
@@ -113,8 +195,19 @@ def normalize_spec(wave, flux, fluxerr, plot=True):
 
 def make_BFinfile(fitsfilepath):
     '''
-    runs on a single visit spectrum
-    returns metadata for use in making a BF_python infile
+    Return info about one spectrum that is useful for the broadening function
+
+    Parameters
+    ----------
+    fitsfilepath: `str`
+        The path to an apVisit file, as determined by the apogee module
+
+    Returns
+    -------
+    HJD: `float`
+        Time of observation from the FITS header, in heliocentric julian days
+    BCV: `float`
+        Barycentric velocity from the FITS header, in km/s
     '''
     header = fits.open(fitsfilepath)[0].header
     HJD = float('24'+str(header['HJD']))
