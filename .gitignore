@@ -1,5 +1,6 @@
 src/
 kics/
+.cache
 *.so
 *.pyc
 *.DS_Store*

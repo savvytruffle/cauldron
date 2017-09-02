@@ -385,6 +385,113 @@ def make_lcrv_plots(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, 
 
     return True
 
+def make_lcrv_plots_poster(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, ooe=True, thresh=10.):
+    plt.rc('font', size=14, weight='normal')
+    plt.rc('text', usetex=True)
+    plt.rc('xtick', labelsize=14)
+    plt.rc('xtick.major', size=6, width=1)
+    plt.rc('axes', labelsize=18, titlesize=22)
+    plt.rc('figure', titlesize=22)
+    from matplotlib.ticker import MaxNLocator
+
+
+    lp = lnprob_lcrv(allpars, qua=np.unique(keblat.quarter))
+    lcpars = keblat.getpars(partype='lc')[:13]
+    lcmod, lcpol = keblat.lcfit(lcpars, keblat.jd[keblat.clip], keblat.quarter[keblat.clip],
+    				keblat.flux[keblat.clip], keblat.fluxerr[keblat.clip],
+    				keblat.crowd[keblat.clip], polyorder=2, ooe=ooe)
+
+    phase = ((keblat.jd[keblat.clip]-lcpars[4]) % lcpars[3])/lcpars[3]
+    phase[phase<-np.clip(keblat.pwidth*3., 0., 0.2)]+=1.
+    phase[phase>np.clip(keblat.sep+keblat.swidth*3., keblat.sep, 1.0)]-=1.
+
+    lcres = keblat.flux[keblat.clip] - lcmod*lcpol
+    lcMAD = np.nanpercentile(abs(keblat.flux[keblat.clip] - lcmod*lcpol), 67)
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(121)
+
+    ax.errorbar(phase, keblat.flux[keblat.clip]/lcpol,
+                 keblat.fluxerr[keblat.clip], fmt='C7.', ecolor='gray', zorder=1)
+    ax.plot(phase, lcmod, 'C0.')
+    ax.set_xlim((-1.2*keblat.pwidth, 1.2*keblat.pwidth))
+    ax.set_ylim((np.min(lcmod)*0.98, np.max(lcmod)*1.02))
+    ax.set_ylabel('Kepler Flux')
+
+    divider = make_axes_locatable(ax)
+    axb = divider.append_axes("bottom", size=2.0, pad=0, sharex=ax)
+
+    axb.errorbar(phase, lcres,
+                 np.sqrt(keblat.fluxerr[keblat.clip]**2 + keblat.pars['lcerr']**2), fmt='C7.', ecolor='gray', zorder=1)
+
+    axb.set_xlim((-1.2*keblat.pwidth, 1.2*keblat.pwidth))
+    axb.set_ylim((-thresh*lcMAD, thresh*lcMAD))
+    axb.set_ylabel('Data - Model')
+    axb.set_xlabel('Phase (Primary Eclipse)')
+    #axb.set_yticklabels(axb.yaxis.get_majorticklabels()[1:])
+
+    ax2 = fig.add_subplot(122)
+
+    ax2.errorbar(phase, keblat.flux[keblat.clip]/lcpol,
+                 keblat.fluxerr[keblat.clip], fmt='C7.', ecolor='gray', zorder=1)
+    ax2.plot(phase, lcmod, 'C0.')
+    ax2.set_xlim((-1.2*keblat.swidth+keblat.sep, 1.2*keblat.swidth+keblat.sep))
+    ax2.set_ylim((np.min(lcmod)*0.98, np.max(lcmod)*1.02))
+
+    divider2 = make_axes_locatable(ax2)
+    ax2b = divider2.append_axes("bottom", size=2.0, pad=0, sharex=ax2)
+
+    ax2b.errorbar(phase, lcres,
+                 np.sqrt(keblat.fluxerr[keblat.clip]**2 + keblat.pars['lcerr']**2), fmt='C7.', ecolor='gray')
+
+    ax2b.set_xlim((-1.2*keblat.swidth+keblat.sep, 1.2*keblat.swidth+keblat.sep))
+    ax2b.set_ylim((-thresh*lcMAD, thresh*lcMAD))
+    ax2b.set_xlabel('Phase (Secondary Eclipse)')
+
+    #ax2b.set_yticklabels(ax2b.yaxis.get_majorticklabels()[1:])
+
+
+    plt.setp(ax.get_xticklabels(), visible=False)
+    plt.setp(ax2.get_xticklabels(), visible=False)
+    plt.suptitle('KIC '+str(kic)+' LC (simultaneous)')
+    if savefig:
+        plt.savefig(prefix+suffix+'_LC.png', dpi=300)
+
+    # rvpars = keblat.getpars(partype='rv')
+    rvpars = np.array([keblat.pars['msum'], keblat.pars['mrat'], keblat.pars['period'], keblat.pars['tpe'],
+                       keblat.pars['esinw'], keblat.pars['ecosw'], keblat.pars['inc'], keblat.pars['k0'], keblat.pars['rverr']])
+
+    rv_fit = keblat.rvfit(rvpars, keblat.rv_t)
+    fig = plt.figure(figsize=(10,8))
+    ax = fig.add_subplot(111)
+    rvphase = (keblat.rv_t - keblat.pars['tpe'])%keblat.pars['period']/keblat.pars['period']
+    ax.errorbar(rvphase[~keblat.bad1], keblat.rv1_obs[~keblat.bad1], np.sqrt(keblat.rv1_err_obs**2+rvpars[-1]**2)[~keblat.bad1], fmt='k.', ecolor='gray')
+    ax.errorbar(rvphase[~keblat.bad2], keblat.rv2_obs[~keblat.bad2], np.sqrt(keblat.rv2_err_obs**2+rvpars[-1]**2)[~keblat.bad2], fmt='k.', ecolor='gray')
+    rvt = np.linspace(0, 1, 100)*keblat.pars['period']+keblat.pars['tpe']
+    rvmod = keblat.rvfit(rvpars, rvt)
+    ax.plot(np.linspace(0, 1, 100), rvmod[0], 'C1-', lw=2)
+    ax.plot(np.linspace(0, 1, 100), rvmod[1], 'C3-', lw=2)
+    ax.set_ylabel('RV (m/s)')
+    
+    locator=MaxNLocator(prune='both',nbins=5)
+    ax.yaxis.set_major_locator(locator)
+    #ax.set_yticklabels(ax.yaxis.get_majorticklabels()[:-1])
+
+    divider = make_axes_locatable(ax)
+    ax2 = divider.append_axes("bottom", size=1.5, pad=0, sharex=ax)
+    ax2.errorbar(rvphase[~keblat.bad1], (keblat.rv1_obs-rv_fit[0])[~keblat.bad1], np.sqrt(keblat.rv1_err_obs**2+rvpars[-1]**2)[~keblat.bad1], fmt='C1.')
+    ax2.errorbar(rvphase[~keblat.bad2], (keblat.rv2_obs-rv_fit[1])[~keblat.bad2], np.sqrt(keblat.rv2_err_obs**2+rvpars[-1]**2)[~keblat.bad2], fmt='C3.')
+
+    ax2.set_xlabel('Phase')
+    ax2.set_ylabel('Data - Model')
+    plt.setp(ax.get_xticklabels(), visible=False)
+    #plt.setp(ax2.get_yticklabels()[-1], visible=False)
+
+    plt.suptitle('KIC '+str(kic)+' RV (simultaneous)')
+    if savefig:
+        plt.savefig(prefix+suffix+'_RV.png', dpi=300)
+
+    return True
+
 def make_sedlcrv_plots(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, ooe=True):
     residuals = keblat.lnlike_all(allpars, lc_constraints=None, qua=np.unique(keblat.quarter),
                               polyorder=polyorder, residual=True)
@@ -839,10 +946,10 @@ def opt_lc_old(lcpars0, jd, phase, flux, dflux, crowd, clip, set_upperb=2., fit_
 #     while (redchi2>1.) and (niter<5):
 #         result0 = minimize(rez, fit_params, kws={'polyorder': 2}, iter_cb=MinimizeStopper(10), **fit_kws)
 #         current_redchi = np.sum((rez(get_lcvals(result0.params), polyorder=2))**2) / np.sum(keblat.clip)
-#         print("Iteration: ", niter, redchi2, current_redchi, result0.redchi, result0.nfev#, get_lcvals(result0.params)
+#         print("Iteration: ", niter, redchi2, current_redchi, result0.redchi, result0.nfev#, get_lcvals(result0.params))
 # #        current_redchi = np.sum((result0.residual)**2) / (len(result0.residual)-result0.nfev)
 #         if current_redchi < redchi2:
-#             print("Saving the following results:"
+#             print("Saving the following results:")
 #             report_fit(result0)
 #             redchi2 = current_redchi * 1.
 #             #guess = get_lcvals(result0.params)
@@ -1667,8 +1774,8 @@ def plot_mc(filename, header, footer, nwalkers, ndim, niter, burnin=40000, plot=
             corner.corner(samples[:, keep,:][:,:,post_inds].reshape((-1, len(post_inds))),
                             labels=np.array(isonames)[post_inds], truths=np.array(huber_truths)[post_inds], truth_color='red')
             plt.savefig(header+footer+'_posteriors.png')
-        except Exception, e:
-            print(str(e))
+        except Exception as e:
+            print(e)
     return params, r1, temp1, logg1, mlpars, True
 
 def make_p0_ball(p_init, ndim, nwalkers, period_scale=1e-7, mass_scale=1e-4, age_scale=1e-5):
@@ -1753,7 +1860,70 @@ def run_emcee(pars, mcfile, p0_scale=None, nwalkers=64, niter=40000):
     except:
         print("Could not compute autocorr time...")
     return p0, sampler
-    
+
+def lnprob_lcrv(lcrvpars, qua=[1]):
+    lcrvpars0 = lcrvpars.copy()
+    lp = keblat.lnprior_lcrv(lcrvpars0)
+    if np.isinf(lp):
+        return -np.inf
+    lcrvpars0[-1] = np.exp(lcrvpars0[-1])
+    lcrvpars0[-3] = np.exp(lcrvpars0[-3])
+    ll = keblat.lnlike_lcrv(lcrvpars0, qua=qua)
+    if (np.isnan(ll) or np.isinf(ll)):
+        return -np.inf
+    return lp + ll
+
+def run_emcee(pars, mcfile, p0_scale=None, nwalkers=64, niter=40000, clobber=True):
+    assert keblat.rv_t is not None, "no rv data found"
+    assert keblat.jd is not None, "no lc data found"
+    if pars.ndim == 1:
+        ndim = len(pars)
+        print(ndim)
+        if p0_scale is None:
+            p0_scale = np.ones(ndim)*1e-4
+        p0 = [pars + p0_scale*pars*np.random.randn(ndim) for ii in range(nwalkers)]
+        p0 = np.array(p0)
+    elif pars.ndim == 2:
+        print(pars.ndim)
+        p0 = pars.copy()   
+        ndim = pars.shape[1]
+    ll0 = np.zeros(nwalkers)
+    for ii in range(nwalkers):
+        ll0[ii] = lnprob_lcrv(p0[ii,:], qua=np.unique(keblat.quarter))
+    if np.any(np.isinf(ll0)):
+        print("Initial Gaussian ball of parameters yield -inf lnprob, check bounds")
+        return p0, ll0
+    if os.path.isfile(mcfile) and not clobber:
+        print("File {0} already exists... do you want to clobber?".format(mcfile))
+        return
+    outf=open(mcfile, "w")
+    outf.close()
+
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_lcrv, threads=4,
+                                         args=[np.unique(keblat.quarter)])
+    start_time = time.time()
+    print("Running {0}k MCMC chain".format(niter/1000))
+    for res in sampler.sample(p0, iterations=niter, storechain=False):
+        if sampler.iterations % 10 == 0:
+            position = res[0]
+            outf = open(mcfile, "a")
+            for k in range(position.shape[0]):
+                outf.write("{0} {1} {2} {3} {4}\n".format(sampler.iterations,
+                           k, sampler.acceptance_fraction[k], res[1][k],
+                            " ".join([str(ii) for ii in position[k]])))
+            outf.close()
+        if sampler.iterations % 10000 == 0:
+            print("Time elapsed since niter={0}:{1}".format(sampler.iterations, 
+                  time.time()-start_time))
+    print("Total time elapsed for MCMC run:{0}".format(time.time()-start_time))
+    print("Total acceptance fraction:{0}".format(np.mean(sampler.acceptance_fraction)))
+    try:
+        print("Total autocorr time:{0}".format(np.mean(sampler.acor)))
+    except:
+        print("Could not compute autocorr time...")
+    return p0, sampler
+
+
 q1, q2, q3, q4 = 0.01, 0.01, 0.01, 0.01
 age, h0, dist = 9.2, 119., 850.
 chunks = identify_gaps(keblat.cadnum, retbounds_inds=True)
@@ -1765,27 +1935,27 @@ lcchi2_threshold = 3/np.nanmedian(np.array([np.nanmedian(abs(keblat.flux[chunks[
 
 prefix = 'kics/{0}/'.format(kic)
 print(blah)
-t, rv1, rv1err, rv2, rv2err = np.loadtxt('data/5285607_jm.rv.txt', usecols=(2, 3, 4, 5, 6), unpack=True)
-m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3, rv1err*1e3, rv2err*1e3)
-opt_lcrvpars = np.loadtxt(prefix+'lcrv.lmfit')
-make_lcrv_plots(kic, opt_lcrvpars, prefix, savefig=False)
-plt.close('all')
-keblat.updatebounds('period', 'tpe')
+niter=50000
+nwalkers=128
+ndim=len(opt_lcrvpars)
 
-opt_lcrvpars[-1] = -4 #rverr in m/s
-opt_lcrvpars[-3] = -11 #lcerr in kep flux
-ndim = len(opt_lcrvpars)
-nwalkers = 64
-niter = 20000
-header = prefix+'lc_'
+header = prefix+'lcrv_'
 footer = str(nwalkers)+'x'+str(niter/1000)+'k'
 mcfile = header+footer+'.mcmc'
+
+opt_lcrvpars = opt_lcrvpars.copy()
+# the lcrv lnprob and lnprior functions take in rverr and lcerr in natural log space,
+# so setting them to small log values
+opt_lcrvpars[-1] = 1 #rverr in m/s
+opt_lcrvpars[-3] = -11 #lcerr in kep flux
+
 p0_scale = np.ones(ndim)*1e-4
 p0_scale[4] = 1e-7
 p0_scale[5] = 1e-6
 p0_scale[[1,3,9]] = 1e-5
-#p0 = [opt_lcrvpars + p0_scale*opt_lcrvpars*np.random.randn(ndim) for ii in range(nwalkers)]
 p0, sampler = run_emcee(opt_lcrvpars, mcfile, p0_scale=p0_scale, nwalkers=nwalkers, niter=niter)
+
+
 burnin=niter/2
 data=np.loadtxt(mcfile)
 isonames = parnames_dict['lcrv']
@@ -1793,11 +1963,18 @@ iwalker = np.arange(nwalkers)
 afrac = np.empty((data.shape[0]/nwalkers, nwalkers))
 logli = afrac*0.
 params = np.empty((data.shape[0]/nwalkers, nwalkers, len(isonames)))
+strays = []
+
 for jj in iwalker:
     afrac[:,jj] = data[jj::nwalkers,2]
     logli[:,jj] = data[jj::nwalkers,3]
+    if len(afrac[:,jj][(afrac[:,jj]<0.1)])>=0.66*len(afrac[:,jj]):
+        strays.append(jj)
     for ii in range(len(isonames)):
         params[:, jj, ii] = data[jj::nwalkers, ii+4]
+
+
+
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 print("Making plots now.")
 fig = plt.figure(figsize=(16, 16))
@@ -1810,9 +1987,9 @@ for ii in range(len(isonames)):
     divider = make_axes_locatable(ax)
     axhist = divider.append_axes("right", size=1.2, pad=0.1, sharey=ax)
     axhist.hist(params[:,:,ii], 100, histtype='step', alpha=0.6, normed=True,
-                orientation='horizontal')
+        orientation='horizontal')
     axhist.hist(params[:,:,ii].ravel(), 100, histtype='step', color='k',
-                normed=True, orientation='horizontal')
+        normed=True, orientation='horizontal')
     plt.setp(axhist.get_yticklabels(), visible=False)
 plt.savefig(header+footer+'_parameters.png')
 
@@ -1829,18 +2006,40 @@ params = params[burnin/10:,:,:]
 
 keep = iwalker
 
+
 bfpars = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
              zip(*np.percentile(params[:,keep,:].reshape((-1, ndim)),
                                 [16, 50, 84], axis=0)))
 print("MCMC result: ")
 print("Accep. Frac = ", np.mean(afrac[:, keep]))
+bffile = open(prefix+'mcmc.pars', "w")
+bffile.write("""{}\n""".format(" ".join([str(mp) for mp in mlpars])))
 for kk in range(len(isonames)):
     print("""{0} = {1[0]} +{1[1]} -{1[2]}""".format(str(isonames[kk]),
           bfpars[kk]))
+    bffile.write("""#{0} = {1[0]} +{1[1]} -{1[2]}\n""".format(str(isonames[kk]),
+          bfpars[kk]))
+
+changeofvar_names = ['m1', 'm2', 'r1', 'r2', 'inc', 'e']
+params_changeofvar = np.zeros((params.shape[0], params.shape[1], len(changeofvar_names)))
+params_changeofvar[:,:,0], params_changeofvar[:,:,1] = keblat.sumrat_to_12(params[:,:,0], params[:,:,1])
+params_changeofvar[:,:,2], params_changeofvar[:,:,3] = keblat.sumrat_to_12(params[:,:,2], params[:,:,3])
+params_changeofvar[:,:,4] = keblat.get_inc(params[:,:,8], params_changeofvar[:,:,2], keblat.get_a(params[:,:,4], params[:,:,0]))
+params_changeofvar[:,:,5] = np.sqrt(params[:,:,6]**2 + params[:,:,7]**2)
+
+bfpars_changeofvar = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
+             zip(*np.percentile(params_changeofvar.reshape((-1, len(changeofvar_names))),
+                                [16, 50, 84], axis=0)))
+for kk in range(len(changeofvar_names)):
+    print("""{0} = {1[0]} +{1[1]} -{1[2]}""".format(str(changeofvar_names[kk]),
+          bfpars_changeofvar[kk]))
+    bffile.write("""#{0} = {1[0]} +{1[1]} -{1[2]}\n""".format(str(changeofvar_names[kk]),
+          bfpars_changeofvar[kk]))
+bffile.close()
 
 bfpars[-1] = np.exp(bfpars[-1])
 bfpars[-3] = np.exp(bfpars[-3])
-make_lcrv_plots(kic, mlpars, header+footer, suffix='', savefig=True)
+make_lcrv_plots_poster(kic, mlpars, header+footer, suffix='', savefig=True)
 
 import corner
 #plt.figure(figsize=(14, 14))
@@ -1855,17 +2054,121 @@ except Exception, e:
     print(str(e))
 
 
+
+pruned = np.arange(nwalkers)[(abs(params[-1,:,-1]-6.82) > 5*0.28)]
+p0_new = params[-1,:,:]
+#print(p0_new.shape, mlpars)
+
+meanpars = [bfpars[ii][0] for ii in range(ndim)]
+cov = [bfpars[ii][1] for ii in range(ndim)]
+test = np.array([np.random.normal(meanpars[ii], cov[ii], len(pruned)) for ii in range(ndim)]).T
+#print test.shape, p0_new.shape
+p0_new[pruned, :] = test
+
+for ii in range(nwalkers):
+    print(lnprob_lcrv(p0_new[ii,:], qua=np.unique(keblat.quarter)))
+
+#t, rv1, rv1err, rv2, rv2err = np.loadtxt('data/5285607_jm.rv.txt', usecols=(2, 3, 4, 5, 6), unpack=True)
+#m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3, rv1err*1e3, rv2err*1e3)
+#opt_lcrvpars = np.loadtxt(prefix+'lcrv.lmfit')
+#make_lcrv_plots(kic, opt_lcrvpars, prefix, savefig=False)
+#plt.close('all')
+#keblat.updatebounds('period', 'tpe')
+#
+#opt_lcrvpars[-1] = -4 #rverr in m/s
+#opt_lcrvpars[-3] = -11 #lcerr in kep flux
+#ndim = len(opt_lcrvpars)
+#nwalkers = 64
+#niter = 20000
+#header = prefix+'lc_'
+#footer = str(nwalkers)+'x'+str(niter/1000)+'k'
+#mcfile = header+footer+'.mcmc'
+#p0_scale = np.ones(ndim)*1e-4
+#p0_scale[4] = 1e-7
+#p0_scale[5] = 1e-6
+#p0_scale[[1,3,9]] = 1e-5
+##p0 = [opt_lcrvpars + p0_scale*opt_lcrvpars*np.random.randn(ndim) for ii in range(nwalkers)]
+#p0, sampler = run_emcee(opt_lcrvpars, mcfile, p0_scale=p0_scale, nwalkers=nwalkers, niter=niter)
+#burnin=niter/2
+#data=np.loadtxt(mcfile)
+#isonames = parnames_dict['lcrv']
+#iwalker = np.arange(nwalkers)
+#afrac = np.empty((data.shape[0]/nwalkers, nwalkers))
+#logli = afrac*0.
+#params = np.empty((data.shape[0]/nwalkers, nwalkers, len(isonames)))
+#for jj in iwalker:
+#    afrac[:,jj] = data[jj::nwalkers,2]
+#    logli[:,jj] = data[jj::nwalkers,3]
+#    for ii in range(len(isonames)):
+#        params[:, jj, ii] = data[jj::nwalkers, ii+4]
+#from mpl_toolkits.axes_grid1 import make_axes_locatable
+#print("Making plots now.")
+#fig = plt.figure(figsize=(16, 16))
+#for ii in range(len(isonames)):
+#    ax = fig.add_subplot(int(len(isonames)/2)+1, 2, ii+1)
+#    ax.plot(params[:, :, ii])
+#    ax.plot([burnin/10, burnin/10], plt.ylim(), 'y-', lw=2.0)
+#    ax.set_xlabel('N/10 iteration')
+#    ax.set_ylabel(isonames[ii])
+#    divider = make_axes_locatable(ax)
+#    axhist = divider.append_axes("right", size=1.2, pad=0.1, sharey=ax)
+#    axhist.hist(params[:,:,ii], 100, histtype='step', alpha=0.6, normed=True,
+#                orientation='horizontal')
+#    axhist.hist(params[:,:,ii].ravel(), 100, histtype='step', color='k',
+#                normed=True, orientation='horizontal')
+#    plt.setp(axhist.get_yticklabels(), visible=False)
+#plt.savefig(header+footer+'_parameters.png')
+#
+#mostlike = np.where(logli == np.max(logli))
+#mlpars = params[:,:,:][mostlike][0]
+#print("Max likelihood out of all samples: ", logli[:,:][mostlike])
+#for kk in range(len(isonames)):
+#    print("""{0} = {1}""".format(str(isonames[kk]), mlpars[kk]))
+#if burnin/10>=params.shape[0]:
+#    print("Burn-in shorter than length of MCMC run, adjusting...")
+#    burnin = params.shape[0]*3/4*10
+#afrac, logli = afrac[burnin/10:,:], logli[burnin/10:,:]
+#params = params[burnin/10:,:,:]
+#
+#keep = iwalker
+#
+#bfpars = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
+#             zip(*np.percentile(params[:,keep,:].reshape((-1, ndim)),
+#                                [16, 50, 84], axis=0)))
+#print("MCMC result: ")
+#print("Accep. Frac = ", np.mean(afrac[:, keep]))
+#for kk in range(len(isonames)):
+#    print("""{0} = {1[0]} +{1[1]} -{1[2]}""".format(str(isonames[kk]),
+#          bfpars[kk]))
+#
+#bfpars[-1] = np.exp(bfpars[-1])
+#bfpars[-3] = np.exp(bfpars[-3])
+#make_lcrv_plots(kic, mlpars, header+footer, suffix='', savefig=True)
+#
+#import corner
+##plt.figure(figsize=(14, 14))
+#samples = params[:, :, :]
+#post_inds = np.arange(len(isonames))
+#post_inds = np.delete(post_inds, np.where(np.std(samples, axis=(0,1)) == 0)[0])
+#try:
+#    corner.corner(samples[:, keep,:][:,:,post_inds].reshape((-1, len(post_inds))),
+#                    labels=np.array(isonames)[post_inds])
+#    plt.savefig(header+footer+'_posteriors.png')
+#except Exception as e:
+#    print(e)
+#
+#
 ############################################################################
 ################ implementation code below is commented out ################
 #################### uncomment them if want to run #########################
 ############################################################################
-
-#prefix = '/astro/store/gradscratch/tmp/windemut/kics/'+str(kic)+'/'
-#check_dir_exists(prefix)
-#keblat.start_errf(prefix+'lcfit.err')
-
 #
-#print blah
+##prefix = '/astro/store/gradscratch/tmp/windemut/kics/'+str(kic)+'/'
+##check_dir_exists(prefix)
+##keblat.start_errf(prefix+'lcfit.err')
+#
+#
+#print(blah)
 #if not os.path.isfile(prefix+'lcpars.lmfit') or clobber_lc:
 #
 #    # make initial guesses for rsum and f2/f1, assuming main sequence equal mass binary
@@ -1889,41 +2192,40 @@ except Exception, e:
 #    ########################### LC ONLY OPTIMIZATION FIRST ############################
 #    ###################################################################################
 #
-#    # for i_b, i_rrat, i_ew in list(itertools.product(b_trials, rrat_trials, ew_trials)):
-#    for i_b, i_rrat in list(itertools.product(b_trials, rrat_trials)):
+#     for i_b, i_rrat, i_ew in list(itertools.product(b_trials, rrat_trials, ew_trials)):
+##    for i_b, i_rrat in list(itertools.product(b_trials, rrat_trials)):
 #        # lcpars0 = np.array([rsum, rsum, i_rrat, period, tpe, ew[0], ew[1], i_b, i_rrat**(2.5),
 #        #                     q1, q2, q3, q4])
 #        upper_b = 2.*i_b if i_b==0.01 else 3.0
 #        keblat.parbounds['b'][1] = upper_b
-#        opt_lcpars0 = opt_lc(msum=rsum, rsum=rsum, rrat=i_rrat, period=period, tpe=tpe, esinw=ew[0],
-#                             ecosw=ew[1], b=i_b, frat=i_rrat**2.5, q1=q1, q2=q2, q3=q3, q4=q4)
+#        opt_lcpars0 = opt_lc(msum=rsum, rsum=rsum, rrat=i_rrat, period=period, tpe=tpe, esinw=i_ew[0],
+#                             ecosw=i_ew[1], b=i_b, frat=i_rrat**2.5, q1=q1, q2=q2, q3=q3, q4=q4)
 #
 #        lcchi2 = np.sum(rez(opt_lcpars0, polyorder=2)**2)/(np.sum(keblat.clip) - len(opt_lcpars0) - 1)
 #        if (lcchi2 < bestlcchi2) or (lc_search_counts < 1):
-#            print("Saving from this run:", lcchi2, bestlcchi2, lc_search_counts
+#            print("Saving from this run:", lcchi2, bestlcchi2, lc_search_counts)
 #            bestlcchi2 = lcchi2*1.0
 #            opt_lcpars = opt_lcpars0
 #        lc_search_counts+=1
 #
 #        if (bestlcchi2 <= 1.5) and opt_lcpars[2]<=1.0:
-#            print("These init b, rrat, esinw, ecosw lcpars are: ", i_b, i_rrat, ew
+#            print("These init b, rrat, esinw, ecosw lcpars are: ", i_b, i_rrat, ew)
 #            break
 #
 #    try:
 #        make_lc_plots(kic, opt_lcpars, prefix, polyorder=2, suffix='lc_opt2', savefig=True)
-#    except Exception, e:
-#        print str(e)
-#
+#    except Exception as e:
+#        print(e)
 #
 #    if bestlcchi2 < lcchi2_threshold:
-#        print("Saving lmfit lcpars..."
+#        print("Saving lmfit lcpars...")
 #        np.savetxt(prefix+'lcpars.lmfit', opt_lcpars)
 #    else:
 #        print("Bestlcchi2 = {0}, exiting.".format(bestlcchi2))
 #        np.savetxt(prefix+'lcpars.lmfit', opt_lcpars)
 #        exit()
 #else:
-#    print("Loading lcpars lmfit"
+#    print("Loading lcpars lmfit")
 #    opt_lcpars = np.loadtxt(prefix+'lcpars.lmfit')
 #
 ##############################################################################
@@ -1993,12 +2295,12 @@ except Exception, e:
 #
 #if not success or not os.path.isfile(mcfile) or clobber_lc:
 #    if not os.path.isfile(mcfile) or clobber_lc:
-#        print("MCMC file does not exist, creating..."
+#        print("MCMC file does not exist, creating...")
 #        outf = open(mcfile, "w")
 #        outf.close()
 #    else:
 #        if not success:
-#            print("MCMC file not complete, appending..."
+#            print("MCMC file not complete, appending...")
 #            #niter = niter-mlpars
 #            outf = open(mcfile, "a")
 #            outf.close()
@@ -2019,15 +2321,15 @@ except Exception, e:
 #                            " ".join([str(ii) for ii in position[k]])))
 #            outf.close()
 #        if sampler.iterations % 10000 == 0:
-#            print("Time Elapsed since niter = ", sampler.iterations, time.time()-start_time
+#            print("Time Elapsed since niter = {}, {}".format(sampler.iterations, time.time()-start_time))
 #
-#    print("Total Time Elapsed for MCMC Run = ", time.time()-start_time
+#    print("Total Time Elapsed for MCMC Run = {}".format(time.time()-start_time))
 #
-#    print("Tot. Acceptance Fraction = ", np.mean(sampler.acceptance_fraction)
+#    print("Tot. Acceptance Fraction = ", np.mean(sampler.acceptance_fraction))
 #    try:
-#        print("Tot autocorr time = ", np.mean(sampler.acor)
+#        print("Tot autocorr time = ", np.mean(sampler.acor))
 #    except:
-#        print("Could not compute autocorr time..."
+#        print("Could not compute autocorr time...")
 #
 #    params, r1, temp1, logg1, mlpars, success = plot_mc(mcfile, header, footer, nwalkers, ndim, niter,
 #                                                        burnin=niter*3/4, plot=True, posteriors=True,
@@ -2048,7 +2350,7 @@ except Exception, e:
 #    dist = 1500.
 #
 #lc_constraints = np.array([opt_lcpars[1]/opt_lcpars[0]**(1./3.), opt_lcpars[2], opt_lcpars[8]])
-#print("LC Constraints (rsum/msum^(1/3), rrat, frat) are: ", lc_constraints
+#print("LC Constraints (rsum/msum^(1/3), rrat, frat) are: ", lc_constraints)
 #
 #if os.path.isfile(prefix+'isopars.lmfit') and not clobber_sed:
 #    print("isopars lmfit file already exists, loading..."
