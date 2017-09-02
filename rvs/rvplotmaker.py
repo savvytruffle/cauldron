@@ -35,6 +35,11 @@ dateoffset = 2454833. # this value will be subtracted from bjds in pane vs. time
 
 colors = user_rc()
 
+sysname = '3247294'; filename = 'data/3247294/3247294outfile.txt'
+timestart = 970; timeend = 1040
+phasemin = -0.1; phasemax = 1.0
+RVmin = 0; RVmax = 150
+
 #sysname = '5285607'; filename = 'data/5285607/5285607OutfileJC.txt'
 #timestart = 975; timeend = 1040
 #phasemin = 0.5; phasemax = 1.5
@@ -45,10 +50,10 @@ colors = user_rc()
 #phasemin = -0.1; phasemax = 1.0
 #RVmin = 0; RVmax = 200
 
-sysname = '6781535'; filename = 'data/6781535/6781535Outfile.txt'
-timestart = 1700; timeend = 2000
-phasemin = -0.1; phasemax = 1.0
-RVmin = -100; RVmax = 200
+#sysname = '6781535'; filename = 'data/6781535/6781535Outfile.txt'#
+#timestart = 1700; timeend = 2000
+#phasemin = -0.1; phasemax = 1.0
+#RVmin = -100; RVmax = 200
 
 #sysname = '4285087'; filename = 'data/4285087/4285087Outfile.txt'
 #timestart = 1700; timeend = 2000
@@ -147,4 +152,4 @@ fig.text(0.14, 0.55, 'Unfolded')
 fig.text(0.14, 0.9, sysname, size='large')
 
 plt.show()
-fig.savefig('6781535rv.png')
+fig.savefig('3247294rv.png')

@@ -129,7 +129,7 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #3247294
 infiles =   'data/3247294/3247294infiles.txt'; bjdinfile = 'data/3247294/3247294bjdinfile.txt'
 gausspars = 'data/3247294/3247294gausspars.txt'
-outfile =   'data/3247294/63247294Outfile.txt'; bfoutfile = 'data/3247294/3247294BFOut.txt'
+outfile =   'data/3247294/3247294Outfile.txt'; bfoutfile = 'data/3247294/3247294BFOut.txt'
 
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
