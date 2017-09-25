@@ -1,7 +1,0 @@
-data/PHOENIX/Z-0.0/lte04700-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes_apogee_norm.txt
-data/4075064/apVisitnorm-5214-55813-079.txt
-data/4075064/apVisitnorm-5215-55823-061.txt
-data/4075064/apVisitnorm-5215-55840-061.txt
-data/4075064/apVisitnorm-5214-55849-079.txt
-data/4075064/apVisitnorm-5215-55851-079.txt
-data/4075064/apVisitnorm-5214-55866-079.txt

@@ -1,7 +1,0 @@
-data/4851217/modelspec.txt
-data/4851217/obsspec1_despiked.txt 
-data/4851217/obsspec2_despiked.txt  
-data/4851217/obsspec3_despiked.txt  
-data/4851217/obsspec4_despiked.txt  
-data/4851217/obsspec5_despiked.txt  
-data/4851217/obsspec6_despiked.txt  
