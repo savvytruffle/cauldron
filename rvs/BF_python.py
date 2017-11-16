@@ -358,16 +358,16 @@ def gaussian(x, amp, mu, sig): # i.e., (xarray, amp, rv, width)
 # PLOT THE FINAL SMOOTHED BFS + GAUSSIAN FITS IN INDIVIDUAL PANELS
 # manually adjust this multi-panel plot based on how many spectra you have
 windowcols = 3 # 4                             # how many columns the plot should have
-windowrows = 3
+#windowrows = 3
 #windowrows = 8                                #6864859 manually set number of plot rows here, or automatically below
 #windowrows = 8                                #6778289
 #windowrows = 10
-#windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
+windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
 xmin = rvneg
 xmax = rvpos
 #fig = plt.figure(1, figsize=(15,12)) 
 #fig = plt.figure(1, figsize=(15,7)) 
-fig = plt.figure(1, figsize=(15,3.5)) #5285607 (6 Visits)
+fig = plt.figure(1, figsize=(15,5)) #5285607 (6 Visits)
 fig.text(0.5, 0.04, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size='large')
 fig.text(0.07, 0.5, 'Broadening Function', ha='center', va='center', size='large', rotation='vertical')
 for i in range (1, nspec):
@@ -399,6 +399,9 @@ for i in range (1, nspec):
     #plt.axvline(x=0, color=colors[15])    
 
     # MAKE A LEGEND
+    
+#ax.legend(bbox_to_anchor=(2.5,0.7), loc=1, borderaxespad=0., 
+#                      frameon=False, handlelength=3, prop={'size':18})
     if nspec - 1 == windowcols * (windowrows - 1): # square plot, you must adjust the rows for room
         # in this situation, the legend is printed below the final subplot
         if i==nspec-1:
