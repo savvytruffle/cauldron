@@ -341,8 +341,8 @@ try:
     for idx in range(1, nspec):
         print('###', file=bfout)
         print('# timestamp: {0}'.format(datetimelist[idx]), file=bfout)
-        print('# Gaussian 1 [amp, RV +/- err, wid]: [{0:.2f}, {1:.2f} +/- {2:.2f}, {3:.2f}]'.format(bffitlist[i][0][0], rvraw1[i], rvraw1_err[i], bffitlist[i][0][2]), file=bfout)
-        print('# Gaussian 2 [amp, RV +/- err, wid]: [{0:.2f}, {1:.2f} +/- {2:.2f}, {3:.2f}]'.format(bffitlist[i][0][3], rvraw2[i], rvraw2_err[i], bffitlist[i][0][5]), file=bfout)
+        print('# Gaussian 1 [amp, RV +/- err, wid]: [{0:.2f}, {1:.2f} +/- {2:.2f}, {3:.2f}]'.format(bffitlist[idx][0][0], rvraw1[idx], rvraw1_err[idx], bffitlist[idx][0][2]), file=bfout)
+        print('# Gaussian 2 [amp, RV +/- err, wid]: [{0:.2f}, {1:.2f} +/- {2:.2f}, {3:.2f}]'.format(bffitlist[idx][0][3], rvraw2[idx], rvraw2_err[idx], bffitlist[idx][0][5]), file=bfout)
         print('# Uncorrected_RV, BF_amp, Gaussian_fit', file=bfout)
         print('###', file=bfout)
         for vel, amp, modamp in zip(bf_ind, bfsmoothlist[idx], bffitlist[idx][1]):
@@ -350,6 +350,17 @@ try:
     bfout.close()
 except:
     print('No BF outfile specified, not saving BF data to file')
+  
+###Functionality to print out Gaussian peak information for primary and secondary separately###  
+try:
+    gout = open(gaussoutfile, 'w')
+    for idx in range(1, nspec):
+        print('Primary Amplitude: {0} +/- {1} width {2} xmax {3}'.format(bffitlist[idx][0][0], bffitlist[idx][2][0], bffitlist[idx][0][2], bffitlist[idx][0][1]), file=gout)
+        print('Secondary Amplitude: {0} +/- {1} width {2} xmax {3}'.format(bffitlist[idx][0][3], bffitlist[idx][2][3], bffitlist[idx][0][5], bffitlist[idx][0][4]), file=gout)
+
+    gout.close()
+except:
+    print('No gaussoutfile specified, not saving gauss data to file')
     
 # handy little gaussian function maker
 def gaussian(x, amp, mu, sig): # i.e., (xarray, amp, rv, width)
