@@ -70,6 +70,8 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #infiles =   'data/5285607/5285607infiles.txt'; bjdinfile = 'data/5285607/5285607bjdinfile.txt'
 #gausspars = 'data/5285607/5285607gausspars.txt'
 #outfile =   'data/5285607/5285607OutfileJC.txt'; bfoutfile = 'data/5285607/5285607BFOut1.txt'
+#gaussoutfile = 'data/5285607/5285607gaussout.txt'; areaout = 'data/5285607/5285607BFArea.txt'
+
 
 #5285607 APSTAR ORDER
 #infiles =   'data/5285607/5285607infilesApstar.txt'; bjdinfile = 'data/5285607/5285607bjdinfileApstar.txt'
@@ -122,14 +124,16 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   'data/6781535/6781535Outfile1.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
 
 #6864859
-#infiles =   'data/6864859/6864859infilesA.txt'; bjdinfile = 'data/6864859/6864859bjdinfileA.txt'
-#gausspars = 'data/6864859/6864859gausspars.txt'
-#outfile =   'data/6864859/6864859OutfileA.txt'; bfoutfile = 'data/6864859/6864859BFOutA.txt'
+infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
+gausspars = 'data/6864859/6864859gausspars.txt'
+outfile =   'data/6864859/6864859Outfile.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
+gaussoutfile = 'data/6864859/6864859gaussout.txt'; areaout = 'data/6864859/6864859BFArea.txt'
+
 
 #3247294
-infiles =   'data/3247294/3247294infiles.txt'; bjdinfile = 'data/3247294/3247294bjdinfile.txt'
-gausspars = 'data/3247294/3247294gausspars.txt'
-outfile =   'data/3247294/3247294Outfile.txt'; bfoutfile = 'data/3247294/3247294BFOut.txt'
+#infiles =   'data/3247294/3247294infiles.txt'; bjdinfile = 'data/3247294/3247294bjdinfile.txt'
+#gausspars = 'data/3247294/3247294gausspars.txt'
+#outfile =   'data/3247294/3247294Outfile.txt'; bfoutfile = 'data/3247294/3247294BFOut.txt'
 
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
@@ -139,13 +143,13 @@ outfile =   'data/3247294/3247294Outfile.txt'; bfoutfile = 'data/3247294/3247294
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
 #period = 30.13015; BJD0 = 2456557.73097 #6778289
 #period = 9.1220856; BJD0 = 2454971.834534 #6781535
-#period = 40.8778427; BJD0 = 2454955.556300 #6864859
+period = 40.8778427; BJD0 = 2454955.556300 #6864859
 #period = 61.4228063; BJD0 = 2455813.69734 #4075064
 #period = 1.0472603; BJD0 = 2455811.61005 #3848919
 #period = 11.3009948; BJD0 = 2456557.73097 #6610219
 #period = 4.4860312; BJD0 = 2454966.450124 #4285087 
 #period = 17.5278303; BJD0 = 2454960.041397  #6131659
-period = 67.4188276; BJD0 = 2454966.433454  #3247294
+#period = 67.4188276; BJD0 = 2454966.433454  #3247294
 
 
 
@@ -176,7 +180,7 @@ w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 
 # CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
 #widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 300; ymin = -0.15; ymax = 1.19 # good starting default
-widlimits = [0,9, 0,7, 0,9]; rvneg = 0; rvpos = 149; ymin = -0.15; ymax = 1.19 # 3247294 #weird tripe only one panel 
+#widlimits = [0,9, 0,7, 0,9]; rvneg = 0; rvpos = 149; ymin = -0.15; ymax = 1.19 # 3247294 #weird tripe only one panel 
 #widlimits = [0,9, 0,10, 0,9]; rvneg = -75; rvpos = 175; ymin = -0.15; ymax = 1.18 # 6781535
 #widlimits = [0,9, 0,9, 0,11]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.19 # 6131659 
 #widlimits = [0,9, 0,7]; rvneg = -300; rvpos = 300; ymin = -0.15; ymax = 1.19 # 6131659 Xtra large
@@ -185,7 +189,7 @@ widlimits = [0,9, 0,7, 0,9]; rvneg = 0; rvpos = 149; ymin = -0.15; ymax = 1.19 #
 #widlimits = [0,16, 0,11]; rvneg = -300; rvpos = 500; ymin = -0.15; ymax = 1.2 #6449358 extra wide 
 #widlimits = [0,16, 0,11]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.2 #6449358
 #widlimits = [0,12, 0,8]; rvneg = -45; rvpos = 199; ymin = -0.15; ymax = 1.4 #6778289
-#widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
+widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
 #widlimits = [0,9, 0,9]; rvneg = -150; rvpos = 50; ymin = -0.15; ymax = 1.19 # 6610259a
 #widlimits = [0,15, 0,15]; rvneg = -50; rvpos = 10; ymin = -0.15; ymax = 1.19 # 6610219b
 
@@ -425,5 +429,34 @@ for i in range (1, nspec):
                       frameon=False, handlelength=3, prop={'size':18})
                       
 plt.show()
-fig.savefig('3247294bfrv.png')
-fig.savefig('3247294bfrv.eps')
+#fig.savefig('3247294bfrv.png')
+#fig.savefig('3247294bfrv.eps')
+
+#Calculate the Area underneath the BF curves 
+
+#PAmp, Perr, PWidth, Samp, Serr, SWidth = np.loadtxt('data/5285607/5285607Gin.txt',
+#	usecols=(0,1,2,3,4,5),unpack=True)
+
+PAmp, Perr, PWidth, Samp, Serr, SWidth = np.loadtxt('data/6864859/6864859Gin.txt',
+	usecols=(0,1,2,3,4,5),unpack=True)
+
+PArea = (PAmp*PWidth)/(2.35*0.3984)
+PAAve = np.mean(PArea)
+SArea = (Samp*SWidth)/(2.35*0.3984)
+SAAve = np.mean(SArea)
+
+AreaRat = (PArea/SArea)
+AvAreaRat = (PAAve/SAAve)
+
+print(AvAreaRat)
+
+dataout = np.vstack((PArea,SArea))
+np.savetxt('6864859BFAreaout.txt', dataout.T, fmt = '%.5f')
+
+#BFAreaout = open(areaout, 'w')
+#print(PArea, file=BFAreaout)
+    #print('Secondary BF Area: {0} +/- {1} width {2} xmax {3}'.format(bffitlist[idx][0][3], bffitlist[idx][2][3], bffitlist[idx][0][5], bffitlist[idx][0][4]), file=gout)
+
+#BFAreaout.close()
+    
+print('BF Areas printed to outfile, Area Ratio star2/star1?=', AvAreaRat)

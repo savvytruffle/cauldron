@@ -5,28 +5,33 @@ from scipy.integrate import simps
 from numpy import trapz
 
 
-# The y values.  A numpy array is used here,
-# but a python list could also be used.
-#y = np.array([5, 20, 4, 18, 19, 18, 7, 4])
-y = np.array([1.0114235023968803])
-
-
 ### Read in all the things! ###
 
-#uncorrRV, BFamp, Gaussian = np.loadtxt('data/5285607/5285607BFOut_visit1.txt',
-#	usecols=(0,1,2),unpack=True)
+areaout = 'data/5285607/5285607BFArea.txt'
 
-### Input file alternates between primary and secondary peak	
-	#with open('data/5285607/5285607BFOut.txt', 'r') as f:
-    #for count, line in enumerate(f, start=1):
-    #    if count % 2 == 0:
-    #        print(line)
-        
+#PAmp, Perr, PWidth, Samp, Serr, SWidth = np.loadtxt('data/5285607/5285607Gin.txt',
+#	usecols=(0,1,2,3,4,5),unpack=True)
 
-# Compute the area using the composite trapezoidal rule.
-area = trapz(y, dx=5)
-print("Trapezoidal area =", area)
+PAmp, Perr, PWidth, Samp, Serr, SWidth = np.loadtxt('data/5285607/5285607Gin.txt',
+	usecols=(0,1,2,3,4,5),unpack=True)
 
-# Compute the area using the composite Simpson's rule.
-area = simps(y, dx=5)
-print("Simpson area =", area)
+PArea = (PAmp*PWidth)/(2.35*0.3984)
+PAAve = np.mean(PArea)
+SArea = (Samp*SWidth)/(2.35*0.3984)
+SAAve = np.mean(SArea)
+
+AreaRat = (PArea/SArea)
+AvAreaRat = (PAAve/SAAve)
+test = (SAAve/PAAve)
+print(AvAreaRat)
+
+dataout = np.vstack((PArea,SArea))
+np.savetxt('5285607BFAreaout.txt', dataout.T, fmt = '%.5f')
+
+#BFAreaout = open(areaout, 'w')
+#print(PArea, file=BFAreaout)
+    #print('Secondary BF Area: {0} +/- {1} width {2} xmax {3}'.format(bffitlist[idx][0][3], bffitlist[idx][2][3], bffitlist[idx][0][5], bffitlist[idx][0][4]), file=gout)
+
+#BFAreaout.close()
+    
+print('DONE! test =', test, 'Primary/Secondary ='AvAreaRat)
