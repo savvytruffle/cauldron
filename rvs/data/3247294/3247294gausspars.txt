@@ -1,0 +1,8 @@
+#amp1, shift1, width1, amp2, shift2, width2, amp3, shift3, width3
+0 0 0 0 0 0 # template placeholder
+0.99   80   9     0.80   250  7    0.45  250 3 #Single Peak 
+0.99  105   9     0.80   55   7    0.45  250 3
+0.99  100   9     0.80   60   7    0.45  250 3
+0.90  90    9     0.80   70   7    0.45  250 3 #Peaks very close together 
+0.90  34    9     0.80   81   7    0.45  130 3 ###Triple Peak is weird###
+0.90  108   9     0.80   48   7    0.45  250 3

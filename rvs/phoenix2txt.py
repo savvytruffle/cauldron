@@ -51,11 +51,12 @@ def fitPhoenix(spec, specerr, wave, deg=4, niter=10, usigma=3., lsigma=0.1, cont
 wavedir = 'data/PHOENIX/'
 # directory where PHOENIX spectra live:
 specdir = 'data/PHOENIX/Z-0.0/'
+#specdir = 'data/PHOENIX/Z+0.5/'
 # spectrum filename:
 #specfile = 'lte05500-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #example
-#specfile = 'lte06900-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #4851217
+specfile = 'lte06900-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #4851217
 #specfile = 'lte06400-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #5285607
-#specfile = 'lte06500-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #6449358
+#specfile = 'lte07400-3.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #6449358
 #specfile = 'lte05700-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #6781535
 #specfile = 'lte04200-5.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #5284133
 #specfile = 'lte06300-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #6778289
@@ -63,7 +64,8 @@ specdir = 'data/PHOENIX/Z-0.0/'
 #specfile = 'lte04700-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #4075064
 #specfile = 'lte05200-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #3848919
 #specfile = 'lte06000-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #6610219
-specfile = 'lte06000-4.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #4285087
+#specfile = 'lte06000-4.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #4285087
+#specfile = 'lte04900-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits' #6131659
 #######################
 ## edit values above ##
 #######################
