@@ -1955,17 +1955,27 @@ m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3*np.nan, rv1err*1e3, rv2err*1e3)
 rvpars_case2 = [keblat.pars[zz] for zz in parnames_dict['rv']]
 rv1_case2, rv2_case2 = keblat.rvfit(rvpars_case2, keblat.rv_t)
 
-keblat.updatebounds('period', 'tpe', 'esinw', 'ecosw')
-keblat.parbounds['msum'] = [1.5, 2.5] 
-opt_lcrvpars = opt_lcrv(msum=2.0, mrat=0.45,                                                                                                                       
-                         rsum=lcpars[1], rrat=lcpars[2], period=lcpars[3],
-                         tpe=lcpars[4], esinw=lcpars[5], ecosw=lcpars[6],
-                         b=lcpars[7], frat=lcpars[8], q1=lcpars[-4],     
-                         q2=lcpars[-3], q3=lcpars[-2], q4=lcpars[-1],    
-                         lcerr=0.0, k0=rvpars_case1[-2], rverr=0.)            
+
+opt_lcrvpars = np.loadtxt(prefix+'lcrv_mass2.5_fix.lmfit')
 make_lcrv_plots(kic, opt_lcrvpars, prefix, savefig=False)
+lcpars3 = [keblat.pars[zz] for zz in parnames_dict['lc']]
+m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3*np.nan, rv1err*1e3, rv2err*1e3)
 rvpars_case3 = [keblat.pars[zz] for zz in parnames_dict['rv']]
 rv1_case3, rv2_case3 = keblat.rvfit(rvpars_case3, keblat.rv_t)
+
+
+###### uncomment code below to test *any* fix msum predictions ######
+#keblat.updatebounds('period', 'tpe', 'esinw', 'ecosw')
+#keblat.parbounds['msum'] = [1.5, 2.5] 
+#opt_lcrvpars = opt_lcrv(msum=2.0, mrat=0.45,                                                                                                                       
+#                         rsum=lcpars[1], rrat=lcpars[2], period=lcpars[3],
+#                         tpe=lcpars[4], esinw=lcpars[5], ecosw=lcpars[6],
+#                         b=lcpars[7], frat=lcpars[8], q1=lcpars[-4],     
+#                         q2=lcpars[-3], q3=lcpars[-2], q4=lcpars[-1],    
+#                         lcerr=0.0, k0=rvpars_case1[-2], rverr=0.)            
+#make_lcrv_plots(kic, opt_lcrvpars, prefix, savefig=False)
+#rvpars_case3 = [keblat.pars[zz] for zz in parnames_dict['rv']]
+#rv1_case3, rv2_case3 = keblat.rvfit(rvpars_case3, keblat.rv_t)
 
 timestamps = np.array([2456557.73275,  2456559.72268, 2456584.63158, 2456585.63008, 
                        2456757.89224, 2456760.90501, 2456761.87212, 2456763.88043, 
