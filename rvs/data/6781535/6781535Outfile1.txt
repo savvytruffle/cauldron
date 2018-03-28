@@ -3,7 +3,7 @@
 # Porb = 9.1220856 days, BJD0 = 2454971.834534 days
 # Wavelength axis = [15170.0 - 16216.442856286209] Angstroms
 #
-# Template spectrum (line 0 of infiles):  data/PHOENIX/Z-0.0/lte05700-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes_apogee_norm.txt
+# Template spectrum (line 0 of infiles):  /Users/jmc2/PHOENIX/Z-0.0/lte05700-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes_apogee_norm.txt
 # RV of template, BCV of template (km/s): 0, 0
 #
 # List of all input spectra (infiles): data/6781535/6781535infiles.txt

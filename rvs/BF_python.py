@@ -97,6 +97,7 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #infiles = 'data/4285087/4285087infiles.txt'; bjdinfile = 'data/4285087/4285087bjdinfile.txt'
 #gausspars = 'data/4285087/4285087gausspars.txt'
 #outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BFOut.txt'
+#gaussoutfile = 'data/4285087/4285087gaussout.txt'; areaout = 'data/4285087/4285087BFArea.txt'
 
 #6131659
 #infiles = 'data/6131659/6131659infiles.txt'; bjdinfile = 'data/6131659/6131659bjdinfile.txt'
@@ -107,6 +108,7 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #infiles =   'data/6449358/6449358infiles.txt'; bjdinfile = 'data/6449358/6449358bjdinfile.txt'
 #gausspars = 'data/6449358/6449358gausspars.txt'
 #outfile =   'data/6449358/6449358Outfile.txt'; bfoutfile = 'data/6449358/6449358BFOut.txt'
+#gaussoutfile = 'data/6449358/64493598gaussout.txt'; areaout = 'data/6449358/6449358BFArea.txt'
 
 #5284133
 #infiles =   'data/5284133/5284133infiles.txt'; bjdinfile = 'data/5284133/5284133bjdinfile.txt'
@@ -117,17 +119,25 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #infiles =   'data/6778289/6778289infiles.txt'; bjdinfile = 'data/6778289/6778289bjdinfiles.txt'
 #gausspars = 'data/6778289/6778289gausspars.txt'
 #outfile =   'data/6778289/6778289Outfile.txt'; bfoutfile = 'data/6778289/6778289BFOut.txt'
+#gaussoutfile = 'data/6778289/6778289gaussout.txt'; areaout = 'data/6778289/6778289BFArea.txt'
+
+#6778289 Visible
+infiles =   'data/6778289/V6778289infiles.txt'; bjdinfile = 'data/6778289/V6778289bjdinfile.txt'
+gausspars = 'data/6778289/V6778289gausspars.txt'
+outfile =   'data/6778289/V6778289Outfile.txt'; bfoutfile = 'data/6778289/V6778289BFOut.txt'
+gaussoutfile = 'data/6778289/V6778289gaussout.txt'; areaout = 'data/6778289/V6778289BFArea.txt'
 
 #6781535 (Suspected Triple System)
 #infiles =   'data/6781535/6781535infiles.txt'; bjdinfile = 'data/6781535/6781535bjdinfile.txt'
 #gausspars = 'data/6781535/6781535gausspars.txt'
 #outfile =   'data/6781535/6781535Outfile1.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
+#gaussoutfile = 'data/6781535/6781535gaussout.txt'; areaout = 'data/6781535/6781535BFArea.txt'
 
 #6864859
-infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
-gausspars = 'data/6864859/6864859gausspars.txt'
-outfile =   'data/6864859/6864859Outfile.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
-gaussoutfile = 'data/6864859/6864859gaussout.txt'; areaout = 'data/6864859/6864859BFArea.txt'
+#infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
+#gausspars = 'data/6864859/6864859gausspars.txt'
+#outfile =   'data/6864859/6864859Outfile.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
+#gaussoutfile = 'data/6864859/6864859gaussout.txt'; areaout = 'data/6864859/6864859BFArea.txt'
 
 
 #3247294
@@ -141,9 +151,9 @@ gaussoutfile = 'data/6864859/6864859gaussout.txt'; areaout = 'data/6864859/68648
 #period = 3.8994011; BJD0 = 2454959.576010 # 5285607
 #period = 5.7767904; BJD0 = 2454955.073410 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
-#period = 30.13015; BJD0 = 2456557.73097 #6778289
+period = 30.13015; BJD0 = 2456557.73097 #6778289
 #period = 9.1220856; BJD0 = 2454971.834534 #6781535
-period = 40.8778427; BJD0 = 2454955.556300 #6864859
+#period = 40.8778427; BJD0 = 2454955.556300 #6864859
 #period = 61.4228063; BJD0 = 2455813.69734 #4075064
 #period = 1.0472603; BJD0 = 2455811.61005 #3848919
 #period = 11.3009948; BJD0 = 2456557.73097 #6610219
@@ -155,7 +165,7 @@ period = 40.8778427; BJD0 = 2454955.556300 #6864859
 
 # STUFF YOU NEED TO DEFINE CORRECTLY !!!
 # if you are fitting three gaussians, you had better give 3 sets of amplimits and widlimits
-isAPOGEE = True        # toggle to use near-IR stuff, or not
+isAPOGEE = False        # toggle to use near-IR stuff, or not
 SpecPlot = False         # toggle to plot spectra before BFs, or not
 bjdoffset = 2454833.    # difference between real BJDs and 'bjdfunny' (truncated BJDs)
 amplimits = [0,1.2, 0,1.2, 0,1.2] # limits for gaussian normalized amplitude [min1,max1,min2,max2]
@@ -168,28 +178,30 @@ rvstd = 0; bcvstd = 0 # model template
 
 # PARAMETERS FOR THE BROADENING FUNCTION (IMPORTANT PAY ATTENTION !!!)
 smoothstd = 1.5      # stdev of Gaussian to smooth BFs by (~slit width in pixels)
-#w00 = 5400          # starting wavelength for new grid
-#n = 38750           # number of wavelength points for new grid
-#stepV = 1.7         # roughly 3e5 / (max_wavelength / wavelength_step) km/s, rounded down
+w00 = 5400          # starting wavelength for new grid
+n = 38750           # number of wavelength points for new grid
+stepV = 1.7         # roughly 3e5 / (max_wavelength / wavelength_step) km/s, rounded down
 m = 401              # length of the BF (must be longer if RVs are far from 0)
 ## good values for APOGEE:
+#w00 = 15170; n = 32000; stepV = 1.0 # Visible?
 #w00 = 15170; n = 32000; stepV = 1.0 # all of APOGEE, (too) high res
 #w00 = 15170; n = 10000; stepV = 1.5 # all of APOGEE, still pretty high res
-w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
+#w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 #w00 = 15170; n = 6000; stepV = 4.0 # a little piece of APOGEE (lower res, apStar)
 
 # CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
-#widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 300; ymin = -0.15; ymax = 1.19 # good starting default
-#widlimits = [0,9, 0,7, 0,9]; rvneg = 0; rvpos = 149; ymin = -0.15; ymax = 1.19 # 3247294 #weird tripe only one panel 
+widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 300; ymin = -0.15; ymax = 1.19 # good starting default
+#widlimits = [0,9, 0,7, 0,9]; rvneg = 0; rvpos = 149; ymin = -0.15; ymax = 1.19 # 3247294 #weird triple only one panel 
 #widlimits = [0,9, 0,10, 0,9]; rvneg = -75; rvpos = 175; ymin = -0.15; ymax = 1.18 # 6781535
 #widlimits = [0,9, 0,9, 0,11]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.19 # 6131659 
 #widlimits = [0,9, 0,7]; rvneg = -300; rvpos = 300; ymin = -0.15; ymax = 1.19 # 6131659 Xtra large
 #widlimits = [0,13, 0,13]; rvneg = -50; rvpos = 249; ymin = -0.15; ymax = 1.19 # 4285087
 #widlimits = [0,18, 0,19]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
 #widlimits = [0,16, 0,11]; rvneg = -300; rvpos = 500; ymin = -0.15; ymax = 1.2 #6449358 extra wide 
+#widlimits = [0,16, 0,11]; rvneg = -90; rvpos = 200; ymin = -0.15; ymax = 1.2 #6449358 thicc
 #widlimits = [0,16, 0,11]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.2 #6449358
 #widlimits = [0,12, 0,8]; rvneg = -45; rvpos = 199; ymin = -0.15; ymax = 1.4 #6778289
-widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
+#widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
 #widlimits = [0,9, 0,9]; rvneg = -150; rvpos = 50; ymin = -0.15; ymax = 1.19 # 6610259a
 #widlimits = [0,15, 0,15]; rvneg = -50; rvpos = 10; ymin = -0.15; ymax = 1.19 # 6610219b
 
@@ -370,6 +382,9 @@ except:
 def gaussian(x, amp, mu, sig): # i.e., (xarray, amp, rv, width)
     return amp * np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
 
+###644 is weird, trying to identify blob things that might be peaks###    
+thirdpeak = [125, -40, 145, 185, 105, -70, -65, 170, -60, 115, 170, 115, 155, -15, -50]
+
 # PLOT THE FINAL SMOOTHED BFS + GAUSSIAN FITS IN INDIVIDUAL PANELS
 # manually adjust this multi-panel plot based on how many spectra you have
 windowcols = 3 # 4                             # how many columns the plot should have
@@ -406,12 +421,14 @@ for i in range (1, nspec):
     #gauss2 = gaussian(bf_ind, bffitlist[i][0][3], bffitlist[i][0][4], bffitlist[i][0][5])
     plt.plot(rvraw1[i], 0.1, color=colors[6], marker='|', ms=15)#, label='RV 1')
     plt.plot(rvraw2[i], 0.1, color=colors[2], marker='|', ms=15)#, label='RV 2')
+    plt.plot(thirdpeak[i-1], 0.1, color=colors[8], marker ='|', ms=15)
     if rvraw3[i] is not None:
         plt.plot(rvraw3[i], 0.1, color=colors[8], marker='|', ms=15)#, label='RV 3')
     #plt.plot(bf_ind, gauss1, color=colors[6], lw=3, ls='--')#, label='Gaussian fit 1')
     #plt.plot(bf_ind, gauss2, color=colors[2], lw=3, ls='--')#, label='Gaussian fit 2')
     # OPTION TO PLOT VERTICAL LINE AT ZERO
     #plt.axvline(x=0, color=colors[15])    
+
 
     # MAKE A LEGEND
     
@@ -436,7 +453,7 @@ plt.show()
 
 #PAmp, Perr, PWidth, Samp, Serr, SWidth = np.loadtxt('data/5285607/5285607Gin.txt',
 #	usecols=(0,1,2,3,4,5),unpack=True)
-
+'''
 PAmp, Perr, PWidth, Samp, Serr, SWidth = np.loadtxt('data/6864859/6864859Gin.txt',
 	usecols=(0,1,2,3,4,5),unpack=True)
 
@@ -451,7 +468,7 @@ AvAreaRat = (PAAve/SAAve)
 print(AvAreaRat)
 
 dataout = np.vstack((PArea,SArea))
-np.savetxt('6864859BFAreaout.txt', dataout.T, fmt = '%.5f')
+np.savetxt('6449358BFAreaout.txt', dataout.T, fmt = '%.5f')
 
 #BFAreaout = open(areaout, 'w')
 #print(PArea, file=BFAreaout)
@@ -460,3 +477,4 @@ np.savetxt('6864859BFAreaout.txt', dataout.T, fmt = '%.5f')
 #BFAreaout.close()
     
 print('BF Areas printed to outfile, Area Ratio star2/star1?=', AvAreaRat)
+'''
