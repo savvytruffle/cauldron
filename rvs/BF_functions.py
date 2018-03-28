@@ -1,4 +1,5 @@
 from __future__ import print_function
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator
@@ -134,7 +135,7 @@ def read_specfiles(infiles = 'infiles_BF.txt', bjdinfile = 'bjds_baryvels.txt', 
         checkAPOGEE = False #all the infiles are APOGEE so we don't have to search
     i = 0 # keep track of which spectrum we're on
     for line in f1: # This loop happens once for each spectrum
-        infile = line.rstrip()
+        infile = os.path.expandvars(line.rstrip())
         if checkAPOGEE == True: # check to see if a subset of infiles are from APOGEE or not
             if 'apogee' in infile or 'APOGEE' in infile: isAPOGEE = True
             else: isAPOGEE = False

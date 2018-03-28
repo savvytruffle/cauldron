@@ -104,9 +104,10 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile = 'data/6131659/6131659outfile.txt'; bfoutfile = 'data/6131659/6131659BFOut.txt'
 
 #6449358
-#infiles =   'data/6449358/6449358infiles.txt'; bjdinfile = 'data/6449358/6449358bjdinfile.txt'
-#gausspars = 'data/6449358/6449358gausspars.txt'
-#outfile =   'data/6449358/6449358Outfile.txt'; bfoutfile = 'data/6449358/6449358BFOut.txt'
+infiles =   'data/6449358/6449358infiles.txt'; bjdinfile = 'data/6449358/6449358bjdinfile.txt'
+gausspars = 'data/6449358/6449358gausspars.txt'
+outfile =   'data/6449358/6449358Outfile2.txt'; bfoutfile = 'data/6449358/6449358BFOut2.txt'
+gaussoutfile = 'data/6449358/6449358gaussout2.txt'
 
 #5284133
 #infiles =   'data/5284133/5284133infiles.txt'; bjdinfile = 'data/5284133/5284133bjdinfile.txt'
@@ -124,10 +125,10 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile =   'data/6781535/6781535Outfile1.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
 
 #6864859
-infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
-gausspars = 'data/6864859/6864859gausspars.txt'
-outfile =   'data/6864859/6864859Outfile.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
-gaussoutfile = 'data/6864859/6864859gaussout.txt'; areaout = 'data/6864859/6864859BFArea.txt'
+#infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
+#gausspars = 'data/6864859/6864859gausspars.txt'
+#outfile =   'data/6864859/6864859Outfile.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
+#gaussoutfile = 'data/6864859/6864859gaussout.txt'; areaout = 'data/6864859/6864859BFArea.txt'
 
 
 #3247294
@@ -139,11 +140,11 @@ gaussoutfile = 'data/6864859/6864859gaussout.txt'; areaout = 'data/6864859/68648
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734 # 4851217
 #period = 3.8994011; BJD0 = 2454959.576010 # 5285607
-#period = 5.7767904; BJD0 = 2454955.073410 # 6449358
+period = 5.7767904; BJD0 = 2454955.073410 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
 #period = 30.13015; BJD0 = 2456557.73097 #6778289
 #period = 9.1220856; BJD0 = 2454971.834534 #6781535
-period = 40.8778427; BJD0 = 2454955.556300 #6864859
+#period = 40.8778427; BJD0 = 2454955.556300 #6864859
 #period = 61.4228063; BJD0 = 2455813.69734 #4075064
 #period = 1.0472603; BJD0 = 2455811.61005 #3848919
 #period = 11.3009948; BJD0 = 2456557.73097 #6610219
@@ -187,9 +188,9 @@ w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 #widlimits = [0,13, 0,13]; rvneg = -50; rvpos = 249; ymin = -0.15; ymax = 1.19 # 4285087
 #widlimits = [0,18, 0,19]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
 #widlimits = [0,16, 0,11]; rvneg = -300; rvpos = 500; ymin = -0.15; ymax = 1.2 #6449358 extra wide 
-#widlimits = [0,16, 0,11]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.2 #6449358
+widlimits = [0,16, 0,11]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.2 #6449358
 #widlimits = [0,12, 0,8]; rvneg = -45; rvpos = 199; ymin = -0.15; ymax = 1.4 #6778289
-widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
+#widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
 #widlimits = [0,9, 0,9]; rvneg = -150; rvpos = 50; ymin = -0.15; ymax = 1.19 # 6610259a
 #widlimits = [0,15, 0,15]; rvneg = -50; rvpos = 10; ymin = -0.15; ymax = 1.19 # 6610219b
 
@@ -345,8 +346,8 @@ try:
     for idx in range(1, nspec):
         print('###', file=bfout)
         print('# timestamp: {0}'.format(datetimelist[idx]), file=bfout)
-        print('# Gaussian 1 [amp, RV +/- err, wid]: [{0:.2f}, {1:.2f} +/- {2:.2f}, {3:.2f}]'.format(bffitlist[idx][0][0], rvraw1[idx], rvraw1_err[idx], bffitlist[idx][0][2]), file=bfout)
-        print('# Gaussian 2 [amp, RV +/- err, wid]: [{0:.2f}, {1:.2f} +/- {2:.2f}, {3:.2f}]'.format(bffitlist[idx][0][3], rvraw2[idx], rvraw2_err[idx], bffitlist[idx][0][5]), file=bfout)
+        print('# Gaussian 1 [amp, RV +/- err, wid]: {0:.2f} {1:.2f} {2:.2f} {3:.2f}'.format(bffitlist[idx][0][0], rvraw1[idx], rvraw1_err[idx], bffitlist[idx][0][2]), file=bfout)
+        print('# Gaussian 2 [amp, RV +/- err, wid]: {0:.2f} {1:.2f} {2:.2f} {3:.2f}'.format(bffitlist[idx][0][3], rvraw2[idx], rvraw2_err[idx], bffitlist[idx][0][5]), file=bfout)
         print('# Uncorrected_RV, BF_amp, Gaussian_fit', file=bfout)
         print('###', file=bfout)
         for vel, amp, modamp in zip(bf_ind, bfsmoothlist[idx], bffitlist[idx][1]):
@@ -432,26 +433,29 @@ plt.show()
 #fig.savefig('3247294bfrv.png')
 #fig.savefig('3247294bfrv.eps')
 
+######################################################
+# JONI PLEASE MOVE THE BELOW TO A DIFFERENT SCRIPT !!!
+######################################################
 #Calculate the Area underneath the BF curves 
 
 #PAmp, Perr, PWidth, Samp, Serr, SWidth = np.loadtxt('data/5285607/5285607Gin.txt',
 #	usecols=(0,1,2,3,4,5),unpack=True)
 
-PAmp, Perr, PWidth, Samp, Serr, SWidth = np.loadtxt('data/6864859/6864859Gin.txt',
-	usecols=(0,1,2,3,4,5),unpack=True)
+#PAmp, Perr, PWidth, Samp, Serr, SWidth = np.loadtxt('data/6864859/6864859Gin.txt',
+#	usecols=(0,1,2,3,4,5),unpack=True)
 
-PArea = (PAmp*PWidth)/(2.35*0.3984)
-PAAve = np.mean(PArea)
-SArea = (Samp*SWidth)/(2.35*0.3984)
-SAAve = np.mean(SArea)
+#PArea = (PAmp*PWidth)/(2.35*0.3984)
+#PAAve = np.mean(PArea)
+#SArea = (Samp*SWidth)/(2.35*0.3984)
+#SAAve = np.mean(SArea)
 
-AreaRat = (PArea/SArea)
-AvAreaRat = (PAAve/SAAve)
+#AreaRat = (PArea/SArea)
+#AvAreaRat = (PAAve/SAAve)
 
-print(AvAreaRat)
+#print(AvAreaRat)
 
-dataout = np.vstack((PArea,SArea))
-np.savetxt('6864859BFAreaout.txt', dataout.T, fmt = '%.5f')
+#dataout = np.vstack((PArea,SArea))
+#np.savetxt('6864859BFAreaout.txt', dataout.T, fmt = '%.5f')
 
 #BFAreaout = open(areaout, 'w')
 #print(PArea, file=BFAreaout)
@@ -459,4 +463,4 @@ np.savetxt('6864859BFAreaout.txt', dataout.T, fmt = '%.5f')
 
 #BFAreaout.close()
     
-print('BF Areas printed to outfile, Area Ratio star2/star1?=', AvAreaRat)
+#print('BF Areas printed to outfile, Area Ratio star2/star1?=', AvAreaRat)
