@@ -97,6 +97,7 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #infiles = 'data/4285087/4285087infiles.txt'; bjdinfile = 'data/4285087/4285087bjdinfile.txt'
 #gausspars = 'data/4285087/4285087gausspars.txt'
 #outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BFOut.txt'
+#gaussoutfile = 'data/4285087/4285087gaussout.txt'; areaout = 'data/4285087/4285087BFArea.txt'
 
 #6131659
 #infiles = 'data/6131659/6131659infiles.txt'; bjdinfile = 'data/6131659/6131659bjdinfile.txt'
@@ -118,11 +119,19 @@ gaussoutfile = 'data/6449358/6449358gaussout2.txt'
 #infiles =   'data/6778289/6778289infiles.txt'; bjdinfile = 'data/6778289/6778289bjdinfiles.txt'
 #gausspars = 'data/6778289/6778289gausspars.txt'
 #outfile =   'data/6778289/6778289Outfile.txt'; bfoutfile = 'data/6778289/6778289BFOut.txt'
+#gaussoutfile = 'data/6778289/6778289gaussout.txt'; areaout = 'data/6778289/6778289BFArea.txt'
+
+#6778289 Visible
+#infiles =   'data/6778289/V6778289infiles.txt'; bjdinfile = 'data/6778289/V6778289bjdinfile.txt'
+#gausspars = 'data/6778289/V6778289gausspars.txt'
+#outfile =   'data/6778289/V6778289Outfile.txt'; bfoutfile = 'data/6778289/V6778289BFOut.txt'
+#gaussoutfile = 'data/6778289/V6778289gaussout.txt'; areaout = 'data/6778289/V6778289BFArea.txt'
 
 #6781535 (Suspected Triple System)
 #infiles =   'data/6781535/6781535infiles.txt'; bjdinfile = 'data/6781535/6781535bjdinfile.txt'
 #gausspars = 'data/6781535/6781535gausspars.txt'
 #outfile =   'data/6781535/6781535Outfile1.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
+#gaussoutfile = 'data/6781535/6781535gaussout.txt'; areaout = 'data/6781535/6781535BFArea.txt'
 
 #6864859
 #infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
@@ -174,6 +183,7 @@ smoothstd = 1.5      # stdev of Gaussian to smooth BFs by (~slit width in pixels
 #stepV = 1.7         # roughly 3e5 / (max_wavelength / wavelength_step) km/s, rounded down
 m = 401              # length of the BF (must be longer if RVs are far from 0)
 ## good values for APOGEE:
+#w00 = 15170; n = 32000; stepV = 1.0 # Visible?
 #w00 = 15170; n = 32000; stepV = 1.0 # all of APOGEE, (too) high res
 #w00 = 15170; n = 10000; stepV = 1.5 # all of APOGEE, still pretty high res
 w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
@@ -181,7 +191,7 @@ w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 
 # CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
 #widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 300; ymin = -0.15; ymax = 1.19 # good starting default
-#widlimits = [0,9, 0,7, 0,9]; rvneg = 0; rvpos = 149; ymin = -0.15; ymax = 1.19 # 3247294 #weird tripe only one panel 
+#widlimits = [0,9, 0,7, 0,9]; rvneg = 0; rvpos = 149; ymin = -0.15; ymax = 1.19 # 3247294 #weird triple only one panel 
 #widlimits = [0,9, 0,10, 0,9]; rvneg = -75; rvpos = 175; ymin = -0.15; ymax = 1.18 # 6781535
 #widlimits = [0,9, 0,9, 0,11]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.19 # 6131659 
 #widlimits = [0,9, 0,7]; rvneg = -300; rvpos = 300; ymin = -0.15; ymax = 1.19 # 6131659 Xtra large
@@ -371,6 +381,9 @@ except:
 def gaussian(x, amp, mu, sig): # i.e., (xarray, amp, rv, width)
     return amp * np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
 
+###644 is weird, trying to identify blob things that might be peaks###    
+thirdpeak = [125, -40, 145, 185, 105, -70, -65, 170, -60, 115, 170, 115, 155, -15, -50]
+
 # PLOT THE FINAL SMOOTHED BFS + GAUSSIAN FITS IN INDIVIDUAL PANELS
 # manually adjust this multi-panel plot based on how many spectra you have
 windowcols = 3 # 4                             # how many columns the plot should have
@@ -407,12 +420,14 @@ for i in range (1, nspec):
     #gauss2 = gaussian(bf_ind, bffitlist[i][0][3], bffitlist[i][0][4], bffitlist[i][0][5])
     plt.plot(rvraw1[i], 0.1, color=colors[6], marker='|', ms=15)#, label='RV 1')
     plt.plot(rvraw2[i], 0.1, color=colors[2], marker='|', ms=15)#, label='RV 2')
+    plt.plot(thirdpeak[i-1], 0.1, color=colors[8], marker ='|', ms=15)
     if rvraw3[i] is not None:
         plt.plot(rvraw3[i], 0.1, color=colors[8], marker='|', ms=15)#, label='RV 3')
     #plt.plot(bf_ind, gauss1, color=colors[6], lw=3, ls='--')#, label='Gaussian fit 1')
     #plt.plot(bf_ind, gauss2, color=colors[2], lw=3, ls='--')#, label='Gaussian fit 2')
     # OPTION TO PLOT VERTICAL LINE AT ZERO
     #plt.axvline(x=0, color=colors[15])    
+
 
     # MAKE A LEGEND
     
@@ -438,11 +453,9 @@ plt.show()
 ######################################################
 #Calculate the Area underneath the BF curves 
 
-#PAmp, Perr, PWidth, Samp, Serr, SWidth = np.loadtxt('data/5285607/5285607Gin.txt',
-#	usecols=(0,1,2,3,4,5),unpack=True)
-
 #PAmp, Perr, PWidth, Samp, Serr, SWidth = np.loadtxt('data/6864859/6864859Gin.txt',
 #	usecols=(0,1,2,3,4,5),unpack=True)
+
 
 #PArea = (PAmp*PWidth)/(2.35*0.3984)
 #PAAve = np.mean(PArea)

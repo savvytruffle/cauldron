@@ -7,12 +7,12 @@ from numpy import trapz
 
 ### Read in all the things! ###
 
-areaout = 'data/5285607/5285607BFArea.txt'
+areaout = 'data/6778289/6778289BFArea.txt'
 
 #PAmp, Perr, PWidth, Samp, Serr, SWidth = np.loadtxt('data/5285607/5285607Gin.txt',
 #	usecols=(0,1,2,3,4,5),unpack=True)
 
-PAmp, Perr, PWidth, Samp, Serr, SWidth = np.loadtxt('data/5285607/5285607Gin.txt',
+PAmp, Perr, PWidth, Samp, Serr, SWidth = np.loadtxt('data/6778289/6778289Gin.txt',
 	usecols=(0,1,2,3,4,5),unpack=True)
 
 PArea = (PAmp*PWidth)/(2.35*0.3984)
@@ -20,13 +20,18 @@ PAAve = np.mean(PArea)
 SArea = (Samp*SWidth)/(2.35*0.3984)
 SAAve = np.mean(SArea)
 
+PAmed = np.median(PArea)
+SAmed = np.median(PArea)
+
 AreaRat = (PArea/SArea)
 AvAreaRat = (PAAve/SAAve)
-test = (SAAve/PAAve)
-print(AvAreaRat)
+MedAreaRat= (SAmed/PAmed)
+SoP = (SAAve/PAAve)
+StD = np.std(SArea)/np.std(PArea)
+#print(AvAreaRat)
 
 dataout = np.vstack((PArea,SArea))
-np.savetxt('5285607BFAreaout.txt', dataout.T, fmt = '%.5f')
+np.savetxt('6778289BFAreaout.txt', dataout.T, fmt = '%.5f')
 
 #BFAreaout = open(areaout, 'w')
 #print(PArea, file=BFAreaout)
@@ -34,4 +39,8 @@ np.savetxt('5285607BFAreaout.txt', dataout.T, fmt = '%.5f')
 
 #BFAreaout.close()
     
-print('DONE! test =', test, 'Primary/Secondary ='AvAreaRat)
+#print(SAmed, PAmed)
+print('SArea = ', SArea)
+print('PArea = ', PArea)
+
+#'S/P =', SoP, 'Std =', StD, 'Median =' ,MedAreaRat, 'Mean =', AvAreaRat)
