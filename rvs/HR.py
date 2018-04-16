@@ -1,4 +1,11 @@
-'''This program does HR diagram stuff'''
+'''This program does HR diagram stuff for a binary star system.
+
+It reads in an isochrone file (hardcoded for now) as well as
+teff for one star and a surface brightness ratio (both on the command line).
+
+It prints out a calculated temperature ratio and teff for the secondary star.
+It also plots the isochrone read in with logg vs. logTeff axes.
+'''
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -11,11 +18,11 @@ mass, logteff, logg, kp = np.loadtxt(isofile, unpack=True, usecols = (1, 2, 3, 1
 teff1 = float(argv[1])
 sbratio = float(argv[2])
 
-mone = float(argv[3])
-mtwo = float(argv[4])
+#mone = float(argv[3])  # not used
+#mtwo = float(argv[4])  # not used
 
-rone = float(argv[5])
-rtwo = float(argv[6])
+#rone = float(argv[5])  # not used
+#rtwo = float(argv[6])  # not used
 
 ########################### Read things from the isochrone file ##############################
 m = np.where(logg >= 4.1)  # a print(m) statement will print all of the masses where the 
@@ -29,7 +36,7 @@ r2 = mass/(10**logg)
 sb = 10**(-kp/2.5)/r2                                 #r^2 came from Gm/r^2 = g
 
 # print some stuff out for funsies #
-print (r2)
+#print (r2)
 
 ###   Math Party!   ###
 sb1 = interp1d(logteff, sb)# this interpolates the relationship between the surface bright-
@@ -71,10 +78,11 @@ loggone = 4.391            # these are for my troubleshooting, attempting to plo
                            # with how radius is calculated or how surface gravity is calculated. 
 
 loggtwo = 4.391
-print('You entered teff 1 as ', teff1)
-print('You entered radius as ', rone)
-print('Using the isochrone file ', isofile)
-#print('r is ', r)
+print('You entered teff 1 as', teff1)
+print('Using the isochrone file', isofile, 'for star 1,')
+print('We calculate the temperature ratio T2/T1 is', tratio)
+print('Which means teff 2 is', teff2)
+print('Here\'s a plot of the isochrone')
 
 ###   Plotting Party!   ###
 #logt1 = np.log10(teff1)
@@ -93,14 +101,17 @@ print('Using the isochrone file ', isofile)
 #log(g) vs. log(teff) complete with Dartmouth evolutionary track
 logt1 = np.log10(teff1)
 logt2 = np.log10(teff2)
-plt.plot(logt1, loggone, 'r.', label='',) 
-plt.plot(logt2, loggtwo, 'b.', label='',)
-plt.plot(logteff, logg, label='',)
-plt.grid()
-plt.ylabel('log(g)$')
-plt.xlabel('log Teff')
+#plt.plot(logt1, loggone, color='C1', marker='o', label='Primary') 
+#plt.plot(logt2, loggtwo, color='C2', marker='o', label='Secondary')
+plt.plot(logteff, logg, label='Isochrone used for Primary')
+plt.axvline(np.log10(teff1), color='C1', label='Primary')
+plt.axvline(np.log10(teff2), color='C2', label='Secondary')
+#plt.grid()
+plt.ylabel('$\log g$')
+plt.xlabel('$\log T_{\mathrm{eff}}$')
 plt.title('5285607')
-plt.axis('tight')
+#plt.axis('tight')
+plt.legend()
 plt.show()
 plt.savefig('5285607HR.pdf')
 
