@@ -14,6 +14,13 @@ Implementation questions:
 Science questions:
 - look at Matson paper Fig 8 and what they did to choose isochrones and draw conclusions about
   evolutionary histories
+  
+  ###
+  They formed a grid of isochrones over a range of logZ/Z_sun (log of the metallicity in 
+  terms of the Sun) values and ages and determined which fit best with a chi squared good-
+  ness of fit statistic. 
+  ###
+  
 - how confident are we that all our systems really are main sequence stars?
 - Goal: be able to plug in KEBLAT results from Matson paper into this (+ other analysis?) and see if 
   we get similar temperatures, radii, etc.

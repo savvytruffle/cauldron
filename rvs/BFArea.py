@@ -83,3 +83,7 @@ print('R_1/R_2 = ', RRat)
 R2 = KRsum / (1 + SoP)
 
 print('R2 = ', R2)
+
+###Now, calculate log(g) to put on our HR diagrams from KEBLAT masses and individual radii just found###
+
+
