@@ -54,8 +54,8 @@ print('You entered teff 1 as', aspcapTeff)
 #labels = ['1 Gyr Z=0', '1 Gyr Z=-0.2', '1 Gyr Z=+0.2']
 
 ###5738698 Matson et al test star
-isofiles = ['ZNeg0.48Age100.txt', 'ZNeg0.48Age025.txt']
-labels = ['1 Gyr Z=-0.48', '2.5 Gyr Z=-0.48']
+isofiles = ['fehm048afem2_age2.txt', 'fehm048afem2_age2p5.txt', 'fehm048afem2_age3.txt']
+labels = ['2 Gyr Z=-0.48', '2.5 Gyr Z=-0.48', '3 Gyr Z=-0.48']
 
 isochroneLogTeffs = []
 isochroneLogggs = []
@@ -127,3 +127,4 @@ plt.title(starId)
 #plt.axis('tight')
 plt.legend()
 plt.show()
+plt.savefig('5738698fehm0.48HR.png')
