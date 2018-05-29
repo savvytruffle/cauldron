@@ -50,8 +50,12 @@ print('Running analysis for star', starId)
 print('You entered teff 1 as', aspcapTeff)
 
 # Put filenames and corresponding labels for the isochrones you want to plot here
-isofiles = ['afep0.txt', 'fehm25afem2_age1.txt', 'fehp02afep0_age1.txt']
-labels = ['1 Gyr Z=0', '1 Gyr Z=-0.2', '1 Gyr Z=+0.2']
+#isofiles = ['afep0.txt', 'fehm25afem2_age1.txt', 'fehp02afep0_age1.txt']
+#labels = ['1 Gyr Z=0', '1 Gyr Z=-0.2', '1 Gyr Z=+0.2']
+
+###5738698 Matson et al test star
+isofiles = ['ZNeg0.48Age100.txt', 'ZNeg0.48Age025.txt']
+labels = ['1 Gyr Z=-0.48', '2.5 Gyr Z=-0.48']
 
 isochroneLogTeffs = []
 isochroneLogggs = []

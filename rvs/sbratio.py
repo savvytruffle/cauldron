@@ -47,7 +47,8 @@ fit = np.argmin(np.abs(sb/sb1-sbratio))
 
 ###   Temp Ratio Party!   ###
 tratio = 10**logteff[fit]/teff1     #Secondary/Primary
-
-print(tratio)
-print(teff1)
+#teff2 = aspcapTeff * tratio
+print('tratio =', tratio)
+print('teff1 =', teff1)
+#print('teff2 =', teff2)
 ###   Plotting Party!   ###
