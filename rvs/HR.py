@@ -41,10 +41,11 @@ from scipy.interpolate import interp1d
 from sys import argv
 import matplotlib.pyplot as plt
 
-# Read starId, aspcapTeff, and keblatSbRatio from the command line
+# Read starId, aspcapTeff, Tefferr, and keblatSbRatio from the command line
 starId = argv[1]
 aspcapTeff = float(argv[2])
-keblatSbRatio = float(argv[3])
+Tefferr = float(argv[3])
+keblatSbRatio = float(argv[4])
 
 print('Running analysis for star', starId)
 print('You entered teff 1 as', aspcapTeff)
@@ -93,10 +94,14 @@ for isofile in isofiles:
     teff2s.append(teff2)
     isochroneLogTeffs.append(isochroneLogTeff)
     isochroneLogggs.append(isochroneLogg)
-
+    
+    # Now, we will find the error in the ratio and the teff of the secondary
+    this = (10**isochroneLogTeff[fit])
+    teff2StD = np.std(this) / np.std(Tefferr)
+    
     print('Using the isochrone file', isofile, 'for star 1,')
     print('We calculate the temperature ratio T2/T1 is', tratio)
-    print('Which means teff 2 is', teff2)
+    print('Which means teff 2 is', teff2, teff2StD)
     # TODO: calculate and print out appropriate uncertainties for tratio and teff2
     # (this means you'll need to input some uncertainties!!)
 
