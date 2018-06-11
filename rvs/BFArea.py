@@ -5,6 +5,9 @@ from scipy.integrate import simps
 from numpy import trapz
 from sys import argv
 
+#This program is executed from the command line with the following arguments:
+# python BFArea.py starID KTRatio KRsum
+# python BFArea.py 5738698 10  0.82
 #Calculate the Area underneath the BF curves 
 
 starId = argv[1] 

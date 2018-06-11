@@ -27,9 +27,9 @@ Science questions:
   
 TO USE THIS PROGRAM:
 
-python HR.py starId aspcapTeff keblatSbRatio
+python HR.py starId aspcapTeff Tefferr keblatSbRatio
 
-e.g., python HR.py 123456 5000 0.5
+e.g., python HR.py 123456 5000 200 0.5
 
 TODO: also read in uncertainties for aspcapTeff and keblatSbRatio
 note we are using 'frat', the keblat flux ratio, as a proxy for the surface brightness ratio
@@ -58,6 +58,7 @@ print('You entered teff 1 as', aspcapTeff)
 isofiles = ['fehm048afem2_age2.txt', 'fehm048afem2_age2p5.txt', 'fehm048afem2_age3.txt']
 labels = ['2 Gyr Z=-0.48', '2.5 Gyr Z=-0.48', '3 Gyr Z=-0.48']
 
+teff2StDs = []
 isochroneLogTeffs = []
 isochroneLogggs = []
 teff2s = []
@@ -97,7 +98,8 @@ for isofile in isofiles:
     
     # Now, we will find the error in the ratio and the teff of the secondary
     this = (10**isochroneLogTeff[fit])
-    teff2StD = np.std(this) / np.std(Tefferr)
+    teff2StD = np.std(this) / (Tefferr)
+    print('teff2StD = ', teff2StD)
     
     print('Using the isochrone file', isofile, 'for star 1,')
     print('We calculate the temperature ratio T2/T1 is', tratio)
