@@ -27,12 +27,11 @@ Science questions:
   
 TO USE THIS PROGRAM:
 
-python HR.py starId aspcapTeff Tefferr keblatSbRatio
+python HR.py starId aspcapTeff Tefferr keblatSbRatio SbRatioError
 
-e.g., python HR.py 123456 5000 200 0.5
+e.g., python HR.py 123456 5000 200 0.5 0.05
 
-TODO: also read in uncertainties for aspcapTeff and keblatSbRatio
-note we are using 'frat', the keblat flux ratio, as a proxy for the surface brightness ratio
+note: we are using 'frat', the keblat flux ratio, as a proxy for the surface brightness ratio
 
 '''
 
@@ -46,6 +45,7 @@ starId = argv[1]
 aspcapTeff = float(argv[2])
 Tefferr = float(argv[3])
 keblatSbRatio = float(argv[4])
+SbErr = float(argv[4])
 
 print('Running analysis for star', starId)
 print('You entered teff 1 as', aspcapTeff)
@@ -58,20 +58,23 @@ print('You entered teff 1 as', aspcapTeff)
 isofiles = ['fehm048afem2_age2.txt', 'fehm048afem2_age2p5.txt', 'fehm048afem2_age3.txt']
 labels = ['2 Gyr Z=-0.48', '2.5 Gyr Z=-0.48', '3 Gyr Z=-0.48']
 
+
+
 teff2StDs = []
 isochroneLogTeffs = []
 isochroneLogggs = []
 teff2s = []
+teff2err = []
 for isofile in isofiles:
     isochroneMass, isochroneLogTeff, isochroneLogg, kp = np.loadtxt(isofile, unpack=True, usecols = (1, 2, 3, 13))
 
     # Read in mass, logteff, magnitude from isochrone file (only for points with logg >= 4.1)
     m = np.where(isochroneLogg >= 4.1)  # this restricts the isochrone points used to those with logg >= 4.1
-                               # in effect, this cuts the isochrone down to only include the main sequence.
+                                        # in effect, this cuts the isochrone down to only include the main sequence.
     isochroneMass = isochroneMass[m]
     isochroneLogTeff = isochroneLogTeff[m]
     isochroneLogg = isochroneLogg[m]
-    kp = kp[m]  # magnitude in kepler bandpass
+    kp = kp[m]                          # magnitude in kepler bandpass
 
     # Calculate two new columns for the isochrone: radius squared and surface brightness
     isochroneRadiusSquared = isochroneMass/(10**isochroneLogg)
@@ -85,25 +88,38 @@ for isofile in isofiles:
 
     # Now we want to find the location at which Keblat's SB ratio matches the isochroneSb / sb1.
     fit = np.argmin(np.abs(isochroneSb/sb1 - keblatSbRatio))
+    
+    # We also need a fit for the maxima and minima of the Keblat's SB ratio
+    keblatSbRatiomax = keblatSbRatio + SbErr
+    keblatSbRatiomin = keblatSbRatio + SbErr
+    fitmax = np.argmin(np.abs(isochroneSb/sb1 - keblatSbRatiomax))
+    fitmin = np.argmin(np.abs(isochroneSb/sb1 - keblatSbRatiomin))
 
     # Use the 'fit' index to select the Teff from the isochrone and calculate a temperature ratio
+    
     tratio = 10**isochroneLogTeff[fit]/aspcapTeff
-
+    tratiomax = 10**isochroneLogTeff[fitmax]/aspcapTeff
+    tratiomin = 10**isochroneLogTeff[fitmin]/aspcapTeff
+    
     # Now that we have the ratio, we can calculate the temperature of the secondary
     teff2 = aspcapTeff * tratio
+    teff2max = aspcapTeff * tratiomax
+    teff2min = aspcapTeff * tratiomin
+    
+    teff2err = teff2max - teff2
     
     teff2s.append(teff2)
     isochroneLogTeffs.append(isochroneLogTeff)
     isochroneLogggs.append(isochroneLogg)
     
     # Now, we will find the error in the ratio and the teff of the secondary
-    this = (10**isochroneLogTeff[fit])
-    teff2StD = np.std(this) / (Tefferr)
-    print('teff2StD = ', teff2StD)
+    #this = (10**isochroneLogTeff[fit])
+    #teff2StD = np.std(this) / (Tefferr)
+    #print('teff2StD = ', teff2StD)
     
     print('Using the isochrone file', isofile, 'for star 1,')
     print('We calculate the temperature ratio T2/T1 is', tratio)
-    print('Which means teff 2 is', teff2, teff2StD)
+    print('Which means teff 2 is', teff2, '+/-', teff2err)
     # TODO: calculate and print out appropriate uncertainties for tratio and teff2
     # (this means you'll need to input some uncertainties!!)
 
@@ -119,11 +135,28 @@ for logteff, logg, label in zip(isochroneLogTeffs, isochroneLogggs, labels):
 # TODO: actually estimate logg because these hard-wired values are based on keblat radii and
 #       don't have any error bars!
 
-# 613 guesstimated loggs
+# 5285607
+#plt.plot(np.log10(aspcapTeff), 4.496, color='C1', ls='None', marker='o', label='Primary')
+#plt.plot(np.log10(teff2s[0]), 4.704, color='C2', ls='None', marker='o', label='Secondary')
+
+# 6864859
+#plt.plot(np.log10(aspcapTeff), 4.496, color='C1', ls='None', marker='o', label='Primary')
+#plt.plot(np.log10(teff2s[0]), 4.704, color='C2', ls='None', marker='o', label='Secondary')
+
+# 6778289
+#plt.plot(np.log10(aspcapTeff), 4.496, color='C1', ls='None', marker='o', label='Primary')
+#plt.plot(np.log10(teff2s[0]), 4.704, color='C2', ls='None', marker='o', label='Secondary')
+
+# 4285087
+#plt.plot(np.log10(aspcapTeff), 4.496, color='C1', ls='None', marker='o', label='Primary')
+#plt.plot(np.log10(teff2s[0]), 4.704, color='C2', ls='None', marker='o', label='Secondary')
+
+# 6131659
 plt.plot(np.log10(aspcapTeff), 4.496, color='C1', ls='None', marker='o', label='Primary')
 plt.plot(np.log10(teff2s[0]), 4.704, color='C2', ls='None', marker='o', label='Secondary')
+#plt.plot(np.log10(teff2err[0]), 4.704, color='C3', ls='None', marker='o')
 
-# 428 guesstimated loggs
+# 6781535
 #plt.plot(np.log10(aspcapTeff), 4.465, color='C1', ls='None', marker='o', label='Primary')
 #plt.plot(np.log10(teff2s[0]), 4.479, color='C2', ls='None', marker='o', label='Secondary')
 
