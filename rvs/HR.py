@@ -136,29 +136,31 @@ for logteff, logg, label in zip(isochroneLogTeffs, isochroneLogggs, labels):
 #       don't have any error bars!
 
 # 5285607
-#plt.plot(np.log10(aspcapTeff), 4.496, color='C1', ls='None', marker='o', label='Primary')
-#plt.plot(np.log10(teff2s[0]), 4.704, color='C2', ls='None', marker='o', label='Secondary')
+#plt.plot(np.log10(aspcapTeff), 3.925, color='C1', ls='None', marker='o', label='Primary')
+#plt.plot(np.log10(teff2s[0]), 4.375, color='C2', ls='None', marker='o', label='Secondary')
+#plt.errorbar(np.log10(teff2s[0]), 4.375, color='C2', ls='None', marker='o', label='Secondary')
 
 # 6864859
-#plt.plot(np.log10(aspcapTeff), 4.496, color='C1', ls='None', marker='o', label='Primary')
-#plt.plot(np.log10(teff2s[0]), 4.704, color='C2', ls='None', marker='o', label='Secondary')
+#plt.plot(np.log10(aspcapTeff), 4.250, color='C1', ls='None', marker='o', label='Primary')
+#plt.plot(np.log10(teff2s[0]), 4.149, color='C2', ls='None', marker='o', label='Secondary')
 
 # 6778289
-#plt.plot(np.log10(aspcapTeff), 4.496, color='C1', ls='None', marker='o', label='Primary')
-#plt.plot(np.log10(teff2s[0]), 4.704, color='C2', ls='None', marker='o', label='Secondary')
+#plt.plot(np.log10(aspcapTeff), 4.132, color='C1', ls='None', marker='o', label='Primary')
+#plt.plot(np.log10(teff2s[0]), 4.478, color='C2', ls='None', marker='o', label='Secondary')
 
 # 4285087
-#plt.plot(np.log10(aspcapTeff), 4.496, color='C1', ls='None', marker='o', label='Primary')
-#plt.plot(np.log10(teff2s[0]), 4.704, color='C2', ls='None', marker='o', label='Secondary')
+#plt.plot(np.log10(aspcapTeff), 4.465, color='C1', ls='None', marker='o', label='Primary')
+#plt.plot(np.log10(teff2s[0]), 4.479, color='C2', ls='None', marker='o', label='Secondary')
 
 # 6131659
-plt.plot(np.log10(aspcapTeff), 4.496, color='C1', ls='None', marker='o', label='Primary')
-plt.plot(np.log10(teff2s[0]), 4.704, color='C2', ls='None', marker='o', label='Secondary')
+#plt.plot(np.log10(aspcapTeff), 4.496, color='C1', ls='None', marker='o', label='Primary')
+#plt.plot(np.log10(teff2s[0]), 4.704, color='C2', ls='None', marker='o', label='Secondary')
 #plt.plot(np.log10(teff2err[0]), 4.704, color='C3', ls='None', marker='o')
 
 # 6781535
-#plt.plot(np.log10(aspcapTeff), 4.465, color='C1', ls='None', marker='o', label='Primary')
-#plt.plot(np.log10(teff2s[0]), 4.479, color='C2', ls='None', marker='o', label='Secondary')
+plt.plot(np.log10(aspcapTeff), 4.465, color='C1', ls='None', marker='o', label='Primary')
+plt.plot(np.log10(teff2s[0]), 4.479, color='C2', ls='None', marker='o', label='Secondary')
+plt.errorbar(np.log10(teff2s[0]), 4.479, yerr = None, xerr = None, ecolor='C2')
 
 #plt.grid()
 plt.ylabel('$\log g$')
@@ -167,4 +169,4 @@ plt.title(starId)
 #plt.axis('tight')
 plt.legend()
 plt.show()
-plt.savefig('5738698fehm0.48HR.png')
+#plt.savefig('5738698fehm0.48HR.png')
