@@ -106,6 +106,11 @@ AreaRat = (PArea/SArea)
 AvAreaRat = (PAAve/SAAve)
 MedAreaRat= (SAmed/PAmed)
 SoP = (SAAve/PAAve)
+
+### This is where the standard deviation of the SoP is calculated using the numpy package 
+  # np.std which takes the standard deviation of the array elements, in this case SArea and
+  # PArea. These standard deviations are then divided, to find the error in the Area ratio.
+  
 StD = np.std(SArea)/np.std(PArea)
 #print(AvAreaRat)
 

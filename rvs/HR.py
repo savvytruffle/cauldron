@@ -160,7 +160,7 @@ for logteff, logg, label in zip(isochroneLogTeffs, isochroneLogggs, labels):
 # 6781535
 plt.plot(np.log10(aspcapTeff), 4.465, color='C1', ls='None', marker='o', label='Primary')
 plt.plot(np.log10(teff2s[0]), 4.479, color='C2', ls='None', marker='o', label='Secondary')
-plt.errorbar(np.log10(teff2s[0]), 4.479, yerr = None, xerr = None, ecolor='C2')
+plt.errorbar(np.log10(teff2s[0]), 4.479, yerr = None, xerr = 2.80, ecolor='C2')
 
 #plt.grid()
 plt.ylabel('$\log g$')
