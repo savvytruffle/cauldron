@@ -54,9 +54,13 @@ print('You entered teff 1 as', aspcapTeff)
 #isofiles = ['afep0.txt', 'fehm25afem2_age1.txt', 'fehp02afep0_age1.txt']
 #labels = ['1 Gyr Z=0', '1 Gyr Z=-0.2', '1 Gyr Z=+0.2']
 
+# Put filenames and corresponding labels for the isochrones you want to plot here
+isofiles = ['afep0.txt', 'fehp02afep0_age1.txt']
+labels = ['1 Gyr Z=0', '1 Gyr Z=+0.2']
+
 ###5738698 Matson et al test star
-isofiles = ['fehm048afem2_age2.txt', 'fehm048afem2_age2p5.txt', 'fehm048afem2_age3.txt']
-labels = ['2 Gyr Z=-0.48', '2.5 Gyr Z=-0.48', '3 Gyr Z=-0.48']
+#isofiles = ['fehm048afem2_age2.txt', 'fehm048afem2_age2p5.txt', 'fehm048afem2_age3.txt']
+#labels = ['2 Gyr Z=-0.48', '2.5 Gyr Z=-0.48', '3 Gyr Z=-0.48']
 
 
 
@@ -160,7 +164,7 @@ for logteff, logg, label in zip(isochroneLogTeffs, isochroneLogggs, labels):
 # 6781535
 plt.plot(np.log10(aspcapTeff), 4.465, color='C1', ls='None', marker='o', label='Primary')
 plt.plot(np.log10(teff2s[0]), 4.479, color='C2', ls='None', marker='o', label='Secondary')
-plt.errorbar(np.log10(teff2s[0]), 4.479, yerr = None, xerr = 2.80, ecolor='C2')
+#plt.errorbar(np.log10(teff2s[0]), 4.479, yerr = None, xerr = 2.80, ecolor='C2')
 
 #plt.grid()
 plt.ylabel('$\log g$')
@@ -169,4 +173,4 @@ plt.title(starId)
 #plt.axis('tight')
 plt.legend()
 plt.show()
-#plt.savefig('5738698fehm0.48HR.png')
+#plt.savefig('6778289HR.png')
