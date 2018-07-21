@@ -40,137 +40,117 @@ from scipy.interpolate import interp1d
 from sys import argv
 import matplotlib.pyplot as plt
 
-# Read starId, aspcapTeff, Tefferr, and keblatSbRatio from the command line
-starId = argv[1]
-aspcapTeff = float(argv[2])
-Tefferr = float(argv[3])
-keblatSbRatio = float(argv[4])
-SbErr = float(argv[4])
+starIds = [5285607, 6864859, 6778289, 6449358, 4285087, 6131659, 6781535]
+aspcapTeffs = [6495, 6417, 6572, 6237, 5664, 4845, 5749]  # Teff of starId from ASPCAP
+Tefferrs = [156, 159, 162, 179, 146, 98, 125]  # error on the above
+fluxRatios = [0.6202419237, 0.7732692053, 0.4621566737, 0.3920984216, 0.9966328203, 0.6478124125, 0.8909515437]  # flux ratios from BF areas
+fluxRatioErrs = [0.02710, 0.02062, 0.02931, 0.01441, 0.02241, 0.02824, 0.07272]  # error on the above
 
-print('Running analysis for star', starId)
-print('You entered teff 1 as', aspcapTeff)
+for starId, aspcapTeff, Tefferr, fluxRatio, fluxRatioErr in zip(
+    starIds, aspcapTeffs, Tefferrs, fluxRatios, fluxRatioErrs):
 
-# Put filenames and corresponding labels for the isochrones you want to plot here
-#isofiles = ['afep0.txt', 'fehm25afem2_age1.txt', 'fehp02afep0_age1.txt']
-#labels = ['1 Gyr Z=0', '1 Gyr Z=-0.2', '1 Gyr Z=+0.2']
+    print(' ')
+    print('Running analysis for star', starId)
 
-# Put filenames and corresponding labels for the isochrones you want to plot here
-isofiles = ['afep0.txt', 'fehp02afep0_age1.txt']
-labels = ['1 Gyr Z=0', '1 Gyr Z=+0.2']
+    # Put filenames and corresponding labels for the isochrones you want to plot here
+    isofiles = ['afep0_age1.txt', 'fehm05afep0_age1.txt']
+    labels = ['1 Gyr $Z=0$', '1 Gyr $Z=-0.5$']
 
-###5738698 Matson et al test star
-#isofiles = ['fehm048afem2_age2.txt', 'fehm048afem2_age2p5.txt', 'fehm048afem2_age3.txt']
-#labels = ['2 Gyr Z=-0.48', '2.5 Gyr Z=-0.48', '3 Gyr Z=-0.48']
+    ###5738698 Matson et al test star
+    #isofiles = ['fehm048afem2_age2.txt', 'fehm048afem2_age2p5.txt', 'fehm048afem2_age3.txt']
+    #labels = ['2 Gyr Z=-0.48', '2.5 Gyr Z=-0.48', '3 Gyr Z=-0.48']
 
+    isochroneLogTeffs = []
+    isochroneLogggs = []
+    teff2s = []
+    teff2err = []
+    for isofile in isofiles:
+        isochroneMass, isochroneLogTeff, isochroneLogg, kp = np.loadtxt(isofile, unpack=True, usecols = (1, 2, 3, 13))
 
+        # Read in mass, logteff, magnitude from isochrone file (only for points with logg >= 4.1)
+        m = np.where(isochroneLogg >= 4.1)  # this restricts the isochrone points used to those with logg >= 4.1
+                                            # in effect, this cuts the isochrone down to only include the main sequence.
+        isochroneMass = isochroneMass[m]
+        isochroneLogTeff = isochroneLogTeff[m]
+        isochroneLogg = isochroneLogg[m]
+        kp = kp[m]                          # magnitude in kepler bandpass
 
-teff2StDs = []
-isochroneLogTeffs = []
-isochroneLogggs = []
-teff2s = []
-teff2err = []
-for isofile in isofiles:
-    isochroneMass, isochroneLogTeff, isochroneLogg, kp = np.loadtxt(isofile, unpack=True, usecols = (1, 2, 3, 13))
+        # Calculate two new columns for the isochrone: radius squared and surface brightness
+        isochroneRadiusSquared = isochroneMass/(10**isochroneLogg)
+        isochroneSb = 10**(-kp/2.5)/isochroneRadiusSquared  # isochrone surface brightness column
 
-    # Read in mass, logteff, magnitude from isochrone file (only for points with logg >= 4.1)
-    m = np.where(isochroneLogg >= 4.1)  # this restricts the isochrone points used to those with logg >= 4.1
-                                        # in effect, this cuts the isochrone down to only include the main sequence.
-    isochroneMass = isochroneMass[m]
-    isochroneLogTeff = isochroneLogTeff[m]
-    isochroneLogg = isochroneLogg[m]
-    kp = kp[m]                          # magnitude in kepler bandpass
+        # We want a more fine-grained set of logteff and surface brightness values, so we interpolate
+        sb1_grid = interp1d(isochroneLogTeff, isochroneSb)  # this returns a scipy.interp1d object
+        #print(np.log10(aspcapTeff))
+        #print(sb1_grid.x)
+        
+        sb1 = sb1_grid(np.log10(aspcapTeff))
+        # This estimates sb1, the surface brightness of the primary, which is assumed to correspond to the ASPCAP Teff
+        # Because we've interpolated, we can now throw any logTeff we want at it and get a surface brightness back!
 
-    # Calculate two new columns for the isochrone: radius squared and surface brightness
-    isochroneRadiusSquared = isochroneMass/(10**isochroneLogg)
-    isochroneSb = 10**(-kp/2.5)/isochroneRadiusSquared  # isochrone surface brightness column
-
-    # We want a more fine-grained set of logteff and surface brightness values, so we interpolate
-    sb1 = interp1d(isochroneLogTeff, isochroneSb)  # this returns a scipy.interp1d object
-    sb1 = sb1(np.log10(aspcapTeff))
-    # This estimates sb1, the surface brightness of the primary, which is assumed to correspond to the ASPCAP Teff
-    # Because we've interpolated, we can now throw any logTeff we want at it and get a surface brightness back!
-
-    # Now we want to find the location at which Keblat's SB ratio matches the isochroneSb / sb1.
-    fit = np.argmin(np.abs(isochroneSb/sb1 - keblatSbRatio))
+        # Now we want to find the location at which the flux ratio matches the isochroneSb / sb1.
+        fit = np.argmin(np.abs(isochroneSb/sb1 - fluxRatio))
+        
+        # Use the 'fit' index to select the Teff from the isochrone and calculate a temperature ratio
+        tratio = 10**isochroneLogTeff[fit]/aspcapTeff
     
-    # We also need a fit for the maxima and minima of the Keblat's SB ratio
-    keblatSbRatiomax = keblatSbRatio + SbErr
-    keblatSbRatiomin = keblatSbRatio + SbErr
-    fitmax = np.argmin(np.abs(isochroneSb/sb1 - keblatSbRatiomax))
-    fitmin = np.argmin(np.abs(isochroneSb/sb1 - keblatSbRatiomin))
+        # Now that we have the ratio, we can calculate the temperature of the secondary
+        teff2 = aspcapTeff * tratio
+        
+        # Attempting some imprecise error propagation... 
+        fluxRatiomax = fluxRatio + fluxRatioErr
+        fluxRatiomin = fluxRatio - fluxRatioErr
+        fitmax = np.argmin(np.abs(isochroneSb/sb1 - fluxRatiomax))
+        fitmin = np.argmin(np.abs(isochroneSb/sb1 - fluxRatiomin))
+        tratiomax = 10**isochroneLogTeff[fitmax]/aspcapTeff
+        tratiomin = 10**isochroneLogTeff[fitmin]/aspcapTeff
+        teff2max = aspcapTeff * tratiomax
+        teff2min = aspcapTeff * tratiomin
+        teff2err = teff2max - teff2
+        #print(fluxRatio, fluxRatiomax, fluxRatiomin)
+        #print(fit, fitmax, fitmin)
+        #print(tratio, tratiomax, tratiomin)
 
-    # Use the 'fit' index to select the Teff from the isochrone and calculate a temperature ratio
+        teff2s.append(teff2)
+        isochroneLogTeffs.append(isochroneLogTeff)
+        isochroneLogggs.append(isochroneLogg)
     
-    tratio = 10**isochroneLogTeff[fit]/aspcapTeff
-    tratiomax = 10**isochroneLogTeff[fitmax]/aspcapTeff
-    tratiomin = 10**isochroneLogTeff[fitmin]/aspcapTeff
+        # Now, we will find the error in the ratio and the teff of the secondary
+        #this = (10**isochroneLogTeff[fit])
+        #teff2StD = np.std(this) / (Tefferr)
+        #print('teff2StD = ', teff2StD)
+
+        print('Using', isofile, 'and {0} +/- {1} K for star 1,'.format(aspcapTeff, Tefferr))
+        print('T2/T1 is {0:.3f} which means teff 2 is {1:.0f} K'.format(tratio, teff2))
+        # TODO: calculate and print out appropriate uncertainties for tratio and teff2
+        # (this means you'll need to input some uncertainties!!)
+
+    ### Plotting stuff ###
+    # NOTE this is still inside the loop over all the stars, but outside the isochrone loop.
+    # First plot all the isochrones
+    for logteff, logg, label in zip(isochroneLogTeffs, isochroneLogggs, labels):
+        plt.plot(logteff, logg, ls=':', label=label)
+        #plt.axvline(np.log10(aspcapTeff), color='C2', label='Primary')  # vertical lines
+        #plt.axvline(np.log10(teff2s[0]), color='C0', ls=':', label='Secondary')
+        #plt.axvline(np.log10(teff2s[1]), color='C1', ls=':', label='Secondary')
+
+    # Now plot points for each star in the binary
+    # TODO: actually estimate logg because these hard-wired values are based on keblat radii and
+    #       don't have any error bars!
+    logg1 = 4.5  # Meredith made these values up. They will come from BFArea.py in reality.
+    logg2 = 4.5  # You will probably add them as lists to the top of the file and access them
+                 # via the big zipped loop over each system.
+    logg1_err = 0.5  # also totally made up
+    logg2_err = 0.5
+
+    plt.errorbar(np.log10(aspcapTeff), logg1, yerr=logg1_err, color='C2', ls='None', marker='o', label='Primary')
+    plt.errorbar(np.log10(teff2s[0]), logg2, yerr=logg2_err, color='C3', ls='None', marker='o', label='Secondary')
+    # may want to add xerr for temperature error bars too? Star 1 is easy (ASPCAP) but Star 2 is hard...
+    # please note!!! just naively plotting teff2s[0] assumes the very first (zeroth) 
+    # isochrone is the right one for calculating teff2!!
     
-    # Now that we have the ratio, we can calculate the temperature of the secondary
-    teff2 = aspcapTeff * tratio
-    teff2max = aspcapTeff * tratiomax
-    teff2min = aspcapTeff * tratiomin
-    
-    teff2err = teff2max - teff2
-    
-    teff2s.append(teff2)
-    isochroneLogTeffs.append(isochroneLogTeff)
-    isochroneLogggs.append(isochroneLogg)
-    
-    # Now, we will find the error in the ratio and the teff of the secondary
-    #this = (10**isochroneLogTeff[fit])
-    #teff2StD = np.std(this) / (Tefferr)
-    #print('teff2StD = ', teff2StD)
-    
-    print('Using the isochrone file', isofile, 'for star 1,')
-    print('We calculate the temperature ratio T2/T1 is', tratio)
-    print('Which means teff 2 is', teff2, '+/-', teff2err)
-    # TODO: calculate and print out appropriate uncertainties for tratio and teff2
-    # (this means you'll need to input some uncertainties!!)
-
-### Plotting stuff ###
-
-# First plot all the isochrones
-for logteff, logg, label in zip(isochroneLogTeffs, isochroneLogggs, labels):
-    plt.plot(logteff, logg, label=label)
-    #plt.axvline(np.log10(aspcapTeff), color='C1', label='Primary')
-    #plt.axvline(np.log10(teff2), color='C2', label='Secondary')
-
-# Now plot points for each star in the binary
-# TODO: actually estimate logg because these hard-wired values are based on keblat radii and
-#       don't have any error bars!
-
-# 5285607
-#plt.plot(np.log10(aspcapTeff), 3.925, color='C1', ls='None', marker='o', label='Primary')
-#plt.plot(np.log10(teff2s[0]), 4.375, color='C2', ls='None', marker='o', label='Secondary')
-#plt.errorbar(np.log10(teff2s[0]), 4.375, color='C2', ls='None', marker='o', label='Secondary')
-
-# 6864859
-#plt.plot(np.log10(aspcapTeff), 4.250, color='C1', ls='None', marker='o', label='Primary')
-#plt.plot(np.log10(teff2s[0]), 4.149, color='C2', ls='None', marker='o', label='Secondary')
-
-# 6778289
-#plt.plot(np.log10(aspcapTeff), 4.132, color='C1', ls='None', marker='o', label='Primary')
-#plt.plot(np.log10(teff2s[0]), 4.478, color='C2', ls='None', marker='o', label='Secondary')
-
-# 4285087
-#plt.plot(np.log10(aspcapTeff), 4.465, color='C1', ls='None', marker='o', label='Primary')
-#plt.plot(np.log10(teff2s[0]), 4.479, color='C2', ls='None', marker='o', label='Secondary')
-
-# 6131659
-#plt.plot(np.log10(aspcapTeff), 4.496, color='C1', ls='None', marker='o', label='Primary')
-#plt.plot(np.log10(teff2s[0]), 4.704, color='C2', ls='None', marker='o', label='Secondary')
-#plt.plot(np.log10(teff2err[0]), 4.704, color='C3', ls='None', marker='o')
-
-# 6781535
-plt.plot(np.log10(aspcapTeff), 4.465, color='C1', ls='None', marker='o', label='Primary')
-plt.plot(np.log10(teff2s[0]), 4.479, color='C2', ls='None', marker='o', label='Secondary')
-#plt.errorbar(np.log10(teff2s[0]), 4.479, yerr = None, xerr = 2.80, ecolor='C2')
-
-#plt.grid()
-plt.ylabel('$\log g$')
-plt.xlabel('$\log T_{\mathrm{eff}}$')
-plt.title(starId)
-#plt.axis('tight')
-plt.legend()
-plt.show()
-#plt.savefig('6778289HR.png')
+    plt.ylabel('$\log g$')
+    plt.xlabel('$\log T_{\mathrm{eff}}$')
+    plt.title(starId)
+    plt.legend()
+    plt.show()
