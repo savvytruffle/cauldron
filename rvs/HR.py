@@ -24,12 +24,6 @@ Science questions:
 - how confident are we that all our systems really are main sequence stars?
 - Goal: be able to plug in KEBLAT results from Matson paper into this (+ other analysis?) and see if 
   we get similar temperatures, radii, etc.
-  
-TO USE THIS PROGRAM:
-
-python HR.py starId aspcapTeff Tefferr keblatSbRatio SbRatioError
-
-e.g., python HR.py 123456 5000 200 0.5 0.05
 
 note: we are using 'frat', the keblat flux ratio, as a proxy for the surface brightness ratio
 

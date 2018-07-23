@@ -18,14 +18,18 @@ kM1s =     [1.554, 1.354, 1.510, np.nan, 1.137, 0.9422, 1.0057]
 kM1_errs = [0.023, 0.029, 0.022, np.nan, 0.013, 0.0093, 0.0327]
 kM2s =     [1.333, 1.411, 1.091, np.nan, 1.103, 0.7028, 1.0346]
 kM2_errs = [0.020, 0.028, 0.018, np.nan, 0.014, 0.0078, 0.0330]
+kfluxRatios = [0.258, 1.407, 0.19138, 0, 0.901, 0.1483, 0.9201]
+kfluxRatioErros = [0.046, 0.101, 2.6e-5, 0.080, 0.0017, 0.0524]
+kradRatios = [0.551, 1.149, 0.57093, np.nan, 0.969, 0.6799, 0.8641] 
+kradRatiosErrs = [0.048, 0.020, 0.013, np.nan, 0.0080, 0.0057, 0.0275]
 
 ### Read in data from BF_python.py 
   # PAmp is the amplitude of the primary BF peak for each APOGEE visit spectra, similarly
   # Samp is the amplitude of the secondary BF peak for each APOGEE visit spectra. The PWidth
   # and SWidth are the width of the peaks, and the Perr and Serr are the associated errors. 
   
-for starId, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2_err in zip(
-    starIds, kRsums, kRsum_errs, kM1s, kM1_errs, kM2s, kM2_errs):
+for starId, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2_err, kfluxRatio, kradRatio in zip(
+    starIds, kRsums, kRsum_errs, kM1s, kM1_errs, kM2s, kM2_errs, kfluxRatios, kradRatios):
     
     print(' ')
     print('###')
@@ -78,7 +82,20 @@ for starId, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2_err in zip(
     print('WARNING these radius and logg values are WRONG (but the error propagation is right, dangit)')
     print('R1 = {0:.3f} +/- {1:.3f}, R2 = {2:.3f} +/- {3:.3f}'.format(R1, R1err, R2, R2err))
 
-    ###Now, calculate log(g) to put on our HR diagrams from KEBLAT masses and individual radii just found###
+### Now, we back out the keblat Tratio from the keblat flux ratio and keblat radius ratio,
+  # and compare it to the temp ratio we can calculate from the BF Area Flux ratio and radius ratio. 
+    
+    kTemprat = (kfluxRatio / kradRatio**2)**(1/4)
+    BFTemprat = (SoP / ((R1/R2)**2))**(1/4)
+    
+    Tempratdif = ((kTemprat - BFTemprat) / ((kTemprat + BFTemprat)/2)) * 100
+    
+    print('Temperature Ratio from Keblat = ', kTemprat)
+    print('Temperature Ratio from BF =', BFTemprat)
+    print('So, the difference between them is', Tempratdif, '%')
+    
+
+### Now, calculate log(g) to put on our HR diagrams from KEBLAT masses and individual radii just found###
 
     g1 = (kM1 / R1**2) * 27400
     logg1 = np.log10(g1)

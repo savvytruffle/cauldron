@@ -2,7 +2,7 @@
 with surface brightnesses for Spectroscopic Eclipsing Binaries. To run this program,
 execute it with the following input arguments: 
 python sbratio.py 0 6237 0.3920984216 0 '''
-
+##################sb ratio :: teff 1 APOCASK :: SBRatio :: Tratio???
 import numpy as np
 from scipy.interpolate import interp1d
 from sys import argv
