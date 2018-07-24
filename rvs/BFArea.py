@@ -70,29 +70,28 @@ for starId, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2_err, kfluxRatio, kradRatio 
 
     print('Flux Ratio (2/1) =', SoP, '+/-', SoP_stderror)  # this is definitely correct, hooray!
 
-    # Forging ahead to calculate radii and logg... 
+### We back out the keblat Tratio from the keblat flux ratio and keblat radius ratio,
+    kTemprat = (kfluxRatio / kradRatio**2)**(1/4)
+    
+### The following lines were used to compare the temperature ratios calculated from the BF flux 
+  # and KEBLAT radii, to the temperature ratios calculated from the KEBLAT flux and radius ratios.
+#    BFTemprat = (SoP / ((R1/R2)**2))**(1/4)
+#    Tempratdif = ((kTemprat - BFTemprat) / ((kTemprat + BFTemprat)/2)) * 100
+#    print('Temperature Ratio from Keblat = ', kTemprat)
+#    print('Temperature Ratio from BF =', BFTemprat)
+#    print('So, the difference between them is', Tempratdif, '%')
 
-    R2 = kRsum / (1 + SoP)  # this is NOT correct... !
-    #RRatio = 1 / (np.sqrt(SoP / TRatio**4))
-    #R2 = kRsum / (1 + RRatio)  # this IS correct, but we need Tratio from HR.py to have RRatio!
+### Next, we will calculate the Radii of the stars using the flux ratio from the BF (SoP) 
+  # and the KEBLAT temperature ratio (kTemprat)
+
+    BFKRadrat = 1 / (np.sqrt(SoP / kTemprat**4))
+    R2 = kRsum / (1 + BFKRadrat)
     R2err = R2 * np.sqrt((kRsum_err / kRsum)**2 + (SoP_stderror / SoP)**2)
-
     R1 = kRsum - R2
     R1err = np.sqrt(kRsum_err**2 + R2err**2)
-    print('WARNING these radius and logg values are WRONG (but the error propagation is right, dangit)')
+    
+#    print('WARNING these radius and logg values are WRONG (but the error propagation is right, dangit)')
     print('R1 = {0:.3f} +/- {1:.3f}, R2 = {2:.3f} +/- {3:.3f}'.format(R1, R1err, R2, R2err))
-
-### Now, we back out the keblat Tratio from the keblat flux ratio and keblat radius ratio,
-  # and compare it to the temp ratio we can calculate from the BF Area Flux ratio and radius ratio. 
-    
-    kTemprat = (kfluxRatio / kradRatio**2)**(1/4)
-    BFTemprat = (SoP / ((R1/R2)**2))**(1/4)
-    
-    Tempratdif = ((kTemprat - BFTemprat) / ((kTemprat + BFTemprat)/2)) * 100
-    
-    print('Temperature Ratio from Keblat = ', kTemprat)
-    print('Temperature Ratio from BF =', BFTemprat)
-    print('So, the difference between them is', Tempratdif, '%')
     
 
 ### Now, calculate log(g) to put on our HR diagrams from KEBLAT masses and individual radii just found###
