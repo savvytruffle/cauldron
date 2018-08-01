@@ -29,13 +29,13 @@ aspcapTeffs = [6495, 6417, 6572, 6237, 5664, 4845, 5749]                        
 Tefferrs = [156, 159, 162, 179, 146, 98, 125]                                                                    # error on the above
 fluxRatios = [0.6202419237, 0.7732692053, 0.4621566737, 0.3920984216, 0.9966328203, 0.6478124125, 0.8909515437]  # flux ratios from BF areas
 fluxRatioErrs = [0.02710, 0.02062, 0.02931, 0.01441, 0.02241, 0.02824, 0.07272]                                  # error on the above
-logg1 = [4.080171, 4.120715, 4.291286, 4.5, 4.487564, 4.813282]                                                  # log(g) of star 1 from BF flux ratio
-logg1_err = [0.041974, 0.023629, 0.049574, 0.5, 0.021908, 0.05458]                                               # error on the above
-logg2 = [4.1503056, 4.277946, 4.254075, 4.5, 4.457921, 4.380783]                                                 # log(g) of star 2 from BF flux ratio
-logg2_err = [0.040514, 0.025099, 0.055558, 0.5, 0.020566, 0.038261]                                              # error on the above 
+logg1s = [4.080171, 4.120715, 4.291286, np.nan, 4.487564, 4.813282, 4.355104]                                    # log(g) of star 1 from BF flux ratio
+logg1_errs = [0.041974, 0.023629, 0.049574, np.nan, 0.021908, 0.05458, 0.064560]                                 # error on the above
+logg2s = [4.1503056, 4.277946, 4.254075, np.nan, 4.457921, 4.380783, 4.508261]                                   # log(g) of star 2 from BF flux ratio
+logg2_errs = [0.040514, 0.025099, 0.055558, np.nan, 0.020566, 0.038261, 0.072749]                                # error on the above 
 
-for starId, aspcapTeff, Tefferr, fluxRatio, fluxRatioErr in zip(
-    starIds, aspcapTeffs, Tefferrs, fluxRatios, fluxRatioErrs):
+for starId, aspcapTeff, Tefferr, fluxRatio, fluxRatioErr, logg1, logg1_err, logg2, logg2_err in zip(
+    starIds, aspcapTeffs, Tefferrs, fluxRatios, fluxRatioErrs, logg1s, logg1_errs, logg2s, logg2_errs):
 
     print(' ')
     print('Running analysis for star', starId)
@@ -51,7 +51,7 @@ for starId, aspcapTeff, Tefferr, fluxRatio, fluxRatioErr in zip(
     isochroneLogTeffs = []
     isochroneLogggs = []
     teff2s = []
-    teff2err = []
+    teff2errs = []
     for isofile in isofiles:
         isochroneMass, isochroneLogTeff, isochroneLogg, kp = np.loadtxt(isofile, unpack=True, usecols = (1, 2, 3, 13))
 
@@ -94,12 +94,13 @@ for starId, aspcapTeff, Tefferr, fluxRatio, fluxRatioErr in zip(
         tratiomin = 10**isochroneLogTeff[fitmin]/aspcapTeff
         teff2max = aspcapTeff * tratiomax
         teff2min = aspcapTeff * tratiomin
-        teff2err = teff2max - teff2
+        teff2err = (teff2max - teff2min)/2
         #print(fluxRatio, fluxRatiomax, fluxRatiomin)
         #print(fit, fitmax, fitmin)
         #print(tratio, tratiomax, tratiomin)
 
         teff2s.append(teff2)
+        teff2errs.append(teff2err)  # values are questionable at best
         isochroneLogTeffs.append(isochroneLogTeff)
         isochroneLogggs.append(isochroneLogg)
     
@@ -121,15 +122,8 @@ for starId, aspcapTeff, Tefferr, fluxRatio, fluxRatioErr in zip(
         #plt.axvline(np.log10(aspcapTeff), color='C2', label='Primary')  # vertical lines
         #plt.axvline(np.log10(teff2s[0]), color='C0', ls=':', label='Secondary')
         #plt.axvline(np.log10(teff2s[1]), color='C1', ls=':', label='Secondary')
-########################################################################################
+    ########################################################################################
     # Now plot points for each star in the binary
-    # TODO: actually estimate logg because these hard-wired values are based on keblat radii and
-    #       don't have any error bars!
-    #logg1 = 4.5  # Meredith made these values up. They will come from BFArea.py in reality.
-    #logg2 = 4.5  # You will probably add them as lists to the top of the file and access them
-                 # via the big zipped loop over each system.
-    logg1_err = 0.5  # also totally made up
-    logg2_err = 0.5
 
     plt.errorbar(np.log10(aspcapTeff), logg1, yerr=logg1_err, color='C2', ls='None', marker='o', label='Primary')
     plt.errorbar(np.log10(teff2s[0]), logg2, yerr=logg2_err, color='C3', ls='None', marker='o', label='Secondary')
