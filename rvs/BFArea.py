@@ -88,10 +88,15 @@ for starId, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2_err, kfluxRatio, kfluxRatio
     R2err = R2 * np.sqrt((kRsum_err / kRsum)**2 + (SoP_stderror / SoP)**2)
     R1 = kRsum - R2
     R1err = np.sqrt(kRsum_err**2 + R2err**2)
+    R2oR1 = R2/R1
+    R1oR2 = R1/R2
+    R2oR1err = R2oR1 * np.sqrt((R2err / R2)**2 + (R1err / R1)**2)
+    R1oR2err = R1oR2 * np.sqrt((R2err / R2)**2 + (R1err / R1)**2)
     
     print('BFKRadrat = {0:.2f} +/- {1:.2f}'.format(BFKRadrat, BFKRadraterr))
 #    print('WARNING these radius and logg values are WRONG (but the error propagation is right, dangit)')
     print('R1 = {0:.3f} +/- {1:.3f}, R2 = {2:.3f} +/- {3:.3f}'.format(R1, R1err, R2, R2err))
+    print('R2/R1 = {0:.3f}, +/- {1:.3f}, R1/R2 = {2:.3f}, +/- {3:.3f}'.format(R2oR1, R2oR1err, R1oR2, R1oR2err))
     
 
 ### Now, calculate log(g) to put on our HR diagrams from KEBLAT masses and individual radii just found###
