@@ -111,4 +111,4 @@ for starId, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2_err, kfluxRatio, kfluxRatio
     g2err = np.sqrt((27400/(R2**2) * kM2_err)**2 + ((-54800*kM2/(R2**3)) * R2err)**2)
     logg2err = 0.434*(g2err/g2)
 
-    print('logg1 = {0:.3f} +/- {1:.3f}, logg2 = {2:.3f} +/- {3:.3f}'.format(logg1, logg1err, logg2, logg2err))
+    print('logg1 = {0:.6f} +/- {1:.6f}, logg2 = {2:.6f} +/- {3:.6f}'.format(logg1, logg1err, logg2, logg2err))

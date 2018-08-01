@@ -10,16 +10,6 @@ Implementation questions:
 - what's the best way to propagate the uncertainties?
 - what's our plan for choosing an appropriate isochrone?
 - in order to plot logg for our stars, we need a mass (keblat is good) and a radius(???)
-
-Science questions:
-- look at Matson paper Fig 8 and what they did to choose isochrones and draw conclusions about
-  evolutionary histories
-  
-  ###
-  They formed a grid of isochrones over a range of logZ/Z_sun (log of the metallicity in 
-  terms of the Sun) values and ages and determined which fit best with a chi squared good-
-  ness of fit statistic. 
-  ###
   
 - how confident are we that all our systems really are main sequence stars?
 - Goal: be able to plug in KEBLAT results from Matson paper into this (+ other analysis?) and see if 
@@ -34,11 +24,15 @@ from scipy.interpolate import interp1d
 from sys import argv
 import matplotlib.pyplot as plt
 
-starIds = [5285607, 6864859, 6778289, 6449358, 4285087, 6131659, 6781535]
-aspcapTeffs = [6495, 6417, 6572, 6237, 5664, 4845, 5749]  # Teff of starId from ASPCAP
-Tefferrs = [156, 159, 162, 179, 146, 98, 125]  # error on the above
+starIds = [5285607, 6864859, 6778289, 6449358, 4285087, 6131659, 6781535]                                        # Kepler Input Catalog #
+aspcapTeffs = [6495, 6417, 6572, 6237, 5664, 4845, 5749]                                                         # Teff of starId from ASPCAP
+Tefferrs = [156, 159, 162, 179, 146, 98, 125]                                                                    # error on the above
 fluxRatios = [0.6202419237, 0.7732692053, 0.4621566737, 0.3920984216, 0.9966328203, 0.6478124125, 0.8909515437]  # flux ratios from BF areas
-fluxRatioErrs = [0.02710, 0.02062, 0.02931, 0.01441, 0.02241, 0.02824, 0.07272]  # error on the above
+fluxRatioErrs = [0.02710, 0.02062, 0.02931, 0.01441, 0.02241, 0.02824, 0.07272]                                  # error on the above
+logg1 = [4.080171, 4.120715, 4.291286, 4.5, 4.487564, 4.813282]                                                  # log(g) of star 1 from BF flux ratio
+logg1_err = [0.041974, 0.023629, 0.049574, 0.5, 0.021908, 0.05458]                                               # error on the above
+logg2 = [4.1503056, 4.277946, 4.254075, 4.5, 4.457921, 4.380783]                                                 # log(g) of star 2 from BF flux ratio
+logg2_err = [0.040514, 0.025099, 0.055558, 0.5, 0.020566, 0.038261]                                              # error on the above 
 
 for starId, aspcapTeff, Tefferr, fluxRatio, fluxRatioErr in zip(
     starIds, aspcapTeffs, Tefferrs, fluxRatios, fluxRatioErrs):
@@ -127,12 +121,12 @@ for starId, aspcapTeff, Tefferr, fluxRatio, fluxRatioErr in zip(
         #plt.axvline(np.log10(aspcapTeff), color='C2', label='Primary')  # vertical lines
         #plt.axvline(np.log10(teff2s[0]), color='C0', ls=':', label='Secondary')
         #plt.axvline(np.log10(teff2s[1]), color='C1', ls=':', label='Secondary')
-
+########################################################################################
     # Now plot points for each star in the binary
     # TODO: actually estimate logg because these hard-wired values are based on keblat radii and
     #       don't have any error bars!
-    logg1 = 4.5  # Meredith made these values up. They will come from BFArea.py in reality.
-    logg2 = 4.5  # You will probably add them as lists to the top of the file and access them
+    #logg1 = 4.5  # Meredith made these values up. They will come from BFArea.py in reality.
+    #logg2 = 4.5  # You will probably add them as lists to the top of the file and access them
                  # via the big zipped loop over each system.
     logg1_err = 0.5  # also totally made up
     logg2_err = 0.5
