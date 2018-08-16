@@ -26,7 +26,9 @@ import matplotlib.pyplot as plt
 
 starIds = [5285607, 6864859, 6778289, 6449358, 4285087, 6131659, 6781535]                                        # Kepler Input Catalog #
 aspcapTeffs = [6495, 6417, 6572, 6237, 5664, 4845, 5749]                                                         # Teff of starId from ASPCAP
-Tefferrs = [156, 159, 162, 179, 146, 98, 125]                                                                    # error on the above
+Tefferrs = [156, 159, 162, 179, 146, 98, 125]
+logTeff1errs = [2.193125, 2.20139, 2.209515, 2.252853, 2.164353, 1.991226, 2.09691]                               # error on the above
+logTeff2errs = [1.78049, 1.618240, 1.886255, 2.010489, 1.447506, 1.504981, 2.332976]                             # log(err) on Teff2 which is calculated below
 fluxRatios = [0.6202419237, 0.7732692053, 0.4621566737, 0.3920984216, 0.9966328203, 0.6478124125, 0.8909515437]  # flux ratios from BF areas
 fluxRatioErrs = [0.02710, 0.02062, 0.02931, 0.01441, 0.02241, 0.02824, 0.07272]                                  # error on the above
 logg1s = [4.080171, 4.120715, 4.291286, np.nan, 4.487564, 4.813282, 4.355104]                                    # log(g) of star 1 from BF flux ratio
@@ -34,19 +36,23 @@ logg1_errs = [0.041974, 0.023629, 0.049574, np.nan, 0.021908, 0.05458, 0.064560]
 logg2s = [4.1503056, 4.277946, 4.254075, np.nan, 4.457921, 4.380783, 4.508261]                                   # log(g) of star 2 from BF flux ratio
 logg2_errs = [0.040514, 0.025099, 0.055558, np.nan, 0.020566, 0.038261, 0.072749]                                # error on the above 
 
-for starId, aspcapTeff, Tefferr, fluxRatio, fluxRatioErr, logg1, logg1_err, logg2, logg2_err in zip(
-    starIds, aspcapTeffs, Tefferrs, fluxRatios, fluxRatioErrs, logg1s, logg1_errs, logg2s, logg2_errs):
+for starId, aspcapTeff, Tefferr, logTeff1err, logTeff2err, fluxRatio, fluxRatioErr, logg1, logg1_err, logg2, logg2_err in zip(
+    starIds, aspcapTeffs, Tefferrs, logTeff1errs, logTeff2errs, fluxRatios, fluxRatioErrs, logg1s, logg1_errs, logg2s, logg2_errs):
 
     print(' ')
     print('Running analysis for star', starId)
 
+### 4285087 ###
+    isofiles = ['afep0_age1.txt']
+    labels = ['afep0_age0.txt']
+    
     # Put filenames and corresponding labels for the isochrones you want to plot here
-    isofiles = ['afep0_age1.txt', 'fehm05afep0_age1.txt']
-    labels = ['1 Gyr $Z=0$', '1 Gyr $Z=-0.5$']
+    #isofiles = ['afep0_age1.txt', 'fehm05afep0_age1.txt']
+    #labels = ['1 Gyr $Z=0$', '1 Gyr $Z=-0.5$']
 
     ###5738698 Matson et al test star
-    #isofiles = ['fehm048afem2_age2.txt', 'fehm048afem2_age2p5.txt', 'fehm048afem2_age3.txt']
-    #labels = ['2 Gyr Z=-0.48', '2.5 Gyr Z=-0.48', '3 Gyr Z=-0.48']
+    #isofiles = ['fehm048afem2_age2.txt', 'fehm048afem2_age2p5.txt']#, 'fehm048afem2_age3.txt']
+    #labels = ['2 Gyr Z=-0.48', '2.5 Gyr Z=-0.48']#, '3 Gyr Z=-0.48']
 
     isochroneLogTeffs = []
     isochroneLogggs = []
@@ -99,16 +105,21 @@ for starId, aspcapTeff, Tefferr, fluxRatio, fluxRatioErr, logg1, logg1_err, logg
         #print(fit, fitmax, fitmin)
         #print(tratio, tratiomax, tratiomin)
 
+        aspcapTeffs.append(aspcapTeff)
+        Tefferrs.append(Tefferr)
         teff2s.append(teff2)
-        teff2errs.append(teff2err)  # values are questionable at best
+        teff2errs.append(teff2err)                     # values are questionable at best
         isochroneLogTeffs.append(isochroneLogTeff)
         isochroneLogggs.append(isochroneLogg)
-    
+        x1err = 0.434 * (Tefferr/aspcapTeff)
+        x2err = 0.434  * (teff2err/teff2)
         # Now, we will find the error in the ratio and the teff of the secondary
         #this = (10**isochroneLogTeff[fit])
         #teff2StD = np.std(this) / (Tefferr)
         #print('teff2StD = ', teff2StD)
-
+        print('teff2err = ', teff2err)
+        print('xerrprim =', x2err)
+        print('xerrsec = ', x2err)
         print('Using', isofile, 'and {0} +/- {1} K for star 1,'.format(aspcapTeff, Tefferr))
         print('T2/T1 is {0:.3f} which means teff 2 is {1:.0f} K'.format(tratio, teff2))
         # TODO: calculate and print out appropriate uncertainties for tratio and teff2
@@ -119,14 +130,20 @@ for starId, aspcapTeff, Tefferr, fluxRatio, fluxRatioErr, logg1, logg1_err, logg
     # First plot all the isochrones
     for logteff, logg, label in zip(isochroneLogTeffs, isochroneLogggs, labels):
         plt.plot(logteff, logg, ls=':', label=label)
+        plt.gca().invert_yaxis()                         #Inverts Y axis (increasing downward)
+        plt.gca().invert_xaxis()                         #Inverts X axis (increasing to the left)
         #plt.axvline(np.log10(aspcapTeff), color='C2', label='Primary')  # vertical lines
         #plt.axvline(np.log10(teff2s[0]), color='C0', ls=':', label='Secondary')
         #plt.axvline(np.log10(teff2s[1]), color='C1', ls=':', label='Secondary')
     ########################################################################################
+    
     # Now plot points for each star in the binary
+    #plt.errorbar(np.log10(aspcapTeff), logg1, yerr=logg1_err, xerr=(Tefferr * np.log10(Tefferr)), color='C2', ls='None', marker='o', label='Primary')
+    #plt.errorbar(np.log10(aspcapTeff), logg1, yerr=logg2_err,  color='C2', ls='None', marker='o', label='Primary')
 
-    plt.errorbar(np.log10(aspcapTeff), logg1, yerr=logg1_err, color='C2', ls='None', marker='o', label='Primary')
-    plt.errorbar(np.log10(teff2s[0]), logg2, yerr=logg2_err, color='C3', ls='None', marker='o', label='Secondary')
+    plt.errorbar(np.log10(aspcapTeff), logg1, yerr=logg1_err, xerr=x1err, color='C2', ls='None', marker='o', label='Primary')
+    plt.errorbar(np.log10(teff2s[0]), logg2, yerr=logg2_err, xerr=x2err, color='C3', ls='None', marker='o', label='Secondary')
+
     # may want to add xerr for temperature error bars too? Star 1 is easy (ASPCAP) but Star 2 is hard...
     # please note!!! just naively plotting teff2s[0] assumes the very first (zeroth) 
     # isochrone is the right one for calculating teff2!!
