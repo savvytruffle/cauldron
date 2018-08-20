@@ -14,8 +14,10 @@ aspcapTeff = 6495                                       # Teff (primary) of star
 teff1err = 156                                          # Teff (primary) error from ASPCAP
 logTeff1err = [2.193125]                                # log_10 of Teff error
 logTeff2err = [1.78049]                                 # log(err) on Teff2 (calculated below)
-fluxRatio = [0.6202419237]                              # flux ratios from BF areas
-fluxRatioErr = [0.02710]                                # error on the above
+BFfluxRatio = [0.6202419237]                            # flux ratios from BF areas
+BFfluxRatioErr = [0.02710]                              # error on the above
+KEBLATfluxratio = [0.258]                               # KEBLAT flux ratio *NOT A SURFACE BRIGHTNESS*
+KEBLATfluxratio_err = [0.046]                           # error on the above
 logg1 = [4.080171]                                      # log(g) of star 1 from BF flux ratio
 logg1_err = [0.041974]                                  # error on the above
 logg2 = [4.1503056]                                     # log(g) of star 2 from BF flux ratio
@@ -69,24 +71,28 @@ for isofile in isofiles:
 
 #### Now we want to find the location at which the flux ratio matches the isochroneSb / sb1. ####
 
-    fit = np.argmin(np.abs(isochroneSb/sb1 - fluxRatio))
+    fit = np.argmin(np.abs(isochroneSb/sb1 - KEBLATfluxratio)) #### Using the KEBLAT SB Ratio
     
 #### Use the 'fit' index to select the Teff from the isochrone and calculate a temperature ratio ####
 
-    tratio = 10**isochroneLogTeff[fit]/aspcapTeff
+    tratio = 10**isochroneLogTeff[fit]/aspcapTeff  ####ONLY from KEBLAT and isochrones 
 
 #### Now that we have the ratio, we can calculate the temperature of the secondary ####
     teff2 = aspcapTeff * tratio
     
 #### Attempting some imprecise error propagation #### 
-    fluxRatiomax = np.array(fluxRatio) + np.array(fluxRatioErr)
-    fluxRatiomin = np.array(fluxRatio) - np.array(fluxRatioErr)
-    fitmax = np.argmax(np.abs(isochroneSb/sb1 - fluxRatiomax))
-    fitmin = np.argmin(np.abs(isochroneSb/sb1 - fluxRatiomin))
+
+    
+
+    KEBLATfluxratiomax = np.array(KEBLATfluxratio) + np.array(KEBLATfluxratio_err)
+    KEBLATfluxratiomin = np.array(KEBLATfluxratio) - np.array(KEBLATfluxratio_err)
+    fitmax = np.argmax(np.abs(isochroneSb/sb1 - KEBLATfluxratiomax))
+    fitmin = np.argmin(np.abs(isochroneSb/sb1 - KEBLATfluxratiomin))
     isochroneLogTeffs.append(isochroneLogTeff)
     isochroneLogggs.append(isochroneLogg)
     tratiomax = 10**isochroneLogTeff[fitmax]/aspcapTeff
     tratiomin = 10**isochroneLogTeff[fitmin]/aspcapTeff
+
     
     teff2s.append(teff2)
     teff2max = aspcapTeff * tratiomax
@@ -126,13 +132,14 @@ for logteff, logg, label in zip(isochroneLogTeffs, isochroneLogggs, labels):
 #### Now,  plot points and error bars for each star in the binary ####
 
 plt.errorbar(np.log10(aspcapTeff), logg1, yerr=logg1_err, xerr=Teff1err, color='C2', ls='None', marker='o', label='Primary')
-plt.errorbar(np.log10(teff2s[0]), logg2, yerr=logg2_err, xerr=Teff2err, color='C3', ls='None', marker='o', label='Secondary')
+#plt.errorbar(np.log10(teff2s[0]), logg2, yerr=logg2_err, xerr=Teff2err, color='C3', ls='None', marker='o', label='Secondary')
+plt.errorbar(np.log10(teff2s[0]), logg2, yerr=logg2_err, color='C3', ls='None', marker='o', label='Secondary')
 plt.gca().invert_yaxis()                   # Inverts Y axis (increasing downward)
 plt.gca().invert_xaxis()                   # Inverts X axis (increasing to the left)
 plt.ylabel('$\log g$')
 plt.xlabel('$\log T_{\mathrm{eff}}$')
 plt.title(starId)
 plt.legend()
-plt.savefig('figures/HRDiagrams/5286507HR.png')
-plt.savefig('figures/HRDiagrams/5286507HR.jpeg')
+plt.savefig('figures/HRDiagrams/5286507HRK.png')
+plt.savefig('figures/HRDiagrams/5286507HRK.jpeg')
 plt.show()
