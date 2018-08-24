@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 
 starId = 6864859                                        # Kepler Input Catalog #
-aspcapTeff = [6417]                                     # Teff of starId from ASPCAP
-Tefferr = [159]                                         # Teff (primary) error from ASPCAP
+aspcapTeff = 6417                                     # Teff of starId from ASPCAP
+teff1err = 159                                         # Teff (primary) error from ASPCAP
 logTeff1err = [2.20139]                                 # error on the above
 logTeff2err = [1.618240]                                # log(err) on Teff2 which is calculated below
 BFfluxRatio = [0.7732692053]                            # flux ratios from BF areas

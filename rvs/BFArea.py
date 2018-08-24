@@ -4,11 +4,16 @@ import numpy as np
 from scipy.integrate import simps
 from numpy import trapz
 from sys import argv
-### BFArea.py
-### Calculate the Area underneath the BF curves of the primary and secondary members of a 
-#   spectroscopic eclipsing binary. The ratio of these areas is directly proportional to 
-#   the flux ratio of the binary (Bayless & Orosz 2006; Stassun et al. 2007).
-### Backs out the keblat Tratio from the keblat flux ratio and keblat radius ratio
+
+##################################### BFArea.py ##########################################
+'''Calculate the Area underneath the BF curves of the primary and secondary members of a''' 
+'''spectroscopic eclipsing binary. The ratio of these areas is directly proportional to '''
+'''the flux ratio of the binary (Bayless & Orosz 2006; Stassun et al. 2007). This version'''
+'''of BFArea.py also backs out the KEBLAT Tratio from the keblat flux ratio and KEBLAT ''' 
+'''radius ratio and compares this Tratio to the Tratio calculated using the BF flux    '''
+'''and the KEBLAT radius ratio.                                                        '''
+##########################################################################################
+
 
 starIds = [5285607, 6864859, 6778289, 6449358, 4285087, 6131659, 6781535]    #KEPLER Input Catalog
 kRsums =     [3.489, 3.104, 2.745, np.nan, 2.033, 1.5251, 2.0408]            #KEBLAT Radius Sums
