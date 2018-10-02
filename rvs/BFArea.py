@@ -1,5 +1,6 @@
 from __future__ import print_function
 import numpy as np
+import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.integrate import simps
 from numpy import trapz
@@ -55,9 +56,9 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ### to the SoP ratio.                                                                  ###
 ##########################################################################################
 
-    PAreas = (PAmp*PWidth)/(2.35*0.3984)           #one value per visit (primary)
-    SAreas = (Samp*SWidth)/(2.35*0.3984)           #one value per visit (secondary)
-    SoP = np.mean(SAreas)/np.mean(PAreas)          #secondary over primary ratio of mean BF areas
+    PAreas = (PAmp*PWidth)/(2.35*0.3984)           ### Primary (one value per visit) 
+    SAreas = (Samp*SWidth)/(2.35*0.3984)           ### Secondary (one value per visit)
+    SoP = np.mean(SAreas)/np.mean(PAreas)          ### secondary over primary ratio of mean BF areas
     Psum = 0
     Ssum = 0
     for PArea, SArea in zip(PAreas, SAreas):
@@ -83,11 +84,11 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ##########################################################################################
 
     R1 = kRsum / (1 + kradRatio)
-    R1_err = (R1/u.Rsun) * np.sqrt((kRsum_err / (kRsum/u.Rsun))**2)
+    R1_err = (R1.value) * np.sqrt((kRsum_err / kRsum.value)**2)
     R2 = kRsum - R1
-    R2_err = (R2/u.Rsun) * np.sqrt((kRsum_err/(kRsum/u.Rsun))**2 + (R1_err/(R1/u.Rsun))**2)
+    R2_err = (R2.value) * np.sqrt(((kRsum_err/kRsum.value)**2) + (R1_err/R1.value)**2)
     R2oR1 = R2/R1
-    R2oR1_err = R2oR1 * np.sqrt((R2_err / (R2/u.Rsun))**2 + ((R1_err / (R1/u.Rsun))**2))
+    R2oR1_err = R2oR1 * np.sqrt((R2_err/R2.value)**2 + (R1_err/R1.value)**2)
 
 ######################### Calculate the sum of the KEBLAT fluxes #########################
 ### Using the ASPCAP temperature, the sum of the squared radii and the distance to our ###
@@ -95,16 +96,22 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ##########################################################################################
 
 
-    KEBLATFluxsum = (((const.sigma_sb * ASPCAPTeff **4 * ((R1.to(u.m))**2 + (R2.to(u.m))**2)) / (GAIAdistance.to(u.m)) **2))
-    KEBLATFluxsum_err = np.sqrt((ASPCAPTeff_err/(ASPCAPTeff/u.K)**2)+((R1_err/(R1/u.Rsun))**2)+((R2_err/(R2/u.Rsun))**2)+((GAIAdistance_err/(GAIAdistance/u.pc))**2))
+    KEBLATFluxsum = ((const.sigma_sb * ASPCAPTeff**4 * ((R1.to(u.m))**2 +
+                           (R2.to(u.m))**2)) / (GAIAdistance.to(u.m)) **2)
+    KEBLATFluxsum_err = np.sqrt( ((ASPCAPTeff_err/ASPCAPTeff.value**2)*R1_err**2)+
+                           ((R2_err/R2.value)**2)+(GAIAdistance_err/(GAIAdistance.value)**2))
     KEBLATFlux1 = KEBLATFluxsum / (1 + kfluxRatio)
-    KEBLATFlux1_err = (KEBLATFlux1/(u.W/(u.m**2))) * np.sqrt((KEBLATFluxsum_err/(KEBLATFluxsum/(u.W/u.m**2)))**2 + (kfluxRatioErr/kfluxRatio)**2)
+    KEBLATFlux1_err = (KEBLATFlux1.value) * np.sqrt((KEBLATFluxsum_err/(KEBLATFluxsum.value))**2 +
+                           (kfluxRatioErr/kfluxRatio)**2)
     KEBLATFlux2 = KEBLATFluxsum - KEBLATFlux1
-    KEBLATFlux2_err = (KEBLATFlux2/(u.W/(u.m**2))) * np.sqrt((KEBLATFluxsum_err/(KEBLATFluxsum/(u.W/u.m**2)))**2 + (KEBLATFlux1_err/(KEBLATFlux1/(u.W/(u.m**2))))**2)
+    KEBLATFlux2_err = (KEBLATFlux2.value) * np.sqrt((KEBLATFluxsum_err/(KEBLATFluxsum.value))**2 +
+                           (KEBLATFlux1_err/KEBLATFlux1.value)**2)
     F2overF1 = KEBLATFlux2/KEBLATFlux1
     
-    print('R1 = {0:.3f} +/- {1:.3f}, R2 = {2:.3f} +/- {3:.3f} R2/R1 = {4:.3f}, +/- {5:.3f}'.format(R1, R1_err, R2, R2_err, R2oR1, R2oR1_err))
-    print('KEBLATFlux1 = {0:.3e} +/-  {1:.3f} KEBLATFlux2 = {2:.3e} +/- = {3:.3f} F2/F1 = {4:.3f}'.format(KEBLATFlux1, KEBLATFlux1_err, KEBLATFlux2, KEBLATFlux2_err, F2overF1))
+    print('R1 = {0:.3f} +/- {1:.3f}, R2 = {2:.3f} +/- {3:.3f} R2/R1 = {4:.3f}, +/- {5:.3f}'
+                            .format(R1, R1_err, R2, R2_err, R2oR1, R2oR1_err))
+    print('KEBLATFlux1 = {0:.3e} +/-  {1:.3f} KEBLATFlux2 = {2:.3e} +/- = {3:.3f} F2/F1 = {4:.3f}'
+                            .format(KEBLATFlux1, KEBLATFlux1_err, KEBLATFlux2, KEBLATFlux2_err, F2overF1))
 
 ################################### Calculate T1 and T2 ##################################
 ###Now we will use the fluxes we just found, and assuming the ASPCAP temperature is the###
@@ -112,42 +119,52 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ###majority of the light, we can calculate the temperatures of the components.         ###
 ##########################################################################################
 
-    T1KEBASP = (KEBLATFlux1 * ((GAIAdistance.to(u.m))**2) / (const.sigma_sb * (R1.to(u.m))**2))**(1/4)
-    T1KEBASP_err = np.sqrt( ((T1KEBASP.value) / 4*(KEBLATFlux1.value) * KEBLATFlux1_err)**2 +
-                            ((T1KEBASP.value) / 2*(GAIAdistance.value) * GAIAdistance_err)**2 +
-                            ((-T1KEBASP.value) / 2*(R1.value) * R1_err)**2 +
-                            const.sigma_sb.value * R1_err )
-    T2KEBASP = (KEBLATFlux2 * ((GAIAdistance.to(u.m))**2) / (const.sigma_sb * (R2.to(u.m))**2))**(1/4)
-    T2KEBASP_err = np.sqrt( ((T2KEBASP.value) / 4*(KEBLATFlux2.value) * KEBLATFlux2_err)**2 +
-                            ((T2KEBASP.value) / 2*(GAIAdistance.value) * GAIAdistance_err)**2 +
-                            ((-T2KEBASP.value) / (2*(R2.value)) * R2_err)**2 + 
-                            const.sigma_sb.value * R2_err )
+    T1KEBASP = ((KEBLATFlux1 * (GAIAdistance.to(u.m))**2) / (const.sigma_sb * 
+                            (R1.to(u.m))**2))**(1/4)
+    T1KEBASP_err = np.sqrt( ((T1KEBASP.value)/4*(KEBLATFlux1.value)*KEBLATFlux1_err)**2 +
+                            ((T1KEBASP.value)/2*(GAIAdistance.value)*GAIAdistance_err)**2 +
+                            ((-T1KEBASP.value)/2*(R1.value)*R1_err)**2 +
+                            (const.sigma_sb.value * R1_err) )
+
+    T2KEBASP = ((KEBLATFlux2 * (GAIAdistance.to(u.m))**2) / (const.sigma_sb * 
+                            (R2.to(u.m))**2))**(1/4)
+    T2KEBASP_err = np.sqrt( ((T2KEBASP.value)/4*(KEBLATFlux2.value)*KEBLATFlux2_err)**2 +
+                            ((T2KEBASP.value)/2*(GAIAdistance.value)*GAIAdistance_err)**2 +
+                            ((-T2KEBASP.value)/(2*(R2.value))*R2_err)**2 + 
+                            (const.sigma_sb.value * R2_err) )
+
     T2oT1KEBASP = (T2KEBASP/T1KEBASP)
 
-    print('T1KEBASP = {0:.0f} +/- {1:.0f} T2KEBASP = {2:.0f} +/- {3:.0f} T2oT1KEBASP = {4:.3f}'.format(T1KEBASP, T1KEBASP_err, T2KEBASP, T2KEBASP_err, T2oT1KEBASP))
+    print('T1KEBASP = {0:.0f} +/- {1:.0f} T2KEBASP = {2:.0f} +/- {3:.0f} T2oT1KEBASP = {4:.3f}'
+                            .format(T1KEBASP, T1KEBASP_err, T2KEBASP, T2KEBASP_err, T2oT1KEBASP))
 
 #################################### Calculate log(g) #################################### 
 ### Calculate log(g) to put on our HR diagrams from KEBLAT masses and individual radii ###
-### found above just found and propagate relevant errors                               ###
+### found above and propagate relevant errors                                          ###
 ##########################################################################################
 
     
     logg1 = u.Dex((const.G*kM1 / R1**2).cgs)
-    logg1_err = 0.434*(u.Dex((const.G*kM1_err*u.Msun / (R1_err*u.Rsun)**2).cgs)).value / logg1.value
+    logg1_err = 0.434*(u.Dex((const.G*kM1_err*u.Msun/(R1_err*u.Rsun)**2).cgs)).value/logg1.value
 
     logg2 = u.Dex((const.G*kM2 / R2**2).cgs)
     logg2_err = 0.434*(u.Dex((const.G*kM2_err*u.Msun / (R2_err*u.Rsun)**2).cgs)).value / logg2.value
 
-    print('logg1 = {0:.4f} +/- {1:.4f}, logg2 = {2:.4f} +/- {3:.4f}'.format(logg1, logg1_err, logg2, logg2_err))
+    print('logg1 = {0:.4f} +/- {1:.4f}, logg2 = {2:.4f} +/- {3:.4f}'
+                            .format(logg1, logg1_err, logg2, logg2_err))
     
 #### Next, we will confirm that the ASPCAP temperature is the flux weighted sum off the temperature components:
     FWSTemp = (T1KEBASP * KEBLATFlux1 + T2KEBASP * KEBLATFlux2) / (KEBLATFlux1 + KEBLATFlux2)
-    FWSTemp_err = np.sqrt(((KEBLATFlux1/(u.W/(u.m**2))/(KEBLATFluxsum/(u.W/(u.m**2))))*T1KEBASP_err)**2+((KEBLATFlux1/(u.W/(u.m**2))*
-    ((T1KEBASP/u.K)-(T2KEBASP/u.K)/(KEBLATFluxsum/(u.W/(u.m**2)))**2))*KEBLATFlux1_err)**2+(((KEBLATFlux1/(u.W/(u.m**2)))/(KEBLATFluxsum/(u.W/(u.m**2))))*T2KEBASP_err)**2
-    +((KEBLATFlux1/(u.W/(u.m**2))*((T2KEBASP/u.K)-(T1KEBASP/u.K)/(KEBLATFluxsum/(u.W/(u.m**2)))**2))*KEBLATFlux1_err)**2)
+    FWSTemp_err = np.sqrt(  ((KEBLATFlux1.value/KEBLATFluxsum.value)*T1KEBASP_err)**2 +
+                            (((KEBLATFlux1.value*T1KEBASP.value-T2KEBASP.value) /
+                            KEBLATFluxsum.value**2)*KEBLATFlux1_err)**2 +
+                            ((KEBLATFlux1.value/KEBLATFluxsum.value)*T2KEBASP_err)**2 +
+                            ((KEBLATFlux1.value*T2KEBASP.value-T1KEBASP.value /
+                            KEBLATFluxsum.value**2)*KEBLATFlux1_err)**2 ) 
     diff = ASPCAPTeff - FWSTemp
     sum = ASPCAPTeff + FWSTemp
     FWSTempASPCAPdiff = np.abs(diff) / (sum/2) * 100
+
     #print('ASPCAP temperature  = {0:.3f} +/- {1:.3}'.format(ASPCAPTeff, ASPCAPTeff_err)
     #print('Temperature from our calculation using ASPCAP and light curve analysis = {0:.3f} +/- {1:.3f}'.format(T1KEBASP, T1KEBASP_err)
     #print('The flux weighted sum of the temperatures we calculated is {0:.3f} +/- {1:.3f}'.format(FWSTemp, FWSTemp_err)
@@ -160,75 +177,79 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ### bandpass reported in the Stellar Evolution Database. 
 ##########################################################################################
 
-    makePlots = False
+    makePlots = True                         ###       "True" for HR diagrams!         ###
     
     amagkep1=-2.5*np.log10(kfluxRatio**(-1)) ### We find the apparent magnitude in the ###
     amagkep2=2.5* np.log10(kfluxRatio**(-1)) ### Kepler band through the apparent mag  ###
                                              ### flux relation with KEBLAT flux ratios.###
-    isochroneLogTeffs = []
-    isochroneLogggs = []
-    teff2s = []
-    teff2errs = []
 
     if starId == 5285607: 
         isofiles = ['isochrones/fehp00afep4_age1.txt', 'isochrones/fehm00afep8_age1.txt', 
-        'isochrones/fehp05afep2_age1.txt']
-        labels = ['1 Gyr $Z=0.01$', '1 Gyr $Z=0.09$', '1 Gyr $Z=0.57$']
+        'isochrones/fehp05afep2_age1.txt', 'isochrones/fehp02afep0_age2p5.txt']
+        labels = ['1 Gyr $Z=0.01$', '1 Gyr $Z=0.09$', '1 Gyr $Z=0.57$', '2.5 Gyr $Z=0.21$'] ### labels verified
 
-    if starId == 6864859:
-        isofiles = ['isochrones/fehm048afep0p8_age1.txt', 'isochrones/fehm00afep8_age1.txt', 
+    elif starId == 6864859:
+        isofiles = ['isochrones/fehm00afep8_age1.txt', 
         'isochrones/fehp02afep0_age2p5.txt', 'isochrones/fehp05afep0_age1.txt']
-        labels = ['1 Gyr $Z=-0.48$', '1 Gyr $Z=0$', '2.5 Gyr $Z=0.21', '1 Gyr $Z=0.56$']
+        labels = ['1 Gyr $Z=0.09$', '2.5 Gyr $Z=0.21$', '1 Gyr $Z=0.56$']
 
-    if starId == 6778289:
-        isofiles = ['isochrones/fehm05afep0_age1.txt', 'isochrones/fehm00afem2_age1.txt', 
+    elif starId == 6778289:
+        isofiles = ['isochrones/fehm00afem2_age1.txt', 
         'isochrones/fehm07afep0_age1.txt', 'isochrones/fehm07afep0_age2.txt']
-        labels = ['1 Gyr $Z=0.56$','1 Gyr $Z=0.6$', '1 Gyr $Z=0.7$', '2 Gyr $Z=0.7$']
+        labels = ['1 Gyr $Z=0.6$', '1 Gyr $Z=0.7$', '2 Gyr $Z=0.7$']
 
-    if starId == 4285087:
-        isofiles = ['isochrones/fehm048afep0p8_age1.txt', 'isochrones/fehm048afep0p8_age1p25.txt',
-        'isochrones/fehm048afep0p8_age1p5.txt', 'isochrones/fehm00afep8_age1.txt', 
+    elif starId == 4285087:
+        isofiles = ['isochrones/fehm048afep0p8_age1p5.txt', 'isochrones/fehm00afep8_age1.txt', 
         'isochrones/fehm00afep8_age1p25.txt', 'isochrones/fehm00afep8_age2.txt']
-        labels = ['1 Gyr $Z=-0.48$', '1.25 Gyr $Z=-0.48$', '1.5 Gyr $Z=-0.48$', '1 Gyr $Z=0.9$',
+        labels = ['1.5 Gyr $Z=-0.48$', '1 Gyr $Z=0.9$',
         '1.25 Gyr $Z=0.9$', '2 Gyr $Z=0.09$']
 
-    if starId == 6131659:
-       isofiles = ['isochrones/fehm1afep0_age1.txt', 'isochrones/fehm1afep0_age1p75.txt', 
-       'isochrones/fehm05afep0_age1.txt', 'isochrones/fehm048afep0p8_age1.txt', 
-       'isochrones/fehp00afep0_age1.txt', 'isochrones/fehp02afep0_age15.txt']
-       labels = ['1 Gyr $Z=-1.00$','1.75 Gyr $Z=-1.00$', '1 Gyr $Z=-0.56$','1 Gyr $Z=-0.48$',
-       '1 Gyr $Z=0$', '15 Gyr $Z=0.21$']
+    elif starId == 6131659:
+       isofiles = ['isochrones/fehp02afep0_age15.txt', 'isochrones/fehp05afep0_age1.txt',
+       'isochrones/fehp02afep0_age2p5.txt','isochrones/fehm07afep0_age2.txt']
+       labels = ['1 Gyr $Z=0.56$','2.5 Gyr $Z=0.21$','2 Gyr $Z=0.7$']
 
-    if starId == 6781535:
-       isofiles = ['isochrones/fehm05afep0_age1.txt', 'isochrones/fehm05afep0_age1p75.txt', 'isochrones/fehm048afep0p8_age1.txt',
-       'isochrones/fehm00afem2_age1.txt', 'isochrones/fehm07afep0_age1.txt','isochrones/fehm07afep0_age2.txt', 'isochrones/fehm00afep8_age3.txt']
+    elif starId == 6781535:
+       isofiles = ['isochrones/fehm05afep0_age1.txt', 'isochrones/fehm05afep0_age1p75.txt',
+       'isochrones/fehm048afep0p8_age1.txt', 'isochrones/fehm00afem2_age1.txt', 
+       'isochrones/fehm07afep0_age1.txt','isochrones/fehm07afep0_age2.txt', 
+       'isochrones/fehm00afep8_age3.txt']
        labels = ['1 Gyr $Z=-0.56$', '1.75 Gyr $Z=-0.56$', '1 Gyr $Z=-0.48$', 
        '1 Gyr $Z=0.6','1 Gyr $Z=0.07', '2 Gyr $Z=0.07', '3 Gyr $Z=0.09']
 
+    else: print('No Isochrone file specified')
+
     if makePlots == True:
+        isochroneLogTeffs = []
+        isochroneLogggs = []
         for isofile in isofiles:
             isochroneMass, isochroneLogTeff, isochroneLogg, kp = np.loadtxt(isofile, 
             unpack=True, usecols = (1, 2, 3, 13))
-        
-        m = np.where(isochroneLogg >= 4.1) ### this restricts the isochrone points used to ###
-                                           ### those with logg >= 4.1 in effect, this cuts ###
-                                           ### the isochrone down to only include the main ###
-                                           ### sequence....................................###
-        isochroneMass = isochroneMass[m]
-        isochroneLogTeff = isochroneLogTeff[m]
-        isochroneLogg = isochroneLogg[m]
-        kp = kp[m]                         ### apparent magnitude in kepler bandpass from  ###
-                                           ### Stellar evolution database.                 ###
-        #magdiff1 = (amagkep1 - kp)
-        #fit = np.argmin(np.abs(magdiff1)) 
-        #fit = np.argmin(np.abs(isochroneSb/sb1 - kp)) 
-        #tratio = 10**isochroneLogTeff[fit]/ASPCAPTeff   ### Finds the tratio at for the fit###
-    
-    
-        ###log1_err, T1KEBASP_err
+            m = np.where(isochroneLogg >= 4.1) ### this restricts the isochrone points ###
+                                               ### used to those with logg >= 4.1 in   ###
+                                               ### effect, this cuts the isochrone down###
+                                               ### to only include the main sequence.. ###
+            isochroneMass = isochroneMass[m]
+            isochroneLogTeff = isochroneLogTeff[m]
+            isochroneLogg = isochroneLogg[m]
+            kp = kp[m]                         ### apparent magnitude in kepler bandpass###
+                                               ### Stellar evolution database.         ###
 
-        T1KEBASPu = T1KEBASP/u.K
-        plt.errorbar(np.log10(T1KEBASPu), logg1, yerr=logg1_err, xerr=T1KEBASP_err, color='C2', ls='None', marker='o', label='Primary')
+            isochroneLogTeffs.append(isochroneLogTeff)
+            isochroneLogggs.append(isochroneLogg)
+        #sns.set()
+        sns.color_palette("colorblind", n_colors=7)        
+        for logteff, logg, label in zip(isochroneLogTeffs, isochroneLogggs, labels):
+            with sns.color_palette("colorblind", 5):
+                plt.plot(logteff, logg, ls=':', label=label)
+
+            #print('logteff =', logteff, 'logg =', logg, 'isochroneLogTeff =', isochroneLogTeff)
+
+        with sns.color_palette("colorblind", 2):
+            plt.plot(np.log10(T1KEBASP.value), logg1, color='C3', ls='None', marker='o', label='Primary')
+            plt.plot(np.log10(T2KEBASP.value), logg2, color='C2', ls='None', marker='o', label='Secondary')
+
+        #plt.errorbar(np.log10(T1KEBASP.value), logg1, yerr=logg1_err, xerr=T1KEBASP_err, color='C2', ls='None', marker='o', label='Primary')
         #plt.errorbar(np.log10(teff2s[0]), logg2, yerr=logg2_err, xerr=Teff2err, color='C3', ls='None', marker='o', label='Secondary')
         #plt.errorbar(np.log10(teff2s[0]), logg2, yerr=logg2_err, color='C3', ls='None', marker='o', label='Secondary')
         plt.gca().invert_yaxis()           ### Inverts Y axis (increasing downward)        ###
@@ -237,19 +258,13 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
         plt.xlabel('$\log T_{\mathrm{eff}}$')
         plt.title(starId)
         plt.legend()
-        #plt.savefig('figures/HRDiagrams/5286507_1.png')
-        #plt.savefig('figures/HRDiagrams/5286507_1.jpeg')
         plt.show()
+        
 
+print('##############################################################')
+print('Analysis Complete, see above')
 
 ###############################   Compare flux ratios   ################################## 
 ### Compare the flux ratios from BF and KEBLAT after applying Bolometric corrections   ###
 ### between the H and Kepler bandpasses (color).                                       ###
 ##########################################################################################
-    
-    
-    #BC_KeplerLC1 = 1+(1.349e(-4)/u.K)(T1KEBASP - 5934*u.K) + (-3.120e(-9)/u.K**2)
-    #BC_KeplerLC2 = 1+(1.349e(-4)/u.K)(T2KEBASP - 5934*u.K) + (-3.120e(-9)/u.K**2)
-    #BC_HBF1 = 1+(1.349e(-4)/u.K)(T1KEBASP - 5934*u.K) + (-3.120e(-9)/u.K**2)
-    #BC_HBF2 = 1+(1.349e(-4)/u.K)(T2KEBASP - 5934*u.K) + (-3.120e(-9)/u.K**2)
-    #KEBLATbolo = F2overF1 * 
