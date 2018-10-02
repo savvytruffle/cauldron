@@ -84,11 +84,16 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ##########################################################################################
 
     R1 = kRsum / (1 + kradRatio)
-    R1_err = (R1.value) * np.sqrt((kRsum_err / kRsum.value)**2)
+    #R1_err = (R1.value) * np.sqrt((kRsum_err / kRsum.value)**2)
+    R1_err = np.sqrt((kRsum_err / kRsum.value)**2)
     R2 = kRsum - R1
-    R2_err = (R2.value) * np.sqrt(((kRsum_err/kRsum.value)**2) + (R1_err/R1.value)**2)
+    #R2_err = (R2.value) * np.sqrt(((kRsum_err/kRsum.value)**2) + (R1_err/R1.value)**2)
+    R2_err = np.sqrt(((kRsum_err/kRsum.value)**2) + (R1_err/R1.value)**2)
+
     R2oR1 = R2/R1
-    R2oR1_err = R2oR1 * np.sqrt((R2_err/R2.value)**2 + (R1_err/R1.value)**2)
+    #R2oR1_err = R2oR1 * np.sqrt((R2_err/R2.value)**2 + (R1_err/R1.value)**2)
+
+    R2oR1_err = np.sqrt((R2_err/R2.value)**2 + (R1_err/R1.value)**2)
 
 ######################### Calculate the sum of the KEBLAT fluxes #########################
 ### Using the ASPCAP temperature, the sum of the squared radii and the distance to our ###
@@ -101,11 +106,17 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
     KEBLATFluxsum_err = np.sqrt( ((ASPCAPTeff_err/ASPCAPTeff.value**2)*R1_err**2)+
                            ((R2_err/R2.value)**2)+(GAIAdistance_err/(GAIAdistance.value)**2))
     KEBLATFlux1 = KEBLATFluxsum / (1 + kfluxRatio)
-    KEBLATFlux1_err = (KEBLATFlux1.value) * np.sqrt((KEBLATFluxsum_err/(KEBLATFluxsum.value))**2 +
+    #KEBLATFlux1_err = (KEBLATFlux1.value) * np.sqrt((KEBLATFluxsum_err/(KEBLATFluxsum.value))**2 +
+    #                    (kfluxRatioErr/kfluxRatio)**2)
+    
+    KEBLATFlux1_err = np.sqrt((KEBLATFluxsum_err/(KEBLATFluxsum.value))**2 +
                            (kfluxRatioErr/kfluxRatio)**2)
     KEBLATFlux2 = KEBLATFluxsum - KEBLATFlux1
-    KEBLATFlux2_err = (KEBLATFlux2.value) * np.sqrt((KEBLATFluxsum_err/(KEBLATFluxsum.value))**2 +
+    #KEBLATFlux2_err = (KEBLATFlux2.value) * np.sqrt((KEBLATFluxsum_err/(KEBLATFluxsum.value))**2 +
+    #                       (KEBLATFlux1_err/KEBLATFlux1.value)**2)
+    KEBLATFlux2_err = np.sqrt((KEBLATFluxsum_err/(KEBLATFluxsum.value))**2 +
                            (KEBLATFlux1_err/KEBLATFlux1.value)**2)
+                           
     F2overF1 = KEBLATFlux2/KEBLATFlux1
     
     print('R1 = {0:.3f} +/- {1:.3f}, R2 = {2:.3f} +/- {3:.3f} R2/R1 = {4:.3f}, +/- {5:.3f}'
@@ -123,15 +134,15 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
                             (R1.to(u.m))**2))**(1/4)
     T1KEBASP_err = np.sqrt( ((T1KEBASP.value)/4*(KEBLATFlux1.value)*KEBLATFlux1_err)**2 +
                             ((T1KEBASP.value)/2*(GAIAdistance.value)*GAIAdistance_err)**2 +
-                            ((-T1KEBASP.value)/2*(R1.value)*R1_err)**2 +
-                            (const.sigma_sb.value * R1_err) )
+                            ((-T1KEBASP.value)/2*(R1.value)*R1_err)**2 
+                            +(const.sigma_sb.value * R1_err) )
 
     T2KEBASP = ((KEBLATFlux2 * (GAIAdistance.to(u.m))**2) / (const.sigma_sb * 
                             (R2.to(u.m))**2))**(1/4)
     T2KEBASP_err = np.sqrt( ((T2KEBASP.value)/4*(KEBLATFlux2.value)*KEBLATFlux2_err)**2 +
                             ((T2KEBASP.value)/2*(GAIAdistance.value)*GAIAdistance_err)**2 +
-                            ((-T2KEBASP.value)/(2*(R2.value))*R2_err)**2 + 
-                            (const.sigma_sb.value * R2_err) )
+                            ((-T2KEBASP.value)/(2*(R2.value))*R2_err)**2 
+                            + (const.sigma_sb.value * R2_err) )
 
     T2oT1KEBASP = (T2KEBASP/T1KEBASP)
 
@@ -177,7 +188,7 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ### bandpass reported in the Stellar Evolution Database. 
 ##########################################################################################
 
-    makePlots = True                         ###       "True" for HR diagrams!         ###
+    makePlots = False                        ###       "True" for HR diagrams!         ###
     
     amagkep1=-2.5*np.log10(kfluxRatio**(-1)) ### We find the apparent magnitude in the ###
     amagkep2=2.5* np.log10(kfluxRatio**(-1)) ### Kepler band through the apparent mag  ###
