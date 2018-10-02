@@ -1,5 +1,6 @@
 from __future__ import print_function
 import numpy as np
+import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.integrate import simps
 from numpy import trapz
@@ -55,9 +56,9 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ### to the SoP ratio.                                                                  ###
 ##########################################################################################
 
-    PAreas = (PAmp*PWidth)/(2.35*0.3984)           #one value per visit (primary)
-    SAreas = (Samp*SWidth)/(2.35*0.3984)           #one value per visit (secondary)
-    SoP = np.mean(SAreas)/np.mean(PAreas)          #secondary over primary ratio of mean BF areas
+    PAreas = (PAmp*PWidth)/(2.35*0.3984)           ### Primary (one value per visit) 
+    SAreas = (Samp*SWidth)/(2.35*0.3984)           ### Secondary (one value per visit)
+    SoP = np.mean(SAreas)/np.mean(PAreas)          ### secondary over primary ratio of mean BF areas
     Psum = 0
     Ssum = 0
     for PArea, SArea in zip(PAreas, SAreas):
@@ -93,7 +94,6 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ### Using the ASPCAP temperature, the sum of the squared radii and the distance to our ###
 ### targets from GAIA(Bailer-Jones et al 2018)and follow through with error propagation###
 ##########################################################################################
-
 
     KEBLATFluxsum = const.sigma_sb * ASPCAPTeff**4 * kRsum**2 / GAIAdistance**2
     
@@ -159,10 +159,9 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 
 #################################### Calculate log(g) #################################### 
 ### Calculate log(g) to put on our HR diagrams from KEBLAT masses and individual radii ###
-### found above just found and propagate relevant errors                               ###
+### found above and propagate relevant errors                                          ###
 ##########################################################################################
 
-    
     logg1 = u.Dex((const.G * kM1 / R1**2).cgs)
     g1_err = np.sqrt( (kM1_err.to(u.g).value * const.G.cgs.value/(R1.to(u.cm).value)**2)**2 + 
                       (R1_err.to(u.cm).value * (-2*const.G.cgs.value*kM1.to(u.g).value/(R1.to(u.cm).value)**3))**2 )
@@ -197,96 +196,104 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ### bandpass reported in the Stellar Evolution Database. 
 ##########################################################################################
 
-    makePlots = False
+    makePlots = False                        ###       "True" for HR diagrams!         ###
     
     amagkep1=-2.5*np.log10(kfluxRatio**(-1)) ### We find the apparent magnitude in the ###
     amagkep2=2.5* np.log10(kfluxRatio**(-1)) ### Kepler band through the apparent mag  ###
                                              ### flux relation with KEBLAT flux ratios.###
-    isochroneLogTeffs = []
-    isochroneLogggs = []
-    teff2s = []
-    teff2errs = []
 
     if starId == 5285607: 
         isofiles = ['isochrones/fehp00afep4_age1.txt', 'isochrones/fehm00afep8_age1.txt', 
-        'isochrones/fehp05afep2_age1.txt']
-        labels = ['1 Gyr $Z=0.01$', '1 Gyr $Z=0.09$', '1 Gyr $Z=0.57$']
+        'isochrones/fehp05afep2_age1.txt', 'isochrones/fehp02afep0_age2p5.txt']
+        labels = ['1 Gyr $Z=0.01$', '1 Gyr $Z=0.09$', '1 Gyr $Z=0.57$', '2.5 Gyr $Z=0.21$'] ### labels verified
 
-    if starId == 6864859:
-        isofiles = ['isochrones/fehm048afep0p8_age1.txt', 'isochrones/fehm00afep8_age1.txt', 
+    elif starId == 6864859:
+        isofiles = ['isochrones/fehm00afep8_age1.txt', 
         'isochrones/fehp02afep0_age2p5.txt', 'isochrones/fehp05afep0_age1.txt']
-        labels = ['1 Gyr $Z=-0.48$', '1 Gyr $Z=0$', '2.5 Gyr $Z=0.21', '1 Gyr $Z=0.56$']
+        labels = ['1 Gyr $Z=0.09$', '2.5 Gyr $Z=0.21$', '1 Gyr $Z=0.56$']
 
-    if starId == 6778289:
-        isofiles = ['isochrones/fehm05afep0_age1.txt', 'isochrones/fehm00afem2_age1.txt', 
+    elif starId == 6778289:
+        isofiles = ['isochrones/fehm00afem2_age1.txt', 
         'isochrones/fehm07afep0_age1.txt', 'isochrones/fehm07afep0_age2.txt']
-        labels = ['1 Gyr $Z=0.56$','1 Gyr $Z=0.6$', '1 Gyr $Z=0.7$', '2 Gyr $Z=0.7$']
+        labels = ['1 Gyr $Z=0.6$', '1 Gyr $Z=0.7$', '2 Gyr $Z=0.7$']
 
-    if starId == 4285087:
-        isofiles = ['isochrones/fehm048afep0p8_age1.txt', 'isochrones/fehm048afep0p8_age1p25.txt',
-        'isochrones/fehm048afep0p8_age1p5.txt', 'isochrones/fehm00afep8_age1.txt', 
+    elif starId == 4285087:
+        isofiles = ['isochrones/fehm048afep0p8_age1p5.txt', 'isochrones/fehm00afep8_age1.txt', 
         'isochrones/fehm00afep8_age1p25.txt', 'isochrones/fehm00afep8_age2.txt']
-        labels = ['1 Gyr $Z=-0.48$', '1.25 Gyr $Z=-0.48$', '1.5 Gyr $Z=-0.48$', '1 Gyr $Z=0.9$',
+        labels = ['1.5 Gyr $Z=-0.48$', '1 Gyr $Z=0.9$',
         '1.25 Gyr $Z=0.9$', '2 Gyr $Z=0.09$']
 
-    if starId == 6131659:
-       isofiles = ['isochrones/fehm1afep0_age1.txt', 'isochrones/fehm1afep0_age1p75.txt', 
-       'isochrones/fehm05afep0_age1.txt', 'isochrones/fehm048afep0p8_age1.txt', 
-       'isochrones/fehp00afep0_age1.txt', 'isochrones/fehp02afep0_age15.txt']
-       labels = ['1 Gyr $Z=-1.00$','1.75 Gyr $Z=-1.00$', '1 Gyr $Z=-0.56$','1 Gyr $Z=-0.48$',
-       '1 Gyr $Z=0$', '15 Gyr $Z=0.21$']
+    elif starId == 6131659:
+       isofiles = ['isochrones/fehp02afep0_age15.txt', 'isochrones/fehp05afep0_age1.txt',
+       'isochrones/fehp02afep0_age2p5.txt','isochrones/fehm07afep0_age2.txt']
+       labels = ['1 Gyr $Z=0.56$','2.5 Gyr $Z=0.21$','2 Gyr $Z=0.7$']
 
-    if starId == 6781535:
-       isofiles = ['isochrones/fehm05afep0_age1.txt', 'isochrones/fehm05afep0_age1p75.txt', 'isochrones/fehm048afep0p8_age1.txt',
-       'isochrones/fehm00afem2_age1.txt', 'isochrones/fehm07afep0_age1.txt','isochrones/fehm07afep0_age2.txt', 'isochrones/fehm00afep8_age3.txt']
+    elif starId == 6781535:
+       isofiles = ['isochrones/fehm05afep0_age1.txt', 'isochrones/fehm05afep0_age1p75.txt',
+       'isochrones/fehm048afep0p8_age1.txt', 'isochrones/fehm00afem2_age1.txt', 
+       'isochrones/fehm07afep0_age1.txt','isochrones/fehm07afep0_age2.txt', 
+       'isochrones/fehm00afep8_age3.txt']
        labels = ['1 Gyr $Z=-0.56$', '1.75 Gyr $Z=-0.56$', '1 Gyr $Z=-0.48$', 
        '1 Gyr $Z=0.6','1 Gyr $Z=0.07', '2 Gyr $Z=0.07', '3 Gyr $Z=0.09']
 
+    else: print('No Isochrone file specified')
+
     if makePlots == True:
+        isochroneLogTeffs = []
+        isochroneLogggs = []
         for isofile in isofiles:
             isochroneMass, isochroneLogTeff, isochroneLogg, kp = np.loadtxt(isofile, 
             unpack=True, usecols = (1, 2, 3, 13))
-        
-        m = np.where(isochroneLogg >= 4.1) ### this restricts the isochrone points used to ###
-                                           ### those with logg >= 4.1 in effect, this cuts ###
-                                           ### the isochrone down to only include the main ###
-                                           ### sequence....................................###
-        isochroneMass = isochroneMass[m]
-        isochroneLogTeff = isochroneLogTeff[m]
-        isochroneLogg = isochroneLogg[m]
-        kp = kp[m]                         ### apparent magnitude in kepler bandpass from  ###
-                                           ### Stellar evolution database.                 ###
-        #magdiff1 = (amagkep1 - kp)
-        #fit = np.argmin(np.abs(magdiff1)) 
-        #fit = np.argmin(np.abs(isochroneSb/sb1 - kp)) 
-        #tratio = 10**isochroneLogTeff[fit]/ASPCAPTeff   ### Finds the tratio at for the fit###
-    
-    
-        ###log1_err, T1KEBASP_err
+            m = np.where(isochroneLogg >= 4.1) ### this restricts the isochrone points ###
+                                               ### used to those with logg >= 4.1 in   ###
+                                               ### effect, this cuts the isochrone down###
+                                               ### to only include the main sequence.. ###
 
-        T1KEBASPu = T1KEBASP/u.K
-        plt.errorbar(np.log10(T1KEBASPu), logg1, yerr=logg1_err, xerr=T1KEBASP_err, color='C2', ls='None', marker='o', label='Primary')
+            #m = np.where(isochroneLogg>= 3.85)###           TEST for 5285607          ###
+                                               ### In its HR diagram, KIC 5285607 primary#
+                                               ### had a log(g) < ~3.7. This test is to###
+                                               ### see if the isochrones selected for  ###
+                                               ### this target will follow the primary ###
+                                               ### to its log(g).     (Positive)       ###
+
+            isochroneMass = isochroneMass[m]
+            isochroneLogTeff = isochroneLogTeff[m]
+            isochroneLogg = isochroneLogg[m]
+            kp = kp[m]                         ### apparent magnitude in kepler bandpass###
+                                               ### Stellar evolution database.         ###
+
+            isochroneLogTeffs.append(isochroneLogTeff)
+            isochroneLogggs.append(isochroneLogg)
+        #sns.set()
+        sns.color_palette("colorblind", n_colors=7)        
+        for logteff, logg, label in zip(isochroneLogTeffs, isochroneLogggs, labels):
+            with sns.color_palette("colorblind", 5):
+                plt.plot(logteff, logg, ls=':', label=label)
+
+            #print('logteff =', logteff, 'logg =', logg, 'isochroneLogTeff =', isochroneLogTeff)
+
+        with sns.color_palette("colorblind", 2):     ### Color-blindness color palette ###
+            plt.plot(np.log10(T1KEBASP.value), logg1, color='C3', ls='None', marker='o', label='Primary')
+            #plt.plot(np.log10(T2KEBASP.value), logg2, color='C2', ls='None', marker='o', label='Secondary')
+            plt.plot(np.log10(T2KEBASP.value), logg2, color='C2', ls='None', marker='o', markersize=5,
+            markeredgewidth=2, markeredgecolor='g', markerfacecolor='None', label='Secondary')
+
+
+        #plt.errorbar(np.log10(T1KEBASP.value), logg1, yerr=logg1_err, xerr=T1KEBASP_err, color='C2', ls='None', marker='o', label='Primary')
         #plt.errorbar(np.log10(teff2s[0]), logg2, yerr=logg2_err, xerr=Teff2err, color='C3', ls='None', marker='o', label='Secondary')
         #plt.errorbar(np.log10(teff2s[0]), logg2, yerr=logg2_err, color='C3', ls='None', marker='o', label='Secondary')
-        plt.gca().invert_yaxis()           ### Inverts Y axis (increasing downward)        ###
-        plt.gca().invert_xaxis()           ### Inverts X axis (increasing to the left)     ###
+        plt.gca().invert_yaxis()               ### Inverts Y axis (increasing downward)###
+        plt.gca().invert_xaxis()               ### Inverts X axis (increasing to left) ###
         plt.ylabel('$\log g$')
         plt.xlabel('$\log T_{\mathrm{eff}}$')
         plt.title(starId)
         plt.legend()
-        #plt.savefig('figures/HRDiagrams/5286507_1.png')
-        #plt.savefig('figures/HRDiagrams/5286507_1.jpeg')
         plt.show()
 
+print('##############################################################')
+print('Analysis Complete, see above')
 
 ###############################   Compare flux ratios   ################################## 
 ### Compare the flux ratios from BF and KEBLAT after applying Bolometric corrections   ###
 ### between the H and Kepler bandpasses (color).                                       ###
 ##########################################################################################
-    
-    
-    #BC_KeplerLC1 = 1+(1.349e(-4)/u.K)(T1KEBASP - 5934*u.K) + (-3.120e(-9)/u.K**2)
-    #BC_KeplerLC2 = 1+(1.349e(-4)/u.K)(T2KEBASP - 5934*u.K) + (-3.120e(-9)/u.K**2)
-    #BC_HBF1 = 1+(1.349e(-4)/u.K)(T1KEBASP - 5934*u.K) + (-3.120e(-9)/u.K**2)
-    #BC_HBF2 = 1+(1.349e(-4)/u.K)(T2KEBASP - 5934*u.K) + (-3.120e(-9)/u.K**2)
-    #KEBLATbolo = F2overF1 * 
