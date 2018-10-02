@@ -229,6 +229,14 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
                                                ### used to those with logg >= 4.1 in   ###
                                                ### effect, this cuts the isochrone down###
                                                ### to only include the main sequence.. ###
+
+            #m = np.where(isochroneLogg>= 3.85)###           TEST for 5285607          ###
+                                               ### In its HR diagram, KIC 5285607 primary#
+                                               ### had a log(g) < ~3.7. This test is to###
+                                               ### see if the isochrones selected for  ###
+                                               ### this target will follow the primary ###
+                                               ### to its log(g).     (Positive)       ###
+
             isochroneMass = isochroneMass[m]
             isochroneLogTeff = isochroneLogTeff[m]
             isochroneLogg = isochroneLogg[m]
@@ -245,21 +253,23 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 
             #print('logteff =', logteff, 'logg =', logg, 'isochroneLogTeff =', isochroneLogTeff)
 
-        with sns.color_palette("colorblind", 2):
+        with sns.color_palette("colorblind", 2):     ### Color-blindness color palette ###
             plt.plot(np.log10(T1KEBASP.value), logg1, color='C3', ls='None', marker='o', label='Primary')
-            plt.plot(np.log10(T2KEBASP.value), logg2, color='C2', ls='None', marker='o', label='Secondary')
+            #plt.plot(np.log10(T2KEBASP.value), logg2, color='C2', ls='None', marker='o', label='Secondary')
+            plt.plot(np.log10(T2KEBASP.value), logg2, color='C2', ls='None', marker='o', markersize=5,
+            markeredgewidth=2, markeredgecolor='g', markerfacecolor='None', label='Secondary')
+
 
         #plt.errorbar(np.log10(T1KEBASP.value), logg1, yerr=logg1_err, xerr=T1KEBASP_err, color='C2', ls='None', marker='o', label='Primary')
         #plt.errorbar(np.log10(teff2s[0]), logg2, yerr=logg2_err, xerr=Teff2err, color='C3', ls='None', marker='o', label='Secondary')
         #plt.errorbar(np.log10(teff2s[0]), logg2, yerr=logg2_err, color='C3', ls='None', marker='o', label='Secondary')
-        plt.gca().invert_yaxis()           ### Inverts Y axis (increasing downward)        ###
-        plt.gca().invert_xaxis()           ### Inverts X axis (increasing to the left)     ###
+        plt.gca().invert_yaxis()               ### Inverts Y axis (increasing downward)###
+        plt.gca().invert_xaxis()               ### Inverts X axis (increasing to left) ###
         plt.ylabel('$\log g$')
         plt.xlabel('$\log T_{\mathrm{eff}}$')
         plt.title(starId)
         plt.legend()
         plt.show()
-        
 
 print('##############################################################')
 print('Analysis Complete, see above')
