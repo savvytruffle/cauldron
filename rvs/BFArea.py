@@ -95,15 +95,19 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ### targets from GAIA(Bailer-Jones et al 2018)and follow through with error propagation###
 ##########################################################################################
 
-    KEBLATFluxsum = const.sigma_sb * ASPCAPTeff**4 * kRsum**2 / GAIAdistance**2
+    # MR is not entirely sure which of these is right ...
+    #KEBLATFluxsum = (const.sigma_sb * ASPCAPTeff**4 * kRsum**2) / (GAIAdistance**2)
+    KEBLATFluxsum = (const.sigma_sb * ASPCAPTeff**4 * (R1**2 + R2**2)) / (GAIAdistance**2)
     
     # partial derivatives for error propagation
-    dFsumdDist = -2*kRsum.to(u.cm).value**2 * const.sigma_sb.cgs.value * ASPCAPTeff.value**4 / GAIAdistance.to(u.cm).value**3
-    dFsumdRsum = 2*kRsum.to(u.cm).value * const.sigma_sb.cgs.value * ASPCAPTeff.value**4 / GAIAdistance.to(u.cm).value**2
-    dFsumdTeff = 4*kRsum.to(u.cm).value**2 * const.sigma_sb.cgs.value * ASPCAPTeff.value**3 / GAIAdistance.to(u.cm).value**2
+    dFsumdDist = -2 * (R1.to(u.cm).value**2 + R1.to(u.cm).value**2) * const.sigma_sb.cgs.value * ASPCAPTeff.value**4 / GAIAdistance.to(u.cm).value**3
+    dFsumdR1 = 2 * R1.to(u.cm).value * const.sigma_sb.cgs.value * ASPCAPTeff.value**4 / GAIAdistance.to(u.cm).value**2
+    dFsumdR2 = 2 * R2.to(u.cm).value * const.sigma_sb.cgs.value * ASPCAPTeff.value**4 / GAIAdistance.to(u.cm).value**2
+    dFsumdTeff = 4 * (R1.to(u.cm).value**2 + R1.to(u.cm).value**2) * const.sigma_sb.cgs.value * ASPCAPTeff.value**3 / GAIAdistance.to(u.cm).value**2
     
     KEBLATFluxsum_err = np.sqrt( (GAIAdistance_err.to(u.cm).value * dFsumdDist)**2 + 
-                                 (kRsum_err.to(u.cm).value * dFsumdRsum)**2 +
+                                 (R1_err.to(u.cm).value * dFsumdR1)**2 +
+                                 (R2_err.to(u.cm).value * dFsumdR2)**2 +
                                  (ASPCAPTeff_err.value * dFsumdTeff)**2 ) * u.erg/u.cm**2/u.s
     KEBLATFlux1 = KEBLATFluxsum / (1 + kfluxRatio)
     KEBLATFlux1_err = KEBLATFlux1.cgs * np.sqrt((KEBLATFluxsum_err/KEBLATFluxsum)**2 + 
