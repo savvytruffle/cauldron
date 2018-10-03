@@ -1,11 +1,13 @@
 from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import cm
 from scipy.integrate import simps
 from numpy import trapz
 from sys import argv
 from astropy import units as u
 from astropy import constants as const
+from sklearn.preprocessing import StandardScaler
 
 ##########################################################################################
 ##################################### BFArea.py ##########################################
@@ -18,16 +20,20 @@ from astropy import constants as const
 starIds = [5285607, 6864859, 6778289, 6449358, 4285087, 6131659, 6781535]                 #KEPLER Input Catalog
 ASPCAPTeffs = [6495, 6417, 6572, 6237, 5664, 4845, 5749] * u.K                            #ASPCAP Effective Temperature
 ASPCAPTeff_errs = [156, 159, 162, 179, 146, 98, 125] * u.K                                #Error on the above 
-kRsums =     [3.489, 3.104, 2.745, np.nan, 2.033, 1.5251, 2.0408] * u.Rsun                #KEBLAT Radius Sums [R_sun]
-kRsum_errs = [0.051, 0.016, 0.0086, np.nan, 0.0080, 0.0052, 0.0213] * u.Rsun              #KEBLAT Radius Sum errors
-kM1s =     [1.554, 1.354, 1.510, np.nan, 1.137, 0.9422, 1.0057] * u.Msun                  #KEBLAT Mass_1
-kM1_errs = [0.023, 0.029, 0.022, np.nan, 0.013, 0.0093, 0.0327] * u.Msun                  #KEBLAT Mass_1 errors
-kM2s =     [1.333, 1.411, 1.091, np.nan, 1.103, 0.7028, 1.0346] * u.Msun                  #KEBLAT Mass_2
-kM2_errs = [0.020, 0.028, 0.018, np.nan, 0.014, 0.0078, 0.0330] * u.Msun                  #KEBLAT Mass_2 errors
-kfluxRatios = [0.258, 1.407, 0.19138, np.nan, 0.901, 0.1483, 0.9201]                      #KEBLAT Flux ratios 
-kfluxRatioErrs = [0.046, 0.101, 2.6e-5, np.nan, 0.080, 0.0017, 0.0524]                    #KEBLAT Flux ratios errors 
-kradRatios = [0.551, 1.149, 0.57093, np.nan, 0.969, 0.6799, 0.8641]                       #KEBLAT Radius Ratios 
-kradRatiosErrs = [0.048, 0.020, 0.013, np.nan, 0.0080, 0.0057, 0.0275]                    #KEBLAT Radius Ratio errors
+kRsums =     [3.489, 3.104, 2.745, 2.80, 2.033, 1.5251, 2.0408] * u.Rsun                #KEBLAT Radius Sums [R_sun]
+R1s = [2.250, 1.444, 1.747, 2.11, 1.033, 0.908, 1.095] * u.Rsun                         #Calculated from the analysis below
+R1_errs = [0.033, 0.007,  0.005, 0, 0.004, 0.003, 0.011] * u.Rsun                    #Calculated from the analysis below
+R2s = [1.239, 1.660, 0.998, 0.692, 1.000, 0.617, 0.946] * u.Rsun                         #Calculated from the analysis below
+R2_errs = [0.026, 0.012, 0.004, 0, 0.006, 0.003, 0.014] * u.Rsun                     #Calculated from the analysis below
+kRsum_errs = [0.051, 0.016, 0.0086, 0, 0.0080, 0.0052, 0.0213] * u.Rsun              #KEBLAT Radius Sum errors
+kM1s =     [1.554, 1.354, 1.510, 1.93, 1.137, 0.9422, 1.0057] * u.Msun                  #KEBLAT Mass_1
+kM1_errs = [0.023, 0.029, 0.022, 0, 0.013, 0.0093, 0.0327] * u.Msun                  #KEBLAT Mass_1 errors
+kM2s =     [1.333, 1.411, 1.091, 0.783, 1.103, 0.7028, 1.0346] * u.Msun                  #KEBLAT Mass_2
+kM2_errs = [0.020, 0.028, 0.018, 0, 0.014, 0.0078, 0.0330] * u.Msun                  #KEBLAT Mass_2 errors
+kfluxRatios = [0.258, 1.407, 0.19138, 0.107, 0.901, 0.1483, 0.9201]                      #KEBLAT Flux ratios 
+kfluxRatioErrs = [0.046, 0.101, 2.6e-5, 0, 0.080, 0.0017, 0.0524]                    #KEBLAT Flux ratios errors 
+kradRatios = [0.551, 1.149, 0.57093, 0.328, 0.969, 0.6799, 0.8641]                       #KEBLAT Radius Ratios 
+kradRatiosErrs = [0.048, 0.020, 0.013, 0, 0.0080, 0.0057, 0.0275]                    #KEBLAT Radius Ratio errors
 GAIAdistances =  [799.7441, 671.2761, 1099.7471, 835.1428, 617.665, np.nan, np.nan] * u.pc   #Gaia distances 
 GAIAdistance_errs = [13.8152, 10.8597, 26.8496, 18.4130, 11.9031, np.nan, np.nan] * u.pc     #Error on distances
 
@@ -199,11 +205,13 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ### bandpass reported in the Stellar Evolution Database. 
 ##########################################################################################
 
-    makePlots = True                        ###       "True" for HR diagrams!         ###
+    makeHRPlots = True                       ###       "True" for HR diagrams!         ###
     
     amagkep1=-2.5*np.log10(kfluxRatio**(-1)) ### We find the apparent magnitude in the ###
     amagkep2=2.5* np.log10(kfluxRatio**(-1)) ### Kepler band through the apparent mag  ###
                                              ### flux relation with KEBLAT flux ratios.###
+
+
 
     if starId == 5285607: 
         isofiles = ['isochrones/fehp00afep4_age1.txt', 'isochrones/fehm00afep8_age1.txt', 
@@ -219,6 +227,11 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
         isofiles = ['isochrones/fehm00afem2_age1.txt', 
         'isochrones/fehm07afep0_age1.txt', 'isochrones/fehm07afep0_age2.txt']
         labels = ['1 Gyr $Z=0.6$', '1 Gyr $Z=0.7$', '2 Gyr $Z=0.7$']
+        
+    elif starId == 6449358:
+        isofiles = ['isochrones/fehm00afem2_age1.txt', 
+        'isochrones/fehm07afep0_age1.txt', 'isochrones/fehm07afep0_age2.txt','isochrones/fehp00afep4_age1.txt']
+        labels = ['1 Gyr $Z=0.6$', '1 Gyr $Z=0.7$', '2 Gyr $Z=0.7$','1 Gyr $Z=0.01$']
 
     elif starId == 4285087:
         isofiles = ['isochrones/fehm048afep0p8_age1p5.txt', 'isochrones/fehm00afep8_age1.txt', 
@@ -226,33 +239,34 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
         labels = ['1.5 Gyr $Z=-0.48$', '1 Gyr $Z=0.9$',
         '1.25 Gyr $Z=0.9$', '2 Gyr $Z=0.09$']
 
-#    elif starId == 6131659:
-#       isofiles = ['isochrones/fehp02afep0_age15.txt', 'isochrones/fehp05afep0_age1.txt',
-#       'isochrones/fehp02afep0_age2p5.txt','isochrones/fehm07afep0_age2.txt']
-#       labels = ['1 Gyr $Z=0.56$','2.5 Gyr $Z=0.21$','2 Gyr $Z=0.7$']
+    elif starId == 6131659:                  ###   No Gaia distances for this target   ###
+       isofiles = ['isochrones/fehp02afep0_age15.txt', 'isochrones/fehp05afep0_age1.txt',
+       'isochrones/fehp02afep0_age2p5.txt','isochrones/fehm07afep0_age2.txt']
+       labels = ['1 Gyr $Z=0.56$','2.5 Gyr $Z=0.21$','2 Gyr $Z=0.7$']
 
-#    elif starId == 6781535:
-#       isofiles = ['isochrones/fehm05afep0_age1.txt', 'isochrones/fehm05afep0_age1p75.txt',
-#       'isochrones/fehm048afep0p8_age1.txt', 'isochrones/fehm00afem2_age1.txt', 
-#       'isochrones/fehm07afep0_age1.txt','isochrones/fehm07afep0_age2.txt', 
-#       'isochrones/fehm00afep8_age3.txt']
-#       labels = ['1 Gyr $Z=-0.56$', '1.75 Gyr $Z=-0.56$', '1 Gyr $Z=-0.48$', 
-#       '1 Gyr $Z=0.6','1 Gyr $Z=0.07', '2 Gyr $Z=0.07', '3 Gyr $Z=0.09']
+    elif starId == 6781535:                  ###   No Gaia distances for this target   ###
+       isofiles = ['isochrones/fehm05afep0_age1.txt', 'isochrones/fehm05afep0_age1p75.txt',
+       'isochrones/fehm048afep0p8_age1.txt', 'isochrones/fehm00afem2_age1.txt', 
+       'isochrones/fehm07afep0_age1.txt','isochrones/fehm07afep0_age2.txt', 
+       'isochrones/fehm00afep8_age3.txt']
+       labels = ['1 Gyr $Z=-0.56$', '1.75 Gyr $Z=-0.56$', '1 Gyr $Z=-0.48$', 
+       '1 Gyr $Z=0.6','1 Gyr $Z=0.07', '2 Gyr $Z=0.07', '3 Gyr $Z=0.09']
 
     else: print('No Isochrone file specified')
 
-    if makePlots == True:
+    if makeHRPlots == True:
         isochroneLogTeffs = []
         isochroneLogggs = []
+
         for isofile in isofiles:
             isochroneMass, isochroneLogTeff, isochroneLogg, kp = np.loadtxt(isofile, 
             unpack=True, usecols = (1, 2, 3, 13))
-            m = np.where(isochroneLogg >= 4.1) ### this restricts the isochrone points ###
+            #m = np.where(isochroneLogg >= 4.1) ### this restricts the isochrone points ###
                                                ### used to those with logg >= 4.1 in   ###
                                                ### effect, this cuts the isochrone down###
                                                ### to only include the main sequence.. ###
 
-            #m = np.where(isochroneLogg>= 3.85)###           TEST for 5285607          ###
+            m = np.where(isochroneLogg>= 3.85)###           TEST for 5285607          ###
                                                ### In its HR diagram, KIC 5285607 primary#
                                                ### had a log(g) < ~3.7. This test is to###
                                                ### see if the isochrones selected for  ###
@@ -268,6 +282,8 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
             isochroneLogTeffs.append(isochroneLogTeff)
             isochroneLogggs.append(isochroneLogg)
  
+ ###############################   Log(Teff) VS Log(g)   ################################# 
+        
         for logteff, logg, label in zip(isochroneLogTeffs, isochroneLogggs, labels):
                 plt.plot(logteff, logg, ls=':', label=label)
 
@@ -286,6 +302,54 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
         plt.title(starId)
         plt.legend()
         plt.show()
+
+###############################   m(M_sun) VS r(R_sun)   ################################# 
+
+col=[]
+for starId in range(len(starIds)):             ### Make each of our systems a different###
+    if starIds[starId] == 5285607:             ### color in our Mass VS Radius plot    ###
+        col.append('r') 
+    elif starIds[starId] == 6864859:
+        col.append('y')
+    elif starIds[starId] == 6778289:
+        col.append('g') 
+    elif starIds[starId] == 6449358:
+        col.append('pink')
+    elif starIds[starId] == 4285087:
+        col.append('b') 
+    elif starIds[starId] == 6131659:
+        col.append('m')
+    elif starIds[starId] == 6781535:
+        col.append('k')
+
+for starId in range(len(kM1s.value)):
+    plt.errorbar(kM1s.value[starId], R1s.value[starId], yerr=R1_errs.value[starId], xerr=kM1_errs.value[starId],
+        ls='None', marker='o', color=col[starId], label = starIds[starId]) 
+
+    plt.errorbar(kM2s.value[starId], R2s.value[starId], yerr=R2_errs.value[starId], xerr=kM2_errs.value[starId], 
+        ls='None', marker='o', color=col[starId], markersize=6, markeredgewidth=1, markerfacecolor='None')
+'''
+    ### Or, a color map would be really cool too
+    plt.imshow(X, origin='lower',
+           extent=[T1KEBASP, T2KEBASP],
+           aspect='auto', interpolation='nearest', cmap='spectral')
+    plt.xlim(T1KEBASP[-1], T1KEBASP[0])
+    #plt.ylim(yedges[-1], yedges[0])
+
+    cb = plt.colorbar(ticks=np.arange(-2.5, 1, 0.5),
+                  format=r'$%.1f$', orientation='verticle')
+    cb.set_label(r'$\T_{eff} [K]}$')
+    plt.clim(-2.5, 0.5)
+'''
+#plt.gca().invert_yaxis()              ### Inverts Y axis (increasing downward)###
+#plt.gca().invert_xaxis()               ### Inverts X axis (increasing to left) ###
+plt.ylabel('Radius $R_{\odot}$')
+plt.xlabel('Mass $M_{\odot}}$')
+plt.title('Mass VS Radius')
+plt.legend()
+plt.show()
+
+
 
 print('##############################################################')
 print('Analysis Complete, see above')
