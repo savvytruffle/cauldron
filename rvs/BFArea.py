@@ -1,6 +1,5 @@
 from __future__ import print_function
 import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.integrate import simps
 from numpy import trapz
@@ -196,7 +195,7 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ### bandpass reported in the Stellar Evolution Database. 
 ##########################################################################################
 
-    makePlots = False                        ###       "True" for HR diagrams!         ###
+    makePlots = True                        ###       "True" for HR diagrams!         ###
     
     amagkep1=-2.5*np.log10(kfluxRatio**(-1)) ### We find the apparent magnitude in the ###
     amagkep2=2.5* np.log10(kfluxRatio**(-1)) ### Kepler band through the apparent mag  ###
@@ -223,18 +222,18 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
         labels = ['1.5 Gyr $Z=-0.48$', '1 Gyr $Z=0.9$',
         '1.25 Gyr $Z=0.9$', '2 Gyr $Z=0.09$']
 
-    elif starId == 6131659:
-       isofiles = ['isochrones/fehp02afep0_age15.txt', 'isochrones/fehp05afep0_age1.txt',
-       'isochrones/fehp02afep0_age2p5.txt','isochrones/fehm07afep0_age2.txt']
-       labels = ['1 Gyr $Z=0.56$','2.5 Gyr $Z=0.21$','2 Gyr $Z=0.7$']
+#    elif starId == 6131659:
+#       isofiles = ['isochrones/fehp02afep0_age15.txt', 'isochrones/fehp05afep0_age1.txt',
+#       'isochrones/fehp02afep0_age2p5.txt','isochrones/fehm07afep0_age2.txt']
+#       labels = ['1 Gyr $Z=0.56$','2.5 Gyr $Z=0.21$','2 Gyr $Z=0.7$']
 
-    elif starId == 6781535:
-       isofiles = ['isochrones/fehm05afep0_age1.txt', 'isochrones/fehm05afep0_age1p75.txt',
-       'isochrones/fehm048afep0p8_age1.txt', 'isochrones/fehm00afem2_age1.txt', 
-       'isochrones/fehm07afep0_age1.txt','isochrones/fehm07afep0_age2.txt', 
-       'isochrones/fehm00afep8_age3.txt']
-       labels = ['1 Gyr $Z=-0.56$', '1.75 Gyr $Z=-0.56$', '1 Gyr $Z=-0.48$', 
-       '1 Gyr $Z=0.6','1 Gyr $Z=0.07', '2 Gyr $Z=0.07', '3 Gyr $Z=0.09']
+#    elif starId == 6781535:
+#       isofiles = ['isochrones/fehm05afep0_age1.txt', 'isochrones/fehm05afep0_age1p75.txt',
+#       'isochrones/fehm048afep0p8_age1.txt', 'isochrones/fehm00afem2_age1.txt', 
+#       'isochrones/fehm07afep0_age1.txt','isochrones/fehm07afep0_age2.txt', 
+#       'isochrones/fehm00afep8_age3.txt']
+#       labels = ['1 Gyr $Z=-0.56$', '1.75 Gyr $Z=-0.56$', '1 Gyr $Z=-0.48$', 
+#       '1 Gyr $Z=0.6','1 Gyr $Z=0.07', '2 Gyr $Z=0.07', '3 Gyr $Z=0.09']
 
     else: print('No Isochrone file specified')
 
@@ -264,24 +263,18 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 
             isochroneLogTeffs.append(isochroneLogTeff)
             isochroneLogggs.append(isochroneLogg)
-        #sns.set()
-        sns.color_palette("colorblind", n_colors=7)        
+ 
         for logteff, logg, label in zip(isochroneLogTeffs, isochroneLogggs, labels):
-            with sns.color_palette("colorblind", 5):
                 plt.plot(logteff, logg, ls=':', label=label)
 
-            #print('logteff =', logteff, 'logg =', logg, 'isochroneLogTeff =', isochroneLogTeff)
 
-        with sns.color_palette("colorblind", 2):     ### Color-blindness color palette ###
-            plt.plot(np.log10(T1KEBASP.value), logg1, color='C3', ls='None', marker='o', label='Primary')
-            #plt.plot(np.log10(T2KEBASP.value), logg2, color='C2', ls='None', marker='o', label='Secondary')
-            plt.plot(np.log10(T2KEBASP.value), logg2, color='C2', ls='None', marker='o', markersize=5,
-            markeredgewidth=2, markeredgecolor='g', markerfacecolor='None', label='Secondary')
+        plt.errorbar(np.log10(T1KEBASP.value), logg1.value, yerr=logg1_err, xerr=(0.434*(T1KEBASP_err/T1KEBASP.value)), 
+             color='C3', ls='None', marker='o', label='Primary')
 
+        plt.errorbar(np.log10(T2KEBASP.value), logg2.value, yerr=logg2_err, xerr=(0.434*(T1KEBASP_err/T2KEBASP.value)), 
+             color='C2', ls='None', marker='o', markersize=6, markeredgewidth=1, 
+             markeredgecolor='C2', markerfacecolor='None', label='Secondary')
 
-        #plt.errorbar(np.log10(T1KEBASP.value), logg1, yerr=logg1_err, xerr=T1KEBASP_err, color='C2', ls='None', marker='o', label='Primary')
-        #plt.errorbar(np.log10(teff2s[0]), logg2, yerr=logg2_err, xerr=Teff2err, color='C3', ls='None', marker='o', label='Secondary')
-        #plt.errorbar(np.log10(teff2s[0]), logg2, yerr=logg2_err, color='C3', ls='None', marker='o', label='Secondary')
         plt.gca().invert_yaxis()               ### Inverts Y axis (increasing downward)###
         plt.gca().invert_xaxis()               ### Inverts X axis (increasing to left) ###
         plt.ylabel('$\log g$')
