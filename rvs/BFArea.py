@@ -8,6 +8,8 @@ from sys import argv
 from astropy import units as u
 from astropy import constants as const
 from sklearn.preprocessing import StandardScaler
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 
 ##########################################################################################
 ##################################### BFArea.py ##########################################
@@ -17,23 +19,23 @@ from sklearn.preprocessing import StandardScaler
 ##########################################################################################
 ##########################################################################################
 
-starIds = [5285607, 6864859, 6778289, 6449358, 4285087, 6131659, 6781535]                 #KEPLER Input Catalog
-ASPCAPTeffs = [6495, 6417, 6572, 6237, 5664, 4845, 5749] * u.K                            #ASPCAP Effective Temperature
-ASPCAPTeff_errs = [156, 159, 162, 179, 146, 98, 125] * u.K                                #Error on the above 
-kRsums =     [3.489, 3.104, 2.745, 2.80, 2.033, 1.5251, 2.0408] * u.Rsun                #KEBLAT Radius Sums [R_sun]
-R1s = [2.250, 1.444, 1.747, 2.11, 1.033, 0.908, 1.095] * u.Rsun                         #Calculated from the analysis below
-R1_errs = [0.033, 0.007,  0.005, 0, 0.004, 0.003, 0.011] * u.Rsun                    #Calculated from the analysis below
-R2s = [1.239, 1.660, 0.998, 0.692, 1.000, 0.617, 0.946] * u.Rsun                         #Calculated from the analysis below
-R2_errs = [0.026, 0.012, 0.004, 0, 0.006, 0.003, 0.014] * u.Rsun                     #Calculated from the analysis below
-kRsum_errs = [0.051, 0.016, 0.0086, 0, 0.0080, 0.0052, 0.0213] * u.Rsun              #KEBLAT Radius Sum errors
-kM1s =     [1.554, 1.354, 1.510, 1.93, 1.137, 0.9422, 1.0057] * u.Msun                  #KEBLAT Mass_1
-kM1_errs = [0.023, 0.029, 0.022, 0, 0.013, 0.0093, 0.0327] * u.Msun                  #KEBLAT Mass_1 errors
-kM2s =     [1.333, 1.411, 1.091, 0.783, 1.103, 0.7028, 1.0346] * u.Msun                  #KEBLAT Mass_2
-kM2_errs = [0.020, 0.028, 0.018, 0, 0.014, 0.0078, 0.0330] * u.Msun                  #KEBLAT Mass_2 errors
-kfluxRatios = [0.258, 1.407, 0.19138, 0.107, 0.901, 0.1483, 0.9201]                      #KEBLAT Flux ratios 
-kfluxRatioErrs = [0.046, 0.101, 2.6e-5, 0, 0.080, 0.0017, 0.0524]                    #KEBLAT Flux ratios errors 
-kradRatios = [0.551, 1.149, 0.57093, 0.328, 0.969, 0.6799, 0.8641]                       #KEBLAT Radius Ratios 
-kradRatiosErrs = [0.048, 0.020, 0.013, 0, 0.0080, 0.0057, 0.0275]                    #KEBLAT Radius Ratio errors
+starIds = [5285607, 6864859, 6778289, 6449358, 4285087, 6131659, 6781535]#KEPLER Input Catalog
+ASPCAPTeffs = [6495, 6417, 6572, 6237, 5664, 4845, 5749] * u.K           #ASPCAP Effective Temperature
+ASPCAPTeff_errs = [156, 159, 162, 179, 146, 98, 125] * u.K               #Error on the above 
+kRsums =     [3.489, 3.104, 2.745, 2.80, 2.033, 1.5251, 2.0408] * u.Rsun #KEBLAT Radius Sums [R_sun]
+R1s = [2.250, 1.444, 1.747, 2.11, 1.033, 0.908, 1.095] * u.Rsun          #Calculated from the analysis below
+R1_errs = [0.033, 0.007,  0.005, 0, 0.004, 0.003, 0.011] * u.Rsun        #Calculated from the analysis below
+R2s = [1.239, 1.660, 0.998, 0.692, 1.000, 0.617, 0.946] * u.Rsun         #Calculated from the analysis below
+R2_errs = [0.026, 0.012, 0.004, 0, 0.006, 0.003, 0.014] * u.Rsun         #Calculated from the analysis below
+kRsum_errs = [0.051, 0.016, 0.0086, 0, 0.0080, 0.0052, 0.0213] * u.Rsun  #KEBLAT Radius Sum errors
+kM1s =     [1.554, 1.354, 1.510, 1.93, 1.137, 0.9422, 1.0057] * u.Msun   #KEBLAT Mass_1
+kM1_errs = [0.023, 0.029, 0.022, 0, 0.013, 0.0093, 0.0327] * u.Msun      #KEBLAT Mass_1 errors
+kM2s =     [1.333, 1.411, 1.091, 0.783, 1.103, 0.7028, 1.0346] * u.Msun  #KEBLAT Mass_2
+kM2_errs = [0.020, 0.028, 0.018, 0, 0.014, 0.0078, 0.0330] * u.Msun      #KEBLAT Mass_2 errors
+kfluxRatios = [0.258, 1.407, 0.19138, 0.107, 0.901, 0.1483, 0.9201]      #KEBLAT Flux ratios 
+kfluxRatioErrs = [0.046, 0.101, 2.6e-5, 0, 0.080, 0.0017, 0.0524]        #KEBLAT Flux ratios errors 
+kradRatios = [0.551, 1.149, 0.57093, 0.328, 0.969, 0.6799, 0.8641]       #KEBLAT Radius Ratios 
+kradRatiosErrs = [0.048, 0.020, 0.013, 0, 0.0080, 0.0057, 0.0275]        #KEBLAT Radius Ratio errors
 GAIAdistances =  [799.7441, 671.2761, 1099.7471, 835.1428, 617.665, np.nan, np.nan] * u.pc   #Gaia distances 
 GAIAdistance_errs = [13.8152, 10.8597, 26.8496, 18.4130, 11.9031, np.nan, np.nan] * u.pc     #Error on distances
 
@@ -204,9 +206,13 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ### the Kepler bandpass (from KEBLAT flux) is closest to the magnitude in the Kepler   ###
 ### bandpass reported in the Stellar Evolution Database. 
 ##########################################################################################
+    col=[]
+    mrk=[]
+    isochroneLogTeffs = []
+    isochroneLogggs = []
+    fig, ax = plt.subplots()
 
     makeHRPlots = True                       ###       "True" for HR diagrams!         ###
-    
     amagkep1=-2.5*np.log10(kfluxRatio**(-1)) ### We find the apparent magnitude in the ###
     amagkep2=2.5* np.log10(kfluxRatio**(-1)) ### Kepler band through the apparent mag  ###
                                              ### flux relation with KEBLAT flux ratios.###
@@ -214,49 +220,81 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 
 
     if starId == 5285607: 
-        isofiles = ['isochrones/fehp00afep4_age1.txt', 'isochrones/fehm00afep8_age1.txt', 
-        'isochrones/fehp05afep2_age1.txt', 'isochrones/fehp02afep0_age2p5.txt']
-        labels = ['1 Gyr $Z=0.01$', '1 Gyr $Z=0.09$', '1 Gyr $Z=0.57$', '2.5 Gyr $Z=0.21$'] ### labels verified
+        isofiles = ['isochrones/fehp00afep0_age1.txt', 'isochrones/fehp00afep0_age2.txt', 
+        'isochrones/fehp00afep0_age3.txt', 'isochrones/fehp00afep0_age4.txt', 
+        'isochrones/fehp00afep0_age5.txt']
+        labels = ['1 Gyr', '2 Gyr', '3 Gyr', '4 Gyr', '5 Gyr']
+        col.append('firebrick')
+        mrk.append('o') 
+        x1, x2, y1, y2 = 3.86, 3.77, 3.8, 4.4
+        axins = zoomed_inset_axes(ax, 1, loc=9)
+        axins.invert_yaxis()
+        axins.invert_xaxis()
+
 
     elif starId == 6864859:
-        isofiles = ['isochrones/fehm00afep8_age1.txt', 
-        'isochrones/fehp02afep0_age2p5.txt', 'isochrones/fehp05afep0_age1.txt']
-        labels = ['1 Gyr $Z=0.09$', '2.5 Gyr $Z=0.21$', '1 Gyr $Z=0.56$']
+        isofiles = ['isochrones/fehp00afep0_age3.txt', 
+        'isochrones/fehp00afep0_age4.txt', 'isochrones/fehp00afep0_age4p5.txt', 
+        'isochrones/fehp00afep0_age5.txt']
+        labels = ['3 Gyr', '4 Gyr', '4.5 Gyr', '5 Gyr']
+        col.append('chocolate')
+        mrk.append('v') 
+        x1, x2, y1, y2 = 3.83, 3.77, 4.1, 4.3
+        axins = zoomed_inset_axes(ax, 1, loc=9)
 
     elif starId == 6778289:
-        isofiles = ['isochrones/fehm00afem2_age1.txt', 
-        'isochrones/fehm07afep0_age1.txt', 'isochrones/fehm07afep0_age2.txt']
-        labels = ['1 Gyr $Z=0.6$', '1 Gyr $Z=0.7$', '2 Gyr $Z=0.7$']
-        
+        isofiles = ['isochrones/fehp00afep0_age1p5.txt',
+        'isochrones/fehp00afep0_age2.txt', 'isochrones/fehp00afep0_age3.txt', 
+        'isochrones/fehp00afep0_age4.txt', 'isochrones/fehp00afep0_age5.txt', 
+        'isochrones/fehp00afep0_age6.txt','isochrones/fehp00afep0_age7.txt']
+        labels = ['1.5 Gyr', '2 Gyr', '3 Gyr', '4 Gyr', '5 Gyr', '6 Gyr', '7 Gyr']
+        col.append('yellow')
+        mrk.append('>')
+        x1, x2, y1, y2 = 3.85, 3.75, 4.0, 4.6
+        axins = zoomed_inset_axes(ax, 1, loc=9)
+
     elif starId == 6449358:
-        isofiles = ['isochrones/fehm00afem2_age1.txt', 
-        'isochrones/fehm07afep0_age1.txt', 'isochrones/fehm07afep0_age2.txt','isochrones/fehp00afep4_age1.txt']
-        labels = ['1 Gyr $Z=0.6$', '1 Gyr $Z=0.7$', '2 Gyr $Z=0.7$','1 Gyr $Z=0.01$']
+        isofiles = ['isochrones/fehp00afep0_age1.txt', 'isochrones/fehp00afep0_age2.txt', 
+        'isochrones/fehp00afep0_age3.txt', 'isochrones/fehp00afep0_age5.txt', 
+        'isochrones/fehp00afep0_age8.txt']
+        labels = ['1 Gyr', '2 Gyr', '3 Gyr', '5 Gyr', '8 Gyr']
+        col.append('darkgreen')
+        mrk.append('^') 
+        x1, x2, y1, y2 = 3.83, 3.75, 4.0, 4.8
+        axins = zoomed_inset_axes(ax, 1, loc=9)
 
     elif starId == 4285087:
-        isofiles = ['isochrones/fehm048afep0p8_age1p5.txt', 'isochrones/fehm00afep8_age1.txt', 
-        'isochrones/fehm00afep8_age1p25.txt', 'isochrones/fehm00afep8_age2.txt']
-        labels = ['1.5 Gyr $Z=-0.48$', '1 Gyr $Z=0.9$',
-        '1.25 Gyr $Z=0.9$', '2 Gyr $Z=0.09$']
+        isofiles = isofiles = ['isochrones/fehp00afep0_age5.txt', 
+        'isochrones/fehp00afep0_age6.txt', 'isochrones/fehp00afep0_age7.txt',
+        'isochrones/fehp00afep0_age8.txt',
+        'isochrones/fehp00afep0_age10.txt', 'isochrones/fehp00afep0_age12.txt']
+        labels = ['5 Gyr', '6 Gyr', '7 Gyr', '8 Gyr', '10 Gyr', '12 Gyr']
+        col.append('teal') 
+        mrk.append('<')
+        x1, x2, y1, y2 = 3.77, 3.74, 4.4, 4.6
+        axins = zoomed_inset_axes(ax, 3, loc=9)
 
     elif starId == 6131659:                  ###   No Gaia distances for this target   ###
-       isofiles = ['isochrones/fehp02afep0_age15.txt', 'isochrones/fehp05afep0_age1.txt',
-       'isochrones/fehp02afep0_age2p5.txt','isochrones/fehm07afep0_age2.txt']
-       labels = ['1 Gyr $Z=0.56$','2.5 Gyr $Z=0.21$','2 Gyr $Z=0.7$']
+        isofiles = ['isochrones/fehp00afep0_age1.txt', 'isochrones/fehp00afep0_age2.txt', 
+        'isochrones/fehp00afep0_age3.txt']
+        labels = ['1 Gyr', '2 Gyr', '3 Gyr']
+        col.append('dodgerblue')
+#        x1, x2, y1, y2 = 5, 5, 5, 5
+        print('No Gaia distances for this target')
+
 
     elif starId == 6781535:                  ###   No Gaia distances for this target   ###
-       isofiles = ['isochrones/fehm05afep0_age1.txt', 'isochrones/fehm05afep0_age1p75.txt',
-       'isochrones/fehm048afep0p8_age1.txt', 'isochrones/fehm00afem2_age1.txt', 
-       'isochrones/fehm07afep0_age1.txt','isochrones/fehm07afep0_age2.txt', 
-       'isochrones/fehm00afep8_age3.txt']
-       labels = ['1 Gyr $Z=-0.56$', '1.75 Gyr $Z=-0.56$', '1 Gyr $Z=-0.48$', 
-       '1 Gyr $Z=0.6','1 Gyr $Z=0.07', '2 Gyr $Z=0.07', '3 Gyr $Z=0.09']
+        isofiles = ['isochrones/fehp00afep0_age1.txt']
+        labels = ['Fe/H = 0.00']
+        col.append('indigo')
+        mrk.append('d')
+#        x1, x2, y1, y2 = 5, 5, 5, 5
+        print('No Gaia distances for this target')
+
 
     else: print('No Isochrone file specified')
 
     if makeHRPlots == True:
-        isochroneLogTeffs = []
-        isochroneLogggs = []
 
         for isofile in isofiles:
             isochroneMass, isochroneLogTeff, isochroneLogg, kp = np.loadtxt(isofile, 
@@ -266,7 +304,7 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
                                                ### effect, this cuts the isochrone down###
                                                ### to only include the main sequence.. ###
 
-            m = np.where(isochroneLogg>= 3.85)###           TEST for 5285607          ###
+            m = np.where(isochroneLogg>= 3.9)###           TEST for 5285607          ###
                                                ### In its HR diagram, KIC 5285607 primary#
                                                ### had a log(g) < ~3.7. This test is to###
                                                ### see if the isochrones selected for  ###
@@ -283,65 +321,120 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
             isochroneLogggs.append(isochroneLogg)
  
  ###############################   Log(Teff) VS Log(g)   ################################# 
+    for logteff, logg, label in zip(isochroneLogTeffs, isochroneLogggs, labels):
+        ax.plot(logteff, logg, ls=':')
+        axins.plot(logteff, logg, ls=':')
+#        axins.invert_yaxis()               ### Inverts Y axis (increasing downward)###
+#        axins.invert_xaxis()               ### Inverts X axis (increasing to left) ###
         
-        for logteff, logg, label in zip(isochroneLogTeffs, isochroneLogggs, labels):
-                plt.plot(logteff, logg, ls=':', label=label)
+        ax.errorbar(np.log10(T1KEBASP.value), logg1.value, yerr=logg1_err, 
+                 xerr=(0.434*(T1KEBASP_err/T1KEBASP.value)), color='C3', ls='None', marker='o', 
+                 label='Primary')
 
+        ax.errorbar(np.log10(T2KEBASP.value), logg2.value, yerr=logg2_err, 
+                xerr=(0.434*(T1KEBASP_err/T2KEBASP.value)), color='C2', ls='None', marker='o', 
+                markersize=6, markeredgewidth=1, markeredgecolor='C2', markerfacecolor='None', 
+                label='Secondary')
 
-        plt.errorbar(np.log10(T1KEBASP.value), logg1.value, yerr=logg1_err, xerr=(0.434*(T1KEBASP_err/T1KEBASP.value)), 
-             color='C3', ls='None', marker='o', label='Primary')
+        axins.errorbar(np.log10(T1KEBASP.value), logg1.value, yerr=logg1_err, 
+                 xerr=(0.434*(T1KEBASP_err/T1KEBASP.value)), color='C3', ls='None', marker='o')
+    
+        axins.errorbar(np.log10(T2KEBASP.value), logg2.value, yerr=logg2_err, 
+                xerr=(0.434*(T1KEBASP_err/T2KEBASP.value)), color='C2', ls='None', marker='o', 
+                markersize=6, markeredgewidth=1, markeredgecolor='C2', markerfacecolor='None')
 
-        plt.errorbar(np.log10(T2KEBASP.value), logg2.value, yerr=logg2_err, xerr=(0.434*(T1KEBASP_err/T2KEBASP.value)), 
-             color='C2', ls='None', marker='o', markersize=6, markeredgewidth=1, 
-             markeredgecolor='C2', markerfacecolor='None', label='Secondary')
+    ax.invert_yaxis()               ### Inverts Y axis (increasing downward)###
+    ax.invert_xaxis()               ### Inverts X axis (increasing to left) ###
 
-        plt.gca().invert_yaxis()               ### Inverts Y axis (increasing downward)###
-        plt.gca().invert_xaxis()               ### Inverts X axis (increasing to left) ###
-        plt.ylabel('$\log g$')
-        plt.xlabel('$\log T_{\mathrm{eff}}$')
-        plt.title(starId)
-        plt.legend()
-        plt.show()
+#    axins.set_xlim(x2, x1)
+#    axins.set_ylim(y2, y1)
+
+    axins.set_xlim(x1, x2)
+    axins.set_ylim(y1, y2)
+    ax.set_xlabel('$\log T_{\mathrm{eff}}$')
+    ax.set_ylabel('$\log g$')
+    ax.set_title(starId)
+    plt.yticks(visible=False)
+    plt.xticks(visible=False)
+    mark_inset(ax, axins, loc1=2, loc2=4, fc="none", ec="0.5")
+    plt.legend()
+    plt.show()
 
 ###############################   m(M_sun) VS r(R_sun)   ################################# 
 
-col=[]
-for starId in range(len(starIds)):             ### Make each of our systems a different###
-    if starIds[starId] == 5285607:             ### color in our Mass VS Radius plot    ###
-        col.append('r') 
-    elif starIds[starId] == 6864859:
-        col.append('y')
-    elif starIds[starId] == 6778289:
-        col.append('g') 
-    elif starIds[starId] == 6449358:
-        col.append('pink')
-    elif starIds[starId] == 4285087:
-        col.append('b') 
-    elif starIds[starId] == 6131659:
-        col.append('m')
-    elif starIds[starId] == 6781535:
-        col.append('k')
-
-for starId in range(len(kM1s.value)):
+for starId in range(len(starIds)):
     plt.errorbar(kM1s.value[starId], R1s.value[starId], yerr=R1_errs.value[starId], xerr=kM1_errs.value[starId],
         ls='None', marker='o', color=col[starId], label = starIds[starId]) 
 
     plt.errorbar(kM2s.value[starId], R2s.value[starId], yerr=R2_errs.value[starId], xerr=kM2_errs.value[starId], 
-        ls='None', marker='o', color=col[starId], markersize=6, markeredgewidth=1, markerfacecolor='None')
-'''
-    ### Or, a color map would be really cool too
-    plt.imshow(X, origin='lower',
-           extent=[T1KEBASP, T2KEBASP],
-           aspect='auto', interpolation='nearest', cmap='spectral')
-    plt.xlim(T1KEBASP[-1], T1KEBASP[0])
-    #plt.ylim(yedges[-1], yedges[0])
+        ls='None', marker='o', markersize=6, markeredgewidth=1, markerfacecolor='None')
 
-    cb = plt.colorbar(ticks=np.arange(-2.5, 1, 0.5),
-                  format=r'$%.1f$', orientation='verticle')
-    cb.set_label(r'$\T_{eff} [K]}$')
-    plt.clim(-2.5, 0.5)
-'''
-#plt.gca().invert_yaxis()              ### Inverts Y axis (increasing downward)###
+
+### Add isochrone (mass and radius) that best fit both members of each binary  ###
+
+    isochroneLogTeffs = []
+    isochroneLogggs = []
+
+for isofile in isofiles:
+    isochroneMass, isochroneLogTeff, isochroneLogg = np.loadtxt(isofile, 
+    unpack=True, usecols = (1, 2, 3))
+    m = np.where(isochroneLogg >= 4.1) ### this restricts the isochrone points ###
+                                               ### used to those with logg >= 4.1 in   ###
+                                               ### effect, this cuts the isochrone down###
+                                               ### to only include the main sequence.. ###
+
+    #m = np.where(isochroneLogg>= 3.9)         ###           TEST for 5285607          ###
+                                               ### In its HR diagram, KIC 5285607 primary#
+                                               ### had a log(g) < ~3.7. This test is to###
+                                               ### see if the isochrones selected for  ###
+                                               ### this target will follow the primary ###
+                                               ### to its log(g).     (Positive)       ###
+    isochroneMass = isochroneMass[m]
+    isochroneLogTeff = isochroneLogTeff[m]
+    isochroneLogg = isochroneLogg[m]
+    isochroneLogTeffs.append(isochroneLogTeff)
+    isochroneLogggs.append(isochroneLogg)
+    isochroneRadius = np.sqrt(isochroneMass/(10**isochroneLogg))
+for i in range(len(starIds)):
+    if starId == 5285607: 
+        isofiles = ['isochrones/fehp00afep0_age3.txt']
+        labels = ['3 Gyr'] 
+
+    elif starId == 6864859:
+        isofiles = ['isochrones/fehp00afep0_age4.txt']
+        labels = ['4 Gyr']
+
+    elif starId == 6778289:
+        isofiles = ['isochrones/fehp00afep0_age2.txt']
+        labels = ['2 Gyr']
+    
+    elif starId == 6449358:
+        isofiles = ['isochrones/fehp00afep0_age5.txt']
+        labels = ['5 Gyr']
+
+    elif starId == 4285087:
+        isofiles = isofiles = ['isochrones/fehp00afep0_age8.txt']
+        labels = ['8 Gyr']
+
+
+    isochroneMass = isochroneMass[m]
+    isochroneLogTeff = isochroneLogTeff[m]
+    isochroneLogg = isochroneLogg[m]
+    isochroneLogTeffs.append(isochroneLogTeff)
+    isochroneLogggs.append(isochroneLogg)
+    isochroneRadius = np.sqrt(isochroneMass/(10**isochroneLogg))
+
+plt.plot(isochroneMass, isochroneRadius, label = '3 Gyr', color = 'firebrick')   ### 5285607
+plt.plot(isochroneMass, isochroneRadius, label = '4 Gyr', color = 'chocolate')    ### 6864859
+plt.plot(isochroneMass, isochroneRadius, label = '2 Gyr', color = 'gold')   ### 6778289
+plt.plot(isochroneMass, isochroneRadius, label = '5 Gyr', color = 'darkgreen')    ### 6449358
+plt.plot(isochroneMass, isochroneRadius, label = '8 Gyr', color = 'teal')   ### 4285087
+
+#plt.plot(isochroneMass[m], isochroneRadius[m], label = '1 Gyr', color = 'dodgerblue')    ### 6131659
+#plt.plot(isochroneMass[m], isochroneRadius[m], label = '1 Gyr', color = 'indigo')    ### 6781535
+
+
+#plt.gca().invert_yaxis()               ### Inverts Y axis (increasing downward)###
 #plt.gca().invert_xaxis()               ### Inverts X axis (increasing to left) ###
 plt.ylabel('Radius $R_{\odot}$')
 plt.xlabel('Mass $M_{\odot}}$')
