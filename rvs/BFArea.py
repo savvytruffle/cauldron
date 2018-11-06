@@ -2,6 +2,7 @@ from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
+import matplotlib.lines as mlines
 from scipy.integrate import simps
 from numpy import trapz
 from sys import argv
@@ -102,8 +103,6 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ### targets from GAIA(Bailer-Jones et al 2018)and follow through with error propagation###
 ##########################################################################################
 
-    # MR is not entirely sure which of these is right ...
-    #KEBLATFluxsum = (const.sigma_sb * ASPCAPTeff**4 * kRsum**2) / (GAIAdistance**2)
     KEBLATFluxsum = (const.sigma_sb * ASPCAPTeff**4 * (R1**2 + R2**2)) / (GAIAdistance**2)
     
     # partial derivatives for error propagation
@@ -126,7 +125,7 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
     F2overF1_err = F2overF1 * np.sqrt((KEBLATFlux1_err.cgs.value/KEBLATFlux1.cgs.value)**2 + 
                                       (KEBLATFlux2_err.cgs.value/KEBLATFlux2.cgs.value)**2)
 
-    #print(KEBLATFlux1.unit)  # MR confirmed this is W/m^2 in SI and erg/cm^2/s in cgs, i.e., g/s^3
+    #print(KEBLATFlux1.unit)
     print('R1 = {0:.3f} +/- {1:.3f}'.format(R1, R1_err))
     print('R2 = {0:.3f} +/- {1:.3f}'.format(R2, R2_err))
     print('R2/R1 = {0:.3f} +/- {1:.3f}'.format(R2oR1, R2oR1_err))
@@ -202,18 +201,18 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
     print('Analysis Complete for star', starId)
     print('##############################################################')
 
-
-
 ################################   HR Diagram Party!   ################################### 
 ### Now, we plot HR diagrams for our targets with evolutionary tracks from theDartmouth###
 ### Stellar Evolution database (Dotter et al. 2008). A fit finds where the magnitude in###
 ### the Kepler bandpass (from KEBLAT flux) is closest to the magnitude in the Kepler   ###
-### bandpass reported in the Stellar Evolution Database. 
+### bandpass reported in the Stellar Evolution Database. Note, you must do EITHER the  ###
+### HR Diagrams (line 276:makeHRPlots = True) OR the Mass VS. Radius plot (line 327:   ###
+### makeMVRPlots = True, but you cannot do both with one execution of the program.     ###
 ##########################################################################################
     isochroneLogTeffs = []
     isochroneLogggs = []
     
-    makeHRPlots = True                       ###       "True" for HR diagrams!         ###
+    makeHRPlots = False                      ###       "True" for HR diagrams!         ###
     amagkep1=-2.5*np.log10(kfluxRatio**(-1)) ### We find the apparent magnitude in the ###
     amagkep2=2.5* np.log10(kfluxRatio**(-1)) ### Kepler band through the apparent mag  ###
                                              ### flux relation with KEBLAT flux ratios.###
@@ -252,14 +251,14 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
         'isochrones_plot/fehp00afep0_age10.txt', 'isochrones_plot/fehp00afep0_age12.txt']
         labels = ['5 Gyr', '6 Gyr', '7 Gyr', '8 Gyr', '10 Gyr', '12 Gyr']
 
-    elif starId == 6131659:                  ###   No Gaia distances for this target   ###
+    elif starId == 6131659:                   ###   No Gaia distances for this target   ###
         isofiles = ['isochrones_plot/fehp00afep0_age1.txt', 'isochrones_plot/fehp00afep0_age2.txt', 
         'isochrones_plot/fehp00afep0_age3.txt']
         labels = ['1 Gyr', '2 Gyr', '3 Gyr']
         print('No Gaia distances for this target')
 
 
-    elif starId == 6781535:                  ###   No Gaia distances for this target   ###
+    elif starId == 6781535:                   ### No Gaia distances for this target ###
         isofiles = ['isochrones_plot/fehp00afep0_age1.txt']
         labels = ['Fe/H = 0.00']
         print('No Gaia distances for this target')
@@ -272,12 +271,12 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
         for isofile in isofiles:
             isochroneMass, isochroneLogTeff, isochroneLogg, kp = np.loadtxt(isofile, 
             unpack=True, usecols = (1, 2, 3, 13))
-            #m = np.where(isochroneLogg >= 4.1) ### this restricts the isochrone points ###
+            #m = np.where(isochroneLogg >= 4.1)### this restricts the isochrone points ###
                                                ### used to those with logg >= 4.1 in   ###
                                                ### effect, this cuts the isochrone down###
                                                ### to only include the main sequence.. ###
 
-            m = np.where(isochroneLogg>= 3.9)###           TEST for 5285607          ###
+            m = np.where(isochroneLogg>= 3.9)###           TEST for 5285607            ###
                                                ### In its HR diagram, KIC 5285607 primary#
                                                ### had a log(g) < ~3.7. This test is to###
                                                ### see if the isochrones selected for  ###
@@ -292,10 +291,13 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 
             isochroneLogTeffs.append(isochroneLogTeff)
             isochroneLogggs.append(isochroneLogg)
-            isochroneRadius = (np.sqrt(((6.67e-8)*(isochroneMass*(1.989e33)))/(10**isochroneLogg)))/(6.955e10)
 
- 
- ###############################   Log(Teff) VS Log(g)   ################################# 
+
+################################   Log(Teff) VS Log(g)   #################################
+### Note, you must do EITHER the HR Diagrams (line 276:makeHRPlots = True) OR the Mass ###
+### VS. Radius plot (line 327:makeMVRPlots = True, but you cannot do both with one     ###
+### execution of the program.                                                          ###
+########################################################################################## 
         for logteff, logg, label in zip(isochroneLogTeffs, isochroneLogggs, labels):
                     plt.plot(logteff, logg, ls=':', label=label)
         
@@ -308,87 +310,111 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
                         markersize=6, markeredgewidth=1, markeredgecolor='C2', markerfacecolor='None', 
                         label='Secondary')
         
-        plt.gca().invert_yaxis()               ### Inverts Y axis (increasing downward)###
-        plt.gca().invert_xaxis()               ### Inverts X axis (increasing to left) ###
+        plt.gca().invert_yaxis()                 ### Y axis increasing downward ###
+        plt.gca().invert_xaxis()                 ### X axis increasing to left ###
         plt.xlabel('$\log T_{\mathrm{eff}}$')
-        #plt.xlim([3.78, 3.72])
-        #plt.ylim([4.6, 4.4])
-        plt.xlim([3.85, 3.78])
-        plt.ylim([4.3, 4.0])
+
+#        plt.xlim([3.78, 3.72])                  ### Zooms in plots 
+#        plt.ylim([4.6, 4.4])                    ### Zooms in plots
+        plt.xlim([3.85, 3.78])                   ### Zooms in plots
+        plt.ylim([4.32, 4.0])                    ### Zooms in plots
         plt.ylabel('$\log g$')
         plt.title(starId)
-#        plt.yticks(visible=False)
-#        plt.xticks(visible=False)
-        plt.legend()
+        plt.legend(frameon=False)
+
         plt.show()
 
-
-
 ###############################   m(M_sun) VS r(R_sun)   ################################# 
-'''
+##########################################################################################
+    makeMVRPlots = True                      ### "True" for m(M_sun) VS r(R_sun) plots ###
+
     col=[]
     mrk=[]
-
-    for i in range(len(starIds)):
+    for i in range(len(starIds)):                ### Begin color and marker loop ###
         if starId == 5285607:  
-            col.append('firebrick')
+            col.append('C0')
             mrk.append('o') 
-            MVRisofiles = ['isochrones_plot/fehp00afep0_age3.txt']
-            labels = ['3 Gyr']
         elif starId == 6864859:
-            col.append('chocolate')
+            col.append('C1')
             mrk.append('v') 
-            MVRisofiles = ['isochrones_plot/fehp00afep0_age4.txt']
-            labels = ['4 Gyr']
         elif starId == 6778289:
-            col.append('yellow')
+            col.append('C2')
             mrk.append('>')
-            MVRisofiles = ['isochrones_plot/fehp00afep0_age2.txt']
-            labels = ['2 Gyr']
         elif starId == 6449358:
-            col.append('darkgreen')
+            col.append('C3')
             mrk.append('^')
-            MVRisofiles = ['isochrones_plot/fehp00afep0_age5.txt']
-            labels = ['5 Gyr']
         elif starId == 4285087:
-            col.append('teal') 
+            col.append('C4') 
             mrk.append('<')
-            MVRisofiles = ['isochrones_plot/fehp00afep0_age8.txt']
-            labels = ['8 Gyr']
         elif starId ==6131659:
-            col.append('dodgerblue')
-            mrk.append('o')
+            col.append('C5')
+            mrk.append('h')
         elif starId == 6781535:
-            col.append('indigo')
+            col.append('C6')
             mrk.append('d')
 
-    plt.errorbar(kM1.value, R1.value, yerr=R1_err.value, xerr=kM1_err.value,
-                ls='None', marker=mrk[i], color=col[i], label=starId) 
+    if makeMVRPlots == True:
+
+        plt.errorbar(kM1.value, R1.value, yerr=R1_err.value, xerr=kM1_err.value,
+                ls='None', marker=mrk[i], color=col[i])
+        
+        plt.errorbar(kM2.value, R2.value, yerr=R2_err.value, xerr=kM2_err.value, 
+                    ls='None', marker=mrk[i], color=col[i], markersize=6, markeredgewidth=1, 
+                    markerfacecolor='None')
+                    
+        MVRisofiles = ['isochrones_plot/fehp00afep0_age1.txt', 'isochrones_plot/fehp00afep0_age1p5.txt',
+        'isochrones_plot/fehm0p5afep0_age1.txt','isochrones_plot/fehm1afep0_age0p75.txt', 
+        'isochrones_plot/fehm1afep0_age1.txt']
     
-    plt.errorbar(kM2.value, R2.value, yerr=R2_err.value, xerr=kM2_err.value, 
-                ls='None', marker=mrk[i], color=col[i], markersize=6, markeredgewidth=1, 
-                markerfacecolor='None')
+        for MVRisofile in MVRisofiles:        
+            isochroneMass, isochroneLogg = np.loadtxt(MVRisofile, unpack=True, usecols = (1, 3))
+    
+            m = np.where(isochroneLogg >= 3.9)     ### this restricts the isochrone points ###
+                                                   ### used to those with logg >= 4.1 in   ###
+                                                   ### effect, this cuts the isochrone down###
+                                                   ### to only include the main sequence.. ###
+    
+            isochroneMass = isochroneMass[m]*u.g
+            isochroneLogg = isochroneLogg[m]
+            isochroneLogggs.append(isochroneLogg)
+            isochroneRadius = (np.sqrt(((6.67e-8)*(isochroneMass*(1.989e33)))/(10**isochroneLogg)))/(6.955e10)
 
-    for MVRisofile in MVRisofiles:        
+            r = np.where(isochroneRadius.value <= 2.2)  ### restricts radius for plotting ###
+            isochroneRadius = isochroneRadius[r]
+            isochroneMass = isochroneMass[r]
+            plt.plot(isochroneMass, isochroneRadius, ls=':')
 
-        isochroneMass, isochroneLogg = np.loadtxt(MVRisofile, unpack=True, usecols = (1, 3))
-        m = np.where(isochroneLogg >= 4.1)### this restricts the isochrone points ###
-                   ### used to those with logg >= 4.1 in   ###
-                   ### effect, this cuts the isochrone down###
-                   ### to only include the main sequence.. ###
+################################## Legend Construction ###################################
+##########################################################################################
 
-        isochroneMass = isochroneMass[m]
-        isochroneLogg = isochroneLogg[m]
-        isochroneLogggs.append(isochroneLogg)
-        isochroneRadius = (np.sqrt(((6.67e-8)*(isochroneMass*(1.989e33)))/(10**isochroneLogg)))/(6.955e10)
-        plt.plot(isochroneMass, isochroneRadius, ls=':', color = col[i])
+#################################### Isochrone Legend ####################################
+            line1 = mlines.Line2D([], [], linewidth=2, ls=':', color='C0', label='[Fe/H] = 0.00, 1.00 Gyr')
+            line2 = mlines.Line2D([], [], linewidth=2, ls=':', color='C1', label='[Fe/H] = 0.00, 1.50 Gyr')
+            line3 = mlines.Line2D([], [], linewidth=2, ls=':', color='C2', label='[Fe/H] = -0.50, 1.00 Gyr')
+            line4 = mlines.Line2D([], [], linewidth=2, ls=':', color='C3', label='[Fe/H] = -1.00, 0.75 Gyr')
+            line5 = mlines.Line2D([], [], linewidth=2, ls=':', color='C4', label='[Fe/H] = -1.00, 1.00 Gyr')
+
+##################################### Star ID Legend #####################################
+
+            KIC5285607 = mlines.Line2D([], [], ls='None', marker = 'o', color='C5', label='5285607')
+            KIC6864859 = mlines.Line2D([], [], ls='None', marker = 'v', color='C6', label='6864859')
+            KIC6778289 = mlines.Line2D([], [], ls='None', marker = '>', color='C7', label='6778289')
+            KIC6449358 = mlines.Line2D([], [], ls='None', marker = '^', color='C8', label='6449358')
+            KIC4285087 = mlines.Line2D([], [], ls='None', marker = '<', color='C9', label='5285607')
+            KIC6131659 = mlines.Line2D([], [], ls='None', marker = 'h', color='#6a3d9a', label='6131659')
+            KIC6781535 = mlines.Line2D([], [], ls='None', marker = 'd', color='#fb9a99', label='6781535')
+            KIClegend = plt.legend(handles=[KIC5285607, KIC6864859, KIC6778289, KIC6449358,
+            KIC4285087, KIC6131659, KIC6781535], loc=4, frameon=False)
+            ax = plt.gca().add_artist(KIClegend)
+            plt.legend(handles=[line1, line2, line3, line4, line5], frameon=False)
+        plt.xlim([0.5, 2.0])                   ### Zooms in plots
+        plt.ylim([0.5, 2.2])
         plt.ylabel('Radius $R_{\odot}$')
         plt.xlabel('Mass $M_{\odot}}$')
         plt.title('Mass VS Radius')
-        plt.legend()
 
+#    plt.show()
 plt.show()
-'''
 ###############################   Compare flux ratios   ################################## 
 ### Compare the flux ratios from BF and KEBLAT after applying Bolometric corrections   ###
 ### between the H and Kepler bandpasses (color).                                       ###
