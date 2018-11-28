@@ -19,20 +19,20 @@ from cycler import cycler
 starIds =         [5285607, 4285087, 6131659, 6449358, 6778289, 6781535, 6864859] #KEPLER Input Catalog
 ASPCAPTeffs =     [6495,    5664,    4845,    6237,    6572,    5749,    6417]   * u.K    #ASPCAP Effective Temperature
 ASPCAPTeff_errs = [156,     146,     98,      179,     162,     125,     159]    * u.K    #Error on the above 
-kRsums =          [3.679,   2.060,   1.525,   2.80,    2.746,   2.641,   3.110]  * u.Rsun #KEBLAT Radius Sums [R_sun]
-kRsum_errs =      [0.033,   0.008,   0.005,   0,       0.0003,  0.031,   0.020]  * u.Rsun #KEBLAT Radius Sum errors
-R1s =             [2.001,   1.046,   0.873,   2.108,   1.748,   1.381,   1.655]  * u.Rsun #Calculated from the analysis below
-R1_errs =         [0.018,   0.004,   0.003,   0.000,   0.000,   0.016,   0.011]  * u.Rsun #Calculated from the analysis below
-R2s =             [1.678,   1.014,   0.652,   0.692,   0.998,   1.260,   1.455]  * u.Rsun #Calculated from the analysis below
-R2_errs =         [0.021,   0.006,   0.003,   0,       0.000,   0.021,   0.013]  * u.Rsun #Calculated from the analysis below
-kM1s =            [1.557,   1.135,   0.942,   1.93,    1.512,   1.006,   1.411]  * u.Msun #KEBLAT Mass_1
-kM1_errs =        [0.038,   0.014,   0.010,   0,       0.022,   0.036,   0.028]  * u.Msun #KEBLAT Mass_1 errors
-kM2s =            [1.346,   1.101,   0.703,   0.703,   1.092,   1.037,   1.354]  * u.Msun #KEBLAT Mass_2
-kM2_errs =        [0.033,   0.014,   0.008,   0,       0.019,   0.036,   0.028]  * u.Msun #KEBLAT Mass_2 errors
-kfluxRatios =     [0.6579,  0.9455,  0.1480,  0.107,   0.1916,  0.7610,  0.7256]          #KEBLAT Flux ratios 
-kfluxRatioErrs =  [0.1025,  0.0396,  0.0010,  0,       0.00002, 0.2569,  0.0129]          #KEBLAT Flux ratios errors
-kradRatios =      [0.839,   0.969,   0.746,   0.328,   0.5708,  0.913,   0.879]           #KEBLAT Radius Ratios 
-kradRatiosErrs =  [0.067,   0.020,   0.003,   0,       0.0003,  0.128,   0.008]           #KEBLAT Radius Ratio errors
+kRsums =          [3.679,   2.060,   1.525,   2.8231,  2.746,   2.641,   3.110]  * u.Rsun #KEBLAT Radius Sums
+kRsum_errs =      [0.033,   0.008,   0.005,   0.0010,  0.013,   0.031,   0.020]  * u.Rsun #KEBLAT Radius Sum errors
+R1s =             [2.003,   1.033,   0.908,   2.1254,  1.748,   1.382,   1.655]  * u.Rsun 
+R1_errs =         [0.062,   0.012,   0.003,   0.0007,  0.009,   0.090,   0.013]  * u.Rsun 
+R2s =             [1.679,   1.026,   0.616,   0.6977,  0.998,   1.262,   1.455]  * u.Rsun 
+R2_errs =         [0.087,   0.011,   0.003,   0.00005, 0.005,   0.092,   0.012]  * u.Rsun 
+kM1s =            [1.557,   1.135,   0.942,   np.nan,  1.512,   1.006,   1.411] * u.Msun #KEBLAT Mass_1
+kM1_errs =        [0.038,   0.014,   0.010,   np.nan,  0.022,   0.036,   0.028]  * u.Msun #KEBLAT Mass_1 errors
+kM2s =            [1.346,   1.101,   0.703,   np.nan,  1.092,   1.037,   1.354] * u.Msun #KEBLAT Mass_2
+kM2_errs =        [0.033,   0.014,   0.008,   np.nan,  0.019,   0.036,   0.028]  * u.Msun #KEBLAT Mass_2 errors
+kfluxRatios =     [0.6579,  0.9455,  0.1480,  0.10752, 0.19155, 0.7610,  0.7256]          #KEBLAT Flux ratios 
+kfluxRatioErrs =  [0.1025,  0.0396,  0.0010,  6.5e-6,  0.00002, 0.2569,  0.0139]          #KEBLAT Flux ratios errors
+kradRatios =      [0.839,   0.969,   0.679,   0.3283,  0.5708,  0.913,   0.879]           #KEBLAT Radius Ratios 
+kradRatiosErrs =  [0.067,   0.020,   0.003,   0.00002, 0.0003,  0.128,   0.008]           #KEBLAT Radius Ratio errors
 GAIAdistances =   [799.744, 617.665, np.nan,  835.143, 1099.75, np.nan,  671.276]* u.pc   #Gaia distances 
 GAIAdistance_errs = [13.82, 11.903,  np.nan,  18.413,  26.8496, np.nan,  10.8597]* u.pc   #Error on distances
 
@@ -45,6 +45,9 @@ logg1s = []
 logg1_errs = []
 logg2s = []
 logg2_errs = []
+
+# Naively try adjusting ASPCAP Teffs to see what happens
+#ASPCAPTeffs = ASPCAPTeffs + 500*u.K
 
 def isochroneParse(isoDir, isoFile, loggMin=3.9):
     '''
@@ -167,7 +170,6 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
     F2overF1_err = F2overF1 * np.sqrt((KEBLATFlux1_err.cgs.value/KEBLATFlux1.cgs.value)**2 + 
                                       (KEBLATFlux2_err.cgs.value/KEBLATFlux2.cgs.value)**2)
 
-    #print(KEBLATFlux1.unit)
     print('R1 = {0:.3f} +/- {1:.3f}'.format(R1, R1_err))
     print('R2 = {0:.3f} +/- {1:.3f}'.format(R2, R2_err))
     print('R2/R1 = {0:.3f} +/- {1:.3f}'.format(R2oR1, R2oR1_err))
@@ -233,11 +235,16 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
     print('logg1 = {0:.4f} +/- {1:.4f}'.format(logg1, logg1_err))
     print('logg2 = {0:.4f} +/- {1:.4f}'.format(logg2, logg2_err))
     
+    # Naively try adjusting loggs to see what happens
+    #logg1 = logg1.cgs + u.Dex(0.2)
+    #logg2 = logg2.cgs + u.Dex(0.2)
+    
     # Actually save logg1 and logg2 so we can loop through them later
     logg1s.append(logg1)
     logg1_errs.append(logg1_err)
     logg2s.append(logg2)
     logg2_errs.append(logg2_err)
+    
     
 #### Next, we will confirm that the ASPCAP temperature is the flux weighted sum off the temperature components:
 # MR says: welllll this is a unit disaster ...
@@ -264,31 +271,27 @@ plt.rc('text', usetex=True)
 isofiles = ['fehp00afep0_age0p8.txt',
             'fehp00afep0_age1.txt', 'fehm05afep0_age1.txt', 'fehm1afep0_age1.txt',
             'fehp00afep0_age3.txt',
-            'fehp00afep0_age5.txt', 'fehm05afep0_age5.txt',
-            'fehp00afep0_age7.txt']
+            'fehp00afep0_age5.txt', 'fehm05afep0_age5.txt']
 
 isolabels = ['0.8 Gyr, [Fe/H] $=0$',
              '1 Gyr, [Fe/H] $=0$', '1 Gyr, [Fe/H] $=-0.5$', '1 Gyr, [Fe/H] $=-1$', 
              '3 Gyr, [Fe/H] $=-1$',
-             '5 Gyr, [Fe/H] $=0$', '5 Gyr, [Fe/H] $=-0.5$',
-             '7 Gyr, [Fe/H] $=0$']
+             '5 Gyr, [Fe/H] $=0$', '5 Gyr, [Fe/H] $=-0.5$']
  
 isolines = ['-',
             '-', '--', ':',
             '-',
-            '-', '--',
-            '-']
+            '-', '--']
 
-isocolors = ['#f0f0f0','#d9d9d9','#bdbdbd','#969696','#737373','#525252','#252525','#000000']
+isocolors = ['#f0f0f0','#d9d9d9','#bdbdbd','#969696','#737373','#525252','#252525']
 isocolors = list(reversed(isocolors))  # darker colors first
 
-starcolors = ['#e41a1c','#377eb8','#a65628','#4daf4a','#984ea3','#737373','#ff7f00']
-starlabels = ['5285607', '4285087', None, '6449358', '6778289', None, '6864859']
+starcolors = ['#e41a1c', '#377eb8', '#4daf4a', '#a65628', '#984ea3', '#737373', '#ff7f00']
 
 assert len(isofiles) == len(isolabels)
 assert len(isofiles) == len(isolines)
 assert len(isofiles) == len(isocolors)
-assert len(starcolors) == len(starlabels)
+assert len(starcolors) == len(starIds)
 
 ################################   Log(Teff) VS Log(g)   #################################
 ##################### ALL the targets on the same Mass-Radius Plot #######################
@@ -298,17 +301,19 @@ plt.figure(figsize=(9,6))
 
 for idx, (starId,  T1,  T1_err,  T2,  T2_err,  logg1,  logg1_err,  logg2,  logg2_err) in enumerate(zip(
           starIds, T1s, T1_errs, T2s, T2_errs, logg1s, logg1_errs, logg2s, logg2_errs)):
-
-    if starId != '6131659' and starId != '6781535':
+    
+    if starId != 6131659 and starId != 6781535 and starId != 6449358:
         plt.errorbar(np.log10(T1.value), logg1.value, yerr=logg1_err, 
                 xerr=(0.434*(T1_err/T1.value)), ls='None', marker='o', 
-                markersize=8, markeredgewidth=1, label=starlabels[idx],
+                markersize=8, markeredgewidth=1, label=starId,
                 c=starcolors[idx], zorder=2)
 
         plt.errorbar(np.log10(T2.value), logg2.value, yerr=logg2_err, 
                 xerr=(0.434*(T2_err/T2.value)), ls='None', marker='o', 
                 markersize=8, markeredgewidth=1, markerfacecolor='None',
                 label='_nolegend_', c=starcolors[idx], zorder=2)
+        
+        #plt.axvline(x=np.log10(ASPCAPTeffs[idx].value + 200), c=starcolors[idx])
 
 for idx, isofile in enumerate(isofiles):     
     isoMasses, isoRadii, isoTemps, isoLoggs = isochroneParse('isochrones_plot', isofile)
@@ -337,45 +342,21 @@ for idx, (starId,  T1,  T1_err,  T2,  T2_err,  logg1,  logg1_err,  logg2,  logg2
 
     # If you only want to plot a subset of isochrones for any star, customize that here
     # Otherwise, the default values assigned above will be plotted instead
-    if starId == 5285607: 
-        #isofiles = 
-        #isolabels = 
-        #isolines = 
-        #isocolors = 
+    if starId == 5285607:  
         pltidx = 1
-
     elif starId == 6864859:
-        #isofiles = 
-        #isolabels = 
-        #isolines = 
-        #isocolors = 
         pltidx = 2
-
     elif starId == 6778289:
-        #isofiles = 
-        #isolabels = 
-        #isolines = 
-        #isocolors = 
         pltidx = 3
-
-    elif starId == 6449358:
-        #isofiles = 
-        #isolabels = 
-        #isolines = 
-        #isocolors = 
-        pltidx = 4
-
     elif starId == 4285087:
-        #isofiles = 
-        #isolabels = 
-        #isolines = 
-        #isocolors = 
-        pltidx = 5
+        pltidx = 4
+    else:
+        pltidx = 0
     
-    if T1.value > 4000:  # only plot the stars with defined temperatures (skip 613 and 678)
+    if pltidx > 0:
         # Make a new subplot panel for each star
-        ax = fig.add_subplot(2, 3, pltidx)
-        plt.subplots_adjust(wspace=0, hspace=0)       
+        ax = fig.add_subplot(2, 2, pltidx)
+        plt.subplots_adjust(wspace=0, hspace=0)
         
         for isoidx, isofile in enumerate(isofiles):   
             isoMasses, isoRadii, isoTemps, isoLoggs = isochroneParse('isochrones_plot', isofile)
@@ -400,15 +381,16 @@ for idx, (starId,  T1,  T1_err,  T2,  T2_err,  logg1,  logg1_err,  logg2,  logg2
         plt.xlim([3.89, 3.73]) 
         plt.ylim([4.65, 3.95])
         
-        if starId != 5285607 and starId != 6449358:
+        if starId != 5285607 and starId != 6778289:
             plt.gca().set_yticklabels([])
         else:
             plt.ylabel('$\log g$', size=14)
-        if starId != 6449358 and starId != 4285087 and starId != 6778289:
+        if starId != 4285087 and starId != 6778289:
             plt.gca().set_xticklabels([])            
-        if starId == 4285087:
+        else:
             plt.xlabel('$\log T_{\mathrm{eff}}$', size=14)
-            plt.legend(bbox_to_anchor=(1.05, 0.8), loc=2, borderaxespad=0., frameon=False, fontsize=12)
+        
+        #plt.legend(bbox_to_anchor=(1.05, 0.8), loc=2, borderaxespad=0., frameon=False, fontsize=12)
 
         plt.text(3.88, 4.55, starId, size=14)
 
@@ -423,13 +405,14 @@ plt.figure(figsize=(9,6))
 for idx, (starId,  M1,   R1,  M1_err,   R1_err,  M2,   R2,  M2_err,   R2_err) in enumerate(zip(
           starIds, kM1s, R1s, kM1_errs, R1_errs, kM2s, R2s, kM2_errs, R2_errs)):
 
-    plt.errorbar(M1.value, R1.value, yerr=R1_err.value, xerr=M1_err.value,
-                 marker='o', markersize=8, markeredgewidth=2, ls='None',
-                 c=starcolors[idx], label=starId)
+    if starId != 6449358:
+        plt.errorbar(M1.value, R1.value, yerr=R1_err.value, xerr=M1_err.value,
+                     marker='o', markersize=8, markeredgewidth=2, ls='None',
+                     c=starcolors[idx], label=starId)
 
-    plt.errorbar(M2.value, R2.value, yerr=R2_err.value, xerr=M2_err.value, 
-                 ls='None', marker='o', markersize=8, markeredgewidth=2, 
-                 markerfacecolor='None', c=starcolors[idx], label='_nolegend_')
+        plt.errorbar(M2.value, R2.value, yerr=R2_err.value, xerr=M2_err.value, 
+                     ls='None', marker='o', markersize=8, markeredgewidth=2, 
+                     markerfacecolor='None', c=starcolors[idx], label='_nolegend_')
 
 for idx, isofile in enumerate(isofiles):
     
@@ -438,10 +421,40 @@ for idx, isofile in enumerate(isofiles):
     plt.plot(isoMasses.to_value(u.Msun), isoRadii.to_value(u.Rsun), ls=isolines[idx],
              lw=2, c=isocolors[idx], label=isolabels[idx])
 
-plt.xlim([0.1, 2])
-plt.ylim([0.4, 2.2])
-plt.ylabel('Radius $R_{\odot}$', size=16)
-plt.xlabel('Mass $M_{\odot}$', size=16)
+plt.xlim([0.2, 1.7])
+plt.ylim([0.5, 2.1])
+plt.ylabel('Radius ($R_{\odot}$)', size=16)
+plt.xlabel('Mass ($M_{\odot}$)', size=16)
 plt.legend(frameon=False, fontsize=12, loc=2)
+
+plt.show()
+
+###### A Mass vs Teff plot? Because, why not ######
+newfig = plt.figure(figsize=(7,6))
+
+for idx, (starId,  M1,   T1,  M1_err,   T1_err,  M2,   T2,  M2_err,   T2_err) in enumerate(zip(
+          starIds, kM1s, T1s, kM1_errs, T1_errs, kM2s, T2s, kM2_errs, T2_errs)):
+
+    if starId != 6131659 and starId != 6781535 and starId != 6449358:
+        plt.errorbar(np.log10(T1.value), M1.value, xerr=(0.434*(T1_err/T1.value)), yerr=M1_err.value,
+                     marker='o', markersize=8, markeredgewidth=2, ls='None',
+                     c=starcolors[idx], label=starId, zorder=2)
+
+        plt.errorbar(np.log10(T2.value), M2.value, xerr=(0.434*(T2_err/T2.value)), yerr=M2_err.value, 
+                     ls='None', marker='o', markersize=8, markeredgewidth=2, 
+                     markerfacecolor='None', c=starcolors[idx], label='_nolegend_', zorder=2)
+    
+for idx, isofile in enumerate(isofiles):
+    
+    isoMasses, isoRadii, isoTemps, isoLoggs = isochroneParse('isochrones_plot', isofile)
+    
+    plt.plot(np.log10(isoTemps.value), isoMasses.to_value(u.Msun), ls=isolines[idx],
+             lw=2, c=isocolors[idx], label=isolabels[idx], zorder=1)
+
+plt.xlabel('$\log T_{\mathrm{eff}}$', size=14)
+plt.ylabel('Mass ($M_{\odot}$)', size=16)
+plt.legend(frameon=False, fontsize=12)
+plt.xlim([3.9, 3.6])
+plt.ylim([0.5, 2.2])
 
 plt.show()
