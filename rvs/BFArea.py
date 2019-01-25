@@ -17,9 +17,9 @@ from cycler import cycler
 ##########################################################################################
 6845
 starIds =         [5285607, 4285087, 6131659, 6449358, 6778289, 6781535, 6864859] #KEPLER Input Catalog
-ASPCAPTeffs =     [6495,    5664,    4845,    6237,    6572,    5749,    6417]   * u.K    #ASPCAP Effective Temperature
-ASPCAPTeff_errs = [156,     146,     98,      179,     162,     125,     159]    * u.K    #Error on the above 
-#ASPCAPTeffs =     [6845,    5689,    5195,    6737,    6822,    5849,    6497]   * u.K    #ASCAP Effective Temperature with El-Badry et al correction
+#ASPCAPTeffs =     [6495,    5804,    4845,    6237,    6572,    5749,    6417]   * u.K    #ASPCAP Effective Temperature
+ASPCAPTeff_errs = [156,     1,     98,      179,     162,     125,     159]    * u.K    #Error on the above 
+ASPCAPTeffs =     [6845,    5689,    5195,    6737,    6822,    5849,    6497]   * u.K    #ASCAP Effective Temperature with El-Badry et al correction
 kRsums =          [3.679,   2.060,   1.525,   2.8231,  2.746,   2.641,   3.110]  * u.Rsun #KEBLAT Radius Sums
 kRsum_errs =      [0.033,   0.008,   0.005,   0.0010,  0.013,   0.031,   0.020]  * u.Rsun #KEBLAT Radius Sum errors
 R1s =             [2.003,   1.033,   0.908,   2.1254,  1.748,   1.382,   1.655]  * u.Rsun 
@@ -414,6 +414,14 @@ for idx, (starId,  M1,   R1,  M1_err,   R1_err,  M2,   R2,  M2_err,   R2_err) in
         plt.errorbar(M2.value, R2.value, yerr=R2_err.value, xerr=M2_err.value, 
                      ls='None', marker='o', markersize=8, markeredgewidth=2, 
                      markerfacecolor='None', c=starcolors[idx], label='_nolegend_')
+
+isofiles = ['fehp00afep0_age0p8.txt',
+            'fehp00afep0_age1.txt', 'fehm05afep0_age1.txt']
+
+isolabels = ['0.8 Gyr, [Fe/H] $=0$',
+             '1 Gyr, [Fe/H] $=0$', '1 Gyr, [Fe/H] $=-0.5$', '1 Gyr, [Fe/H] $=-1$', 
+             '3 Gyr, [Fe/H] $=-1$',
+             '5 Gyr, [Fe/H] $=0$', '5 Gyr, [Fe/H] $=-0.5$']
 
 for idx, isofile in enumerate(isofiles):
     
