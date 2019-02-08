@@ -16,26 +16,26 @@ from cycler import cycler
 ##########################################################################################
 ##########################################################################################
 6845
-starIds =         [5285607, 4285087, 6131659, 6449358, 6778289, 6781535, 6864859] #KEPLER Input Catalog
-#ASPCAPTeffs =     [6495,    5804,    4845,    6237,    6572,    5749,    6417]   * u.K    #ASPCAP Effective Temperature
-ASPCAPTeff_errs = [156,     1,     98,      179,     162,     125,     159]    * u.K    #Error on the above 
-ASPCAPTeffs =     [6845,    5689,    5195,    6737,    6822,    5849,    6497]   * u.K    #ASCAP Effective Temperature with El-Badry et al correction
-kRsums =          [3.679,   2.060,   1.525,   2.8231,  2.746,   2.641,   3.110]  * u.Rsun #KEBLAT Radius Sums
-kRsum_errs =      [0.033,   0.008,   0.005,   0.0010,  0.013,   0.031,   0.020]  * u.Rsun #KEBLAT Radius Sum errors
-R1s =             [2.003,   1.033,   0.908,   2.1254,  1.748,   1.382,   1.655]  * u.Rsun 
-R1_errs =         [0.062,   0.012,   0.003,   0.0007,  0.009,   0.090,   0.013]  * u.Rsun 
-R2s =             [1.679,   1.026,   0.616,   0.6977,  0.998,   1.262,   1.455]  * u.Rsun 
-R2_errs =         [0.087,   0.011,   0.003,   0.00005, 0.005,   0.092,   0.012]  * u.Rsun 
-kM1s =            [1.557,   1.135,   0.942,   np.nan,  1.512,   1.006,   1.411] * u.Msun #KEBLAT Mass_1
-kM1_errs =        [0.038,   0.014,   0.010,   np.nan,  0.022,   0.036,   0.028]  * u.Msun #KEBLAT Mass_1 errors
-kM2s =            [1.346,   1.101,   0.703,   np.nan,  1.092,   1.037,   1.354] * u.Msun #KEBLAT Mass_2
-kM2_errs =        [0.033,   0.014,   0.008,   np.nan,  0.019,   0.036,   0.028]  * u.Msun #KEBLAT Mass_2 errors
-kfluxRatios =     [0.6579,  0.9455,  0.1480,  0.10752, 0.19155, 0.7610,  0.7256]          #KEBLAT Flux ratios 
-kfluxRatioErrs =  [0.1025,  0.0396,  0.0010,  6.5e-6,  0.00002, 0.2569,  0.0139]          #KEBLAT Flux ratios errors
-kradRatios =      [0.839,   0.969,   0.679,   0.3283,  0.5708,  0.913,   0.879]           #KEBLAT Radius Ratios 
-kradRatiosErrs =  [0.067,   0.020,   0.003,   0.00002, 0.0003,  0.128,   0.008]           #KEBLAT Radius Ratio errors
-GAIAdistances =   [799.744, 617.665, np.nan,  835.143, 1099.75, np.nan,  671.276]* u.pc   #Gaia distances 
-GAIAdistance_errs = [13.82, 11.903,  np.nan,  18.413,  26.8496, np.nan,  10.8597]* u.pc   #Error on distances
+starIds =         [5285607, 6864859, 6778289, 6449358, 4285087, 6131659,  6781535] #KEPLER Input Catalog
+#ASPCAPTeffs =     [6495,    6417,  6572,     6237,    5804,    4845,     5749]    * u.K    #ASPCAP Effective Temperature
+ASPCAPTeff_errs = [156,     159,     162,     179,     1,       98,       125]     * u.K    #Error on the above 
+ASPCAPTeffs =     [6845,    6497,    6822,    6737,    5689,    5195,     5849]    * u.K    #ASCAP Effective Temperature with El-Badry et al correction
+kRsums =          [3.679,   3.110,   2.746,   2.8231,  2.060,   1.525,    2.641]   * u.Rsun #KEBLAT Radius Sums
+kRsum_errs =      [0.033,   0.020,   0.013,   0.0010,  0.008,   0.005,    0.031]   * u.Rsun #KEBLAT Radius Sum errors
+R1s =             [2.003,   1.655,   1.748,   2.1254,  1.033,   0.908,    1.382]   * u.Rsun 
+R1_errs =         [0.062,   0.013,   0.009,   0.0007,  0.012,   0.003,    0.090]   * u.Rsun 
+R2s =             [1.679,   1.455,   0.998,   0.6977,  1.026,   0.616,    1.262]   * u.Rsun 
+R2_errs =         [0.087,   0.012,   0.005,   0.00005, 0.011,   0.003,    0.092]   * u.Rsun 
+kM1s =            [1.557,   1.411,   1.512,   np.nan,  1.135,   0.942,    1.006]   * u.Msun #KEBLAT Mass_1
+kM1_errs =        [0.038,   0.028,   0.022,   np.nan,  0.014,   0.010,    0.036]   * u.Msun #KEBLAT Mass_1 errors
+kM2s =            [1.346,   1.354,   1.092,   np.nan,  1.101,   0.703,    1.037]   * u.Msun #KEBLAT Mass_2
+kM2_errs =        [0.033,   0.028,   0.019,   np.nan,  0.014,   0.008,    0.036]   * u.Msun #KEBLAT Mass_2 errors
+kfluxRatios =     [0.6579,  0.7256,  0.19155, 0.10752, 0.9455,  0.1480,   0.7610]           #KEBLAT Flux ratios 
+kfluxRatioErrs =  [0.1025,  0.0139,  0.00002, 6.5e-6,  0.0396,  0.0010,   0.2569]           #KEBLAT Flux ratios errors
+kradRatios =      [0.839,   0.879,   0.5708,  0.3283,  0.969,   0.679,    0.913]            #KEBLAT Radius Ratios 
+kradRatiosErrs =  [0.067,   0.008,   0.0003,  0.00002, 0.020,   0.003,    0.128]            #KEBLAT Radius Ratio errors
+GAIAdistances =   [799.744, 671.276, 1099.75, 835.143, 617.665, np.nan,   np.nan]  * u.pc   #Gaia distances 
+GAIAdistance_errs = [13.82, 10.8597, 26.8496, 18.413,  11.903,  np.nan,   np.nan]  * u.pc   #Error on distances
 
 # Placeholder arrays for values we will calculate in the superloop
 T1s = []
@@ -331,6 +331,7 @@ plt.xlabel('$\log T_{\mathrm{eff}}$', size=16)
 plt.ylabel('$\log g$',size=16)
 
 plt.show()
+plt.savefig('LTeffvLg.eps')
 
 ################################   Log(Teff) VS Log(g)   #################################
 ################################## ONE target per panel ##################################
@@ -396,6 +397,7 @@ for idx, (starId,  T1,  T1_err,  T2,  T2_err,  logg1,  logg1_err,  logg2,  logg2
         plt.text(3.88, 4.55, starId, size=14)
 
 plt.show()
+plt.savefig('Teffloggsubs.eps')
 
 ###############################   m(M_sun) VS r(R_sun)   #################################
 ##################### ALL the targets on the same Mass-Radius Plot #######################
@@ -467,3 +469,4 @@ plt.xlim([3.9, 3.6])
 plt.ylim([0.5, 2.2])
 
 plt.show()
+plt.savefig('MvR.eps')
