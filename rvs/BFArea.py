@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 from matplotlib import cm
 from numpy import trapz
 from sys import argv
@@ -20,19 +21,19 @@ starIds =         [5285607, 6864859, 6778289, 6449358, 4285087, 6131659,  678153
 #ASPCAPTeffs =     [6495,    6417,  6572,     6237,    5804,    4845,     5749]    * u.K    #ASPCAP Effective Temperature
 ASPCAPTeff_errs = [156,     159,     162,     179,     1,       98,       125]     * u.K    #Error on the above 
 ASPCAPTeffs =     [6845,    6497,    6822,    6737,    5689,    5195,     5849]    * u.K    #ASCAP Effective Temperature with El-Badry et al correction
-kRsums =          [3.679,   3.110,   2.746,   2.8231,  2.060,   1.525,    2.641]   * u.Rsun #KEBLAT Radius Sums
+kRsums =          [3.679,   3.110,   2.746,   2.8231,  2.060,   1.525,    2.632]   * u.Rsun #KEBLAT Radius Sums
 kRsum_errs =      [0.033,   0.020,   0.013,   0.0010,  0.008,   0.005,    0.031]   * u.Rsun #KEBLAT Radius Sum errors
-R1s =             [2.003,   1.655,   1.748,   2.1254,  1.033,   0.908,    1.382]   * u.Rsun 
-R1_errs =         [0.062,   0.013,   0.009,   0.0007,  0.012,   0.003,    0.090]   * u.Rsun 
-R2s =             [1.679,   1.455,   0.998,   0.6977,  1.026,   0.616,    1.262]   * u.Rsun 
-R2_errs =         [0.087,   0.012,   0.005,   0.00005, 0.011,   0.003,    0.092]   * u.Rsun 
-kM1s =            [1.557,   1.411,   1.512,   np.nan,  1.135,   0.942,    1.006]   * u.Msun #KEBLAT Mass_1
+R1s =             [2.003,   1.655,   1.748,   2.1254,  1.033,   0.908,    1.434]   * u.Rsun 
+R1_errs =         [0.062,   0.013,   0.009,   0.0007,  0.012,   0.003,    0.110]   * u.Rsun 
+R2s =             [1.679,   1.455,   0.998,   0.6977,  1.026,   0.616,    1.199]   * u.Rsun 
+R2_errs =         [0.087,   0.012,   0.005,   0.00005, 0.011,   0.003,    0.114]   * u.Rsun 
+kM1s =            [1.557,   1.411,   1.512,   np.nan,  1.135,   0.942,    1.034]   * u.Msun #KEBLAT Mass_1
 kM1_errs =        [0.038,   0.028,   0.022,   np.nan,  0.014,   0.010,    0.036]   * u.Msun #KEBLAT Mass_1 errors
-kM2s =            [1.346,   1.354,   1.092,   np.nan,  1.101,   0.703,    1.037]   * u.Msun #KEBLAT Mass_2
+kM2s =            [1.346,   1.354,   1.092,   np.nan,  1.101,   0.703,    1.003]   * u.Msun #KEBLAT Mass_2
 kM2_errs =        [0.033,   0.028,   0.019,   np.nan,  0.014,   0.008,    0.036]   * u.Msun #KEBLAT Mass_2 errors
-kfluxRatios =     [0.6579,  0.7256,  0.19155, 0.10752, 0.9455,  0.1480,   0.7610]           #KEBLAT Flux ratios 
-kfluxRatioErrs =  [0.1025,  0.0139,  0.00002, 6.5e-6,  0.0396,  0.0010,   0.2569]           #KEBLAT Flux ratios errors
-kradRatios =      [0.839,   0.879,   0.5708,  0.3283,  0.969,   0.679,    0.913]            #KEBLAT Radius Ratios 
+kfluxRatios =     [0.6579,  0.7256,  0.19155, 0.010752, 0.9455,  0.1480,   0.9386]           #KEBLAT Flux ratios 
+kfluxRatioErrs =  [0.1025,  0.0139,  0.00002, 6.5e-6,  0.0396,  0.0010,   0.2384]           #KEBLAT Flux ratios errors
+kradRatios =      [0.839,   0.879,   0.5708,  0.3283,  0.969,   0.679,    0.8361]            #KEBLAT Radius Ratios 
 kradRatiosErrs =  [0.067,   0.008,   0.0003,  0.00002, 0.020,   0.003,    0.128]            #KEBLAT Radius Ratio errors
 GAIAdistances =   [799.744, 671.276, 1099.75, 835.143, 617.665, np.nan,   np.nan]  * u.pc   #Gaia distances 
 GAIAdistance_errs = [13.82, 10.8597, 26.8496, 18.413,  11.903,  np.nan,   np.nan]  * u.pc   #Error on distances
@@ -46,9 +47,6 @@ logg1s = []
 logg1_errs = []
 logg2s = []
 logg2_errs = []
-
-# Naively try adjusting ASPCAP Teffs to see what happens
-#ASPCAPTeffs = ASPCAPTeffs + 500*u.K
 
 def isochroneParse(isoDir, isoFile, loggMin=3.9):
     '''
@@ -298,10 +296,11 @@ assert len(starcolors) == len(starIds)
 ##################### ALL the targets on the same Mass-Radius Plot #######################
 ########################################################################################## 
 
-plt.figure(figsize=(9,6))
+fig = plt.figure(figsize=(9,6))
 
 for idx, (starId,  T1,  T1_err,  T2,  T2_err,  logg1,  logg1_err,  logg2,  logg2_err) in enumerate(zip(
           starIds, T1s, T1_errs, T2s, T2_errs, logg1s, logg1_errs, logg2s, logg2_errs)):
+    
     
     if starId != 6131659 and starId != 6781535 and starId != 6449358:
         plt.errorbar(np.log10(T1.value), logg1.value, yerr=logg1_err, 
@@ -331,13 +330,15 @@ plt.xlabel('$\log T_{\mathrm{eff}}$', size=16)
 plt.ylabel('$\log g$',size=16)
 
 plt.show()
-plt.savefig('LTeffvLg.eps')
+#fig.savefig('loggteffall.eps')
 
 ################################   Log(Teff) VS Log(g)   #################################
 ################################## ONE target per panel ##################################
 ########################################################################################## 
 
 fig = plt.figure(figsize=(9,6))
+labs = [5285607, 6864859, 6778289, 4285087]
+
 
 for idx, (starId,  T1,  T1_err,  T2,  T2_err,  logg1,  logg1_err,  logg2,  logg2_err) in enumerate(zip(
           starIds, T1s, T1_errs, T2s, T2_errs, logg1s, logg1_errs, logg2s, logg2_errs)):
@@ -391,19 +392,29 @@ for idx, (starId,  T1,  T1_err,  T2,  T2_err,  logg1,  logg1_err,  logg2,  logg2
             plt.gca().set_xticklabels([])            
         else:
             plt.xlabel('$\log T_{\mathrm{eff}}$', size=14)
+            
+        if starId == 5285607:
+            plt.text(3.88, 4.55, "5285607", size=14)
+        if starId == 6864859:
+            plt.text(3.88, 4.55, "6864859", size=14)
+        if starId == 6778289:
+            plt.text(3.88, 4.55, "6778289", size=14)
+        if starId == 4285087:
+            plt.text(3.88, 4.55, "4285087", size=14)
         
         #plt.legend(bbox_to_anchor=(1.05, 0.8), loc=2, borderaxespad=0., frameon=False, fontsize=12)
-
-        plt.text(3.88, 4.55, starId, size=14)
+        #ax[0].legend([sc1], ["5285607"], size=14)
+        #txtstr = 5285607, 6864859, 6778289, 4285087
+        
 
 plt.show()
-plt.savefig('Teffloggsubs.eps')
+fig.savefig('loggteffsubs.eps')
 
 ###############################   m(M_sun) VS r(R_sun)   #################################
 ##################### ALL the targets on the same Mass-Radius Plot #######################
 ##########################################################################################  
 
-plt.figure(figsize=(9,6))
+fig = plt.figure(figsize=(9,6))
 
 for idx, (starId,  M1,   R1,  M1_err,   R1_err,  M2,   R2,  M2_err,   R2_err) in enumerate(zip(
           starIds, kM1s, R1s, kM1_errs, R1_errs, kM2s, R2s, kM2_errs, R2_errs)):
@@ -439,6 +450,8 @@ plt.xlabel('Mass ($M_{\odot}$)', size=16)
 plt.legend(frameon=False, fontsize=12, loc=2)
 
 plt.show()
+#fig.savefig('M_VS_R_all.eps')
+
 
 ###### A Mass vs Teff plot? Because, why not ######
 newfig = plt.figure(figsize=(7,6))
@@ -469,4 +482,4 @@ plt.xlim([3.9, 3.6])
 plt.ylim([0.5, 2.2])
 
 plt.show()
-plt.savefig('MvR.eps')
+
