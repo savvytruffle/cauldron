@@ -107,10 +107,10 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile = 'data/6131659/6131659outfile.txt'; bfoutfile = 'data/6131659/6131659BFOut.txt'
 
 #6449358
-infiles =   'data/6449358/6449358infilesALL.txt'; bjdinfile = 'data/6449358/6449358bjdinfileALL.txt'
-gausspars = 'data/6449358/6449358gaussparsALL.txt'
-outfile =   'data/6449358/6449358OutfileALL.txt'; bfoutfile = 'data/6449358/6449358BFOutALL.txt'
-gaussoutfile = 'data/6449358/6449358gaussoutALL.txt'
+#infiles =   'data/6449358/6449358infilesALL.txt'; bjdinfile = 'data/6449358/6449358bjdinfileALL.txt'
+#gausspars = 'data/6449358/6449358gaussparsALL.txt'
+#outfile =   'data/6449358/6449358OutfileALL.txt'; bfoutfile = 'data/6449358/6449358BFOutALL.txt'
+#gaussoutfile = 'data/6449358/6449358gaussoutALL.txt'
 
 #5284133
 #infiles =   'data/5284133/5284133infiles.txt'; bjdinfile = 'data/5284133/5284133bjdinfile.txt'
@@ -136,10 +136,10 @@ gaussoutfile = 'data/6449358/6449358gaussoutALL.txt'
 #gaussoutfile = 'data/6781535/6781535gaussout.txt'; areaout = 'data/6781535/6781535BFArea.txt'
 
 #6864859
-#infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
-#gausspars = 'data/6864859/6864859gausspars.txt'
-#outfile =   'data/6864859/6864859Outfile.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
-#gaussoutfile = 'data/6864859/6864859gaussout.txt'; areaout = 'data/6864859/6864859BFArea.txt'
+infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
+gausspars = 'data/6864859/6864859gausspars.txt'
+outfile =   'data/6864859/6864859Outfile.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
+gaussoutfile = 'data/6864859/6864859gaussout.txt'; areaout = 'data/6864859/6864859BFArea.txt'
 
 
 #3247294
@@ -151,11 +151,11 @@ gaussoutfile = 'data/6449358/6449358gaussoutALL.txt'
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734      # 4851217
 #period = 3.8994011; BJD0 = 2454959.576010   # 5285607
-period = 5.7767904; BJD0 = 2454955.073410   # 6449358
+#period = 5.7767904; BJD0 = 2454955.073410   # 6449358
 #####period = 8.7845759; BJD0 = 245800.46231 #5284133
 #period = 30.13015; BJD0 = 2454971.834534    #6778289 FIXED BJD0 01/23/2019
 #period = 9.1220856; BJD0 = 2454971.834534   #6781535
-#period = 40.8778427; BJD0 = 2454955.556300  #6864859
+period = 40.8778427; BJD0 = 2454955.556300  #6864859
 #period = 61.4228063; BJD0 = 2455813.69734   #4075064
 #period = 1.0472603; BJD0 = 2455811.61005    #3848919
 #period = 11.3009948; BJD0 = 2456557.73097   #6610219
@@ -200,9 +200,9 @@ w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 #widlimits = [0,13, 0,13]; rvneg = -50; rvpos = 249; ymin = -0.15; ymax = 1.19 # 4285087
 #widlimits = [0,18, 0,19]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
 #widlimits = [0,16, 0,11]; rvneg = -300; rvpos = 500; ymin = -0.15; ymax = 1.2 #6449358 extra wide 
-widlimits = [0,16, 0,11]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.10 #6449358
+#widlimits = [0,16, 0,11]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.10 #6449358
 #widlimits = [0,12, 0,8]; rvneg = -45; rvpos = 199; ymin = -0.15; ymax = 1.4 #6778289
-#widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
+widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
 #widlimits = [0,9, 0,9]; rvneg = -150; rvpos = 50; ymin = -0.15; ymax = 1.19 # 6610259a
 #widlimits = [0,15, 0,15]; rvneg = -50; rvpos = 10; ymin = -0.15; ymax = 1.19 # 6610219b
 
@@ -393,8 +393,8 @@ windowcols = 3 # 4                             # how many columns the plot shoul
 windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
 xmin = rvneg
 xmax = rvpos
-fig = plt.figure(1, figsize=(12,16)) 
-#fig = plt.figure(1, figsize=(16,12))
+#fig = plt.figure(1, figsize=(12,16)) 
+fig = plt.figure(1, figsize=(16,12))
 #fig = plt.figure(1, figsize=(15,7)) 
 #fig = plt.figure(1, figsize=(15,5)) #5285607 (6 Visits)
 fig.text(0.5, 0.04, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size='large')
@@ -430,24 +430,24 @@ for i in range (1, nspec):
     #plt.plot(bf_ind, gauss2, color=colors[2], lw=3, ls='--')#, label='Gaussian fit 2')
     # OPTION TO PLOT VERTICAL LINE AT ZERO
     #plt.axvline(x=0, color=colors[15])    
-ax.legend(bbox_to_anchor=(0.5,-1.5), loc=4, borderaxespad=0., 
-       frameon=False, handlelength=3, prop={'size':16})
+#ax.legend(bbox_to_anchor=(0.5,-1.5), loc=4, borderaxespad=0., 
+#       frameon=False, handlelength=3, prop={'size':16})
 
     # MAKE A LEGEND
 #1.2
-#ax.legend(bbox_to_anchor=(2.5,0.7), loc=1, borderaxespad=0., 
-#                      frameon=False, handlelength=3, prop={'size':18})
-#    if nspec - 1 == windowcols * (windowrows - 1): # square plot, you must adjust the rows for room
-#        # in this situation, the legend is printed below the final subplot
-#        if i==nspec-1:
-#            ax.legend(bbox_to_anchor=(0.5,-1.2), loc=4, borderaxespad=0., 
-#                      frameon=False, handlelength=3, prop={'size':16})
-#    else:
-#        # in this situation, the legend is printed to the right of the final subplot
-#        if i==nspec-1: 
-#            ax.legend(bbox_to_anchor=(2.1,0.7), loc=1, borderaxespad=0., 
-#                      frameon=False, handlelength=3, prop={'size':18})
-                    
+ax.legend(bbox_to_anchor=(2.5,0.7), loc=1, borderaxespad=0., 
+                      frameon=False, handlelength=3, prop={'size':18})
+if nspec - 1 == windowcols * (windowrows - 1): # square plot, you must adjust the rows for room
+    # in this situation, the legend is printed below the final subplot
+    if i==nspec-1:
+        ax.legend(bbox_to_anchor=(0.5,-1.2), loc=4, borderaxespad=0., 
+                  frameon=False, handlelength=3, prop={'size':16})
+else:
+    # in this situation, the legend is printed to the right of the final subplot
+    if i==nspec-1: 
+        ax.legend(bbox_to_anchor=(2.1,0.7), loc=1, borderaxespad=0., 
+                  frameon=False, handlelength=3, prop={'size':18})
+                
 plt.show()
-fig.savefig('6449358bfrv_new.eps')
+fig.savefig('6864859bfrv_new.eps')
 #fig.savefig('3247294bfrv.eps')

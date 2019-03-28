@@ -307,7 +307,7 @@ for idx, (starId,  T1,  T1_err,  T2,  T2_err,  logg1,  logg1_err,  logg2,  logg2
           starIds, T1s, T1_errs, T2s, T2_errs, logg1s, logg1_errs, logg2s, logg2_errs)):
     
     
-    if starId != 6131659 and starId != 6781535 and starId != 6449358 and starId !=4285087:
+    if starId != 6131659 and starId != 6781535 and starId != 6449358: #and starId !=4285087:
         plt.errorbar(np.log10(T1.value), logg1.value, yerr=logg1_err, 
                 xerr=(0.434*(T1_err/T1.value)), ls='None', marker='o', 
                 markersize=8, markeredgewidth=1, label=starId,
@@ -317,21 +317,6 @@ for idx, (starId,  T1,  T1_err,  T2,  T2_err,  logg1,  logg1_err,  logg2,  logg2
                 xerr=(0.434*(T2_err/T2.value)), ls='None', marker='o', 
                 markersize=8, markeredgewidth=1, markerfacecolor='None',
                 label='_nolegend_', c=starcolors[idx], zorder=2)
-                
-### Because the definitions of star 1 and star 2 are wonky and different in BF land    ###
-### and KEBLAT RV land, the following if statement switches which circle is filled     ###
-### (primary) and which circle is empty (secondary).                                   ###
-
-    if starId == 4285087:
-        plt.errorbar(np.log10(T2.value), logg2.value, yerr=logg2_err, 
-                xerr=(0.434*(T2_err/T2.value)), ls='None', marker='o', 
-                markersize=8, markeredgewidth=1, label=starId,
-                c='#984ea3', zorder=2)
- 
-        plt.errorbar(np.log10(T1.value), logg1.value, yerr=logg1_err, 
-                xerr=(0.434*(T1_err/T1.value)), ls='None', marker='o', 
-                markersize=8, markeredgewidth=1, markerfacecolor='None',
-                label='_nolegend_', c='#984ea3', zorder=2)
 
         #plt.axvline(x=np.log10(ASPCAPTeffs[idx].value + 200), c=starcolors[idx])
 
