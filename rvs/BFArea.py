@@ -164,9 +164,9 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 ### Using the ASPCAP temperature, the sum of the squared radii and the distance to our ###
 ### targets from GAIA(Bailer-Jones et al 2018)and follow through with error propagation###
 ##########################################################################################
-    Flux1 = KEBLATFluxsum / (1 + BFFluxRatSoP)
+    Flux1 = KEBLATFluxsum / (1 + kfluxRatio)
     Flux1_err = Flux1.cgs * np.sqrt((KEBLATFluxsum_err/KEBLATFluxsum)**2 + 
-                                                (BFFluxRatSop_err/BFFluxRatSoP)**2)
+                                                (kfluxRatioErr/kfluxRatio)**2)
     Flux2 = KEBLATFluxsum - Flux1
     Flux2_err = Flux2.cgs * np.sqrt((KEBLATFluxsum_err/KEBLATFluxsum)**2 +
                                                 (Flux1_err/Flux1)**2)
@@ -249,21 +249,6 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
     logg2s.append(logg2)
     logg2_errs.append(logg2_err)
     
-    
-#### Next, we will confirm that the ASPCAP temperature is the flux weighted sum off the temperature components:
-# MR says: welllll this is a unit disaster ...
-#    FWSTemp = (T1KEBASP * Flux1 + T2KEBASP * Flux2) / (Flux1 + Flux2)
-#    FWSTemp_err = np.sqrt(((Flux1/(u.W/(u.m**2))/(KEBLATFluxsum/(u.W/(u.m**2))))*T1KEBASP_err)**2+((Flux1/(u.W/(u.m**2))*
-#    ((T1KEBASP/u.K)-(T2KEBASP/u.K)/(KEBLATFluxsum/(u.W/(u.m**2)))**2))*Flux1_err)**2+(((Flux1/(u.W/(u.m**2)))/(KEBLATFluxsum/(u.W/(u.m**2))))*T2KEBASP_err)**2
-#    +((Flux1/(u.W/(u.m**2))*((T2KEBASP/u.K)-(T1KEBASP/u.K)/(KEBLATFluxsum/(u.W/(u.m**2)))**2))*Flux1_err)**2)
-#    diff = ASPCAPTeff - FWSTemp
-#    sum = ASPCAPTeff + FWSTemp
-#    FWSTempASPCAPdiff = np.abs(diff) / (sum/2) * 100
-    #print('ASPCAP temperature  = {0:.3f} +/- {1:.3}'.format(ASPCAPTeff, ASPCAPTeff_err)
-    #print('Temperature from our calculation using ASPCAP and light curve analysis = {0:.3f} +/- {1:.3f}'.format(T1KEBASP, T1KEBASP_err)
-    #print('The flux weighted sum of the temperatures we calculated is {0:.3f} +/- {1:.3f}'.format(FWSTemp, FWSTemp_err)
-    #print('So, the difference between them is', FWSTempASPCAPdiff, '%')
-    print('Analysis Complete for star', starId)
     print('##############################################################')
 
 ################################   HR Diagram Party!   ################################### 
@@ -273,27 +258,26 @@ for starId, ASPCAPTeff, ASPCAPTeff_err, kRsum, kRsum_err, kM1, kM1_err, kM2, kM2
 plt.rc('text', usetex=True)
 
 isofiles = ['fehp00afep0_age0p8.txt',
-            'fehp00afep0_age1.txt', 'fehm05afep0_age1.txt', 'fehm1afep0_age1.txt',
-            'fehp00afep0_age3.txt',
-            'fehp00afep0_age5.txt', 'fehm05afep0_age5.txt']
+            'fehp00afep0_age1.txt','fehp00afep0_age3.txt','fehm05afep0_age1.txt'] 
+            #, #'fehm05afep0_age5.txt.txt', , 'fehp00afep0_age5.txt','fehm1afep0_age1.txt'
 
-isolabels = ['0.8 Gyr, [Fe/H] $=0$',
-             '1 Gyr, [Fe/H] $=0$', '1 Gyr, [Fe/H] $=-0.5$', '1 Gyr, [Fe/H] $=-1$', 
-             '3 Gyr, [Fe/H] $=-1$',
-             '5 Gyr, [Fe/H] $=0$', '5 Gyr, [Fe/H] $=-0.5$']
+isolabels = ['0.8 Gyr, [Fe/H] $=0$','1 Gyr, [Fe/H] $=0$', '3 Gyr, [Fe/H] $=0$',
+             '1 Gyr, [Fe/H] $=-0.5$']
+             #'3 Gyr, [Fe/H] $=-1$' , '5 Gyr, [Fe/H] $=0$', '1 Gyr, [Fe/H] $=-1.0$'
+ 
  
 isolines = ['-',
             '-', '--', ':',
             '-',
             '-', '--']
 
-isocolors = ['#f0f0f0','#d9d9d9','#bdbdbd','#969696','#737373','#525252','#252525']
-isocolors = list(reversed(isocolors))  # darker colors first
 
+isocolors = ['dimgrey','darkgrey','lightgrey','black']
+isocolors = list(reversed(isocolors))  # darker colors first
 starcolors = ['#e41a1c', '#377eb8', '#4daf4a', '#a65628', '#984ea3', '#737373', '#ff7f00']
 
 assert len(isofiles) == len(isolabels)
-assert len(isofiles) == len(isolines)
+#assert len(isofiles) == len(isolines)
 assert len(isofiles) == len(isocolors)
 assert len(starcolors) == len(starIds)
 
@@ -335,7 +319,7 @@ plt.xlabel('$\log T_{\mathrm{eff}}$', size=16)
 plt.ylabel('$\log g$',size=16)
 
 plt.show()
-fig.savefig('loggteffallBF.eps')
+#fig.savefig('loggteffall_final.eps')
 
 ################################   Log(Teff) VS Log(g)   #################################
 ################################## ONE target per panel ##################################
@@ -407,15 +391,15 @@ for idx, (starId,  T1,  T1_err,  T2,  T2_err,  logg1,  logg1_err,  logg2,  logg2
         if starId == 4285087:
             plt.text(3.88, 4.55, "4285087", size=14)
         
-        #plt.legend(bbox_to_anchor=(1.05, 0.8), loc=2, borderaxespad=0., frameon=False, fontsize=12)
-        #ax[0].legend([sc1], ["5285607"], size=14)
-        #txtstr = 5285607, 6864859, 6778289, 4285087
+plt.legend(bbox_to_anchor=(-0.3, 1.4), loc=3, borderaxespad=0., frameon=True, fontsize=12)
+#    ax[0].legend([sc1], ["5285607"], size=14)
+txtstr = 5285607, 6864859, 6778289, 4285087
         
 
 plt.show()
-#fig.savefig('loggteffsubsBF.eps')
+#fig.savefig('loggteffsubs_final.eps')
 
-###############################   m(M_sun) VS r(R_sun)   #################################
+###############################      R_sun vs M_sun      #################################
 ##################### ALL the targets on the same Mass-Radius Plot #######################
 ##########################################################################################  
 
@@ -434,12 +418,21 @@ for idx, (starId,  M1,   R1,  M1_err,   R1_err,  M2,   R2,  M2_err,   R2_err) in
                      markerfacecolor='None', c=starcolors[idx], label='_nolegend_')
 
 isofiles = ['fehp00afep0_age0p8.txt',
-            'fehp00afep0_age1.txt', 'fehm05afep0_age1.txt']
+            'fehp00afep0_age1.txt','fehp00afep0_age3.txt','fehm05afep0_age1.txt'] 
+            #, #'fehm05afep0_age5.txt.txt', , 'fehp00afep0_age5.txt','fehm1afep0_age1.txt'
 
-isolabels = ['0.8 Gyr, [Fe/H] $=0$',
-             '1 Gyr, [Fe/H] $=0$', '1 Gyr, [Fe/H] $=-0.5$', '1 Gyr, [Fe/H] $=-1$', 
-             '3 Gyr, [Fe/H] $=-1$',
-             '5 Gyr, [Fe/H] $=0$', '5 Gyr, [Fe/H] $=-0.5$']
+isolabels = ['0.8 Gyr, [Fe/H] $=0$','1 Gyr, [Fe/H] $=0$', '3 Gyr, [Fe/H] $=0$',
+             '1 Gyr, [Fe/H] $=-0.5$']
+             #'3 Gyr, [Fe/H] $=-1$' , '5 Gyr, [Fe/H] $=0$', '1 Gyr, [Fe/H] $=-1.0$'
+ 
+ 
+isolines = ['-',
+            '-', '--', ':',
+            '-',
+            '-', '--']
+
+isocolors = ['dimgrey','darkgrey','lightgrey','black']
+#isocolors = list(reversed(isocolors))  # darker colors first
 
 for idx, isofile in enumerate(isofiles):
     
@@ -455,7 +448,7 @@ plt.xlabel('Mass ($M_{\odot}$)', size=16)
 plt.legend(frameon=False, fontsize=12, loc=2)
 
 plt.show()
-#fig.savefig('M_VS_R_allBF.eps')
+fig.savefig('R_vs_M_final.eps')
 
 
 ###### A Mass vs Teff plot? Because, why not ######
