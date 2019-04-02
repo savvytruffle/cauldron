@@ -1,6 +1,8 @@
 from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.rcParams['text.usetex'] = True
 from matplotlib.ticker import MultipleLocator
 from astropy.io import fits
 from astropy.time import Time
@@ -105,10 +107,10 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #outfile = 'data/6131659/6131659outfile.txt'; bfoutfile = 'data/6131659/6131659BFOut.txt'
 
 #6449358
-infiles =   'data/6449358/6449358infiles.txt'; bjdinfile = 'data/6449358/6449358bjdinfile.txt'
-gausspars = 'data/6449358/6449358gausspars.txt'
-outfile =   'data/6449358/6449358Outfile2.txt'; bfoutfile = 'data/6449358/6449358BFOut2.txt'
-gaussoutfile = 'data/6449358/6449358gaussout2.txt'
+#infiles =   'data/6449358/6449358infilesALL.txt'; bjdinfile = 'data/6449358/6449358bjdinfileALL.txt'
+#gausspars = 'data/6449358/6449358gaussparsALL.txt'
+#outfile =   'data/6449358/6449358OutfileALL.txt'; bfoutfile = 'data/6449358/6449358BFOutALL.txt'
+#gaussoutfile = 'data/6449358/6449358gaussoutALL.txt'
 
 #5284133
 #infiles =   'data/5284133/5284133infiles.txt'; bjdinfile = 'data/5284133/5284133bjdinfile.txt'
@@ -118,8 +120,8 @@ gaussoutfile = 'data/6449358/6449358gaussout2.txt'
 #6778289 
 #infiles =   'data/6778289/6778289infiles.txt'; bjdinfile = 'data/6778289/6778289bjdinfiles.txt'
 #gausspars = 'data/6778289/6778289gausspars.txt'
-#outfile =   'data/6778289/6778289Outfile.txt'; bfoutfile = 'data/6778289/6778289BFOut.txt'
-#gaussoutfile = 'data/6778289/6778289gaussout.txt'; areaout = 'data/6778289/6778289BFArea.txt'
+#outfile =   'data/6778289/6778289OutfileNEW.txt'; bfoutfile = 'data/6778289/6778289BFOutNEW.txt'
+#gaussoutfile = 'data/6778289/6778289gaussout.txt'; areaout = 'data/6778289/6778289BFAreaNEW.txt'
 
 #6778289 Visible
 #infiles =   'data/6778289/V6778289infiles.txt'; bjdinfile = 'data/6778289/V6778289bjdinfile.txt'
@@ -130,14 +132,14 @@ gaussoutfile = 'data/6449358/6449358gaussout2.txt'
 #6781535 (Suspected Triple System)
 #infiles =   'data/6781535/6781535infiles.txt'; bjdinfile = 'data/6781535/6781535bjdinfile.txt'
 #gausspars = 'data/6781535/6781535gausspars.txt'
-#outfile =   'data/6781535/6781535Outfile1.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
+#outfile =   'data/6781535/6781535Outfile.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
 #gaussoutfile = 'data/6781535/6781535gaussout.txt'; areaout = 'data/6781535/6781535BFArea.txt'
 
 #6864859
-#infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
-#gausspars = 'data/6864859/6864859gausspars.txt'
-#outfile =   'data/6864859/6864859Outfile.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
-#gaussoutfile = 'data/6864859/6864859gaussout.txt'; areaout = 'data/6864859/6864859BFArea.txt'
+infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
+gausspars = 'data/6864859/6864859gausspars.txt'
+outfile =   'data/6864859/6864859Outfile.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
+gaussoutfile = 'data/6864859/6864859gaussout.txt'; areaout = 'data/6864859/6864859BFArea.txt'
 
 
 #3247294
@@ -147,17 +149,17 @@ gaussoutfile = 'data/6449358/6449358gaussout2.txt'
 
 
 # ORBITAL PERIOD AND ZEROPOINT !!!
-#period = 2.47028; BJD0 = 2455813.69734 # 4851217
-#period = 3.8994011; BJD0 = 2454959.576010 # 5285607
-period = 5.7767904; BJD0 = 2454955.073410 # 6449358
-#period = 8.7845759; BJD0 = 245800.46231 #5284133
-#period = 30.13015; BJD0 = 2456557.73097 #6778289
-#period = 9.1220856; BJD0 = 2454971.834534 #6781535
-#period = 40.8778427; BJD0 = 2454955.556300 #6864859
-#period = 61.4228063; BJD0 = 2455813.69734 #4075064
-#period = 1.0472603; BJD0 = 2455811.61005 #3848919
-#period = 11.3009948; BJD0 = 2456557.73097 #6610219
-#period = 4.4860312; BJD0 = 2454966.450124 #4285087 
+#period = 2.47028; BJD0 = 2455813.69734      # 4851217
+#period = 3.8994011; BJD0 = 2454959.576010   # 5285607
+#period = 5.7767904; BJD0 = 2454955.073410   # 6449358
+#####period = 8.7845759; BJD0 = 245800.46231 #5284133
+#period = 30.13015; BJD0 = 2454971.834534    #6778289 FIXED BJD0 01/23/2019
+#period = 9.1220856; BJD0 = 2454971.834534   #6781535
+period = 40.8778427; BJD0 = 2454955.556300  #6864859
+#period = 61.4228063; BJD0 = 2455813.69734   #4075064
+#period = 1.0472603; BJD0 = 2455811.61005    #3848919
+#period = 11.3009948; BJD0 = 2456557.73097   #6610219
+#period = 4.4860312; BJD0 = 2454966.450124   #4285087 
 #period = 17.5278303; BJD0 = 2454960.041397  #6131659
 #period = 67.4188276; BJD0 = 2454966.433454  #3247294
 
@@ -192,15 +194,15 @@ w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 # CUSTOMIZED BF WIDTH (for gausspars) AND PLOT LIMITS
 #widlimits = [0,15, 0,15]; rvneg = -100; rvpos = 300; ymin = -0.15; ymax = 1.19 # good starting default
 #widlimits = [0,9, 0,7, 0,9]; rvneg = 0; rvpos = 149; ymin = -0.15; ymax = 1.19 # 3247294 #weird triple only one panel 
-#widlimits = [0,9, 0,10, 0,9]; rvneg = -75; rvpos = 175; ymin = -0.15; ymax = 1.18 # 6781535
-#widlimits = [0,9, 0,9, 0,11]; rvneg = 0; rvpos = 200; ymin = -0.15; ymax = 1.19 # 6131659 
+#widlimits = [0,12, 0,11, 0,11]; rvneg = -75; rvpos = 199; ymin = -0.15; ymax = 1.18 # 6781535
+#widlimits = [0,9, 0,9, 0,11]; rvneg = 0; rvpos = 199; ymin = -0.15; ymax = 1.18 # 6131659  
 #widlimits = [0,9, 0,7]; rvneg = -300; rvpos = 300; ymin = -0.15; ymax = 1.19 # 6131659 Xtra large
 #widlimits = [0,13, 0,13]; rvneg = -50; rvpos = 249; ymin = -0.15; ymax = 1.19 # 4285087
 #widlimits = [0,18, 0,19]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
 #widlimits = [0,16, 0,11]; rvneg = -300; rvpos = 500; ymin = -0.15; ymax = 1.2 #6449358 extra wide 
-widlimits = [0,16, 0,11]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.2 #6449358
+#widlimits = [0,16, 0,11]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.10 #6449358
 #widlimits = [0,12, 0,8]; rvneg = -45; rvpos = 199; ymin = -0.15; ymax = 1.4 #6778289
-#widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
+widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
 #widlimits = [0,9, 0,9]; rvneg = -150; rvpos = 50; ymin = -0.15; ymax = 1.19 # 6610259a
 #widlimits = [0,15, 0,15]; rvneg = -50; rvpos = 10; ymin = -0.15; ymax = 1.19 # 6610219b
 
@@ -381,9 +383,6 @@ except:
 def gaussian(x, amp, mu, sig): # i.e., (xarray, amp, rv, width)
     return amp * np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
 
-###644 is weird, trying to identify blob things that might be peaks###    
-thirdpeak = [125, -40, 145, 185, 105, -70, -65, 170, -60, 115, 170, 115, 155, -15, -50]
-
 # PLOT THE FINAL SMOOTHED BFS + GAUSSIAN FITS IN INDIVIDUAL PANELS
 # manually adjust this multi-panel plot based on how many spectra you have
 windowcols = 3 # 4                             # how many columns the plot should have
@@ -394,9 +393,10 @@ windowcols = 3 # 4                             # how many columns the plot shoul
 windowrows = int([np.rint((nspec-1)/windowcols) if (np.float(nspec-1)/windowcols)%windowcols == 0 else np.rint((nspec-1)/windowcols)+1][0])
 xmin = rvneg
 xmax = rvpos
-#fig = plt.figure(1, figsize=(15,12)) 
+#fig = plt.figure(1, figsize=(12,16)) 
+fig = plt.figure(1, figsize=(16,12))
 #fig = plt.figure(1, figsize=(15,7)) 
-fig = plt.figure(1, figsize=(15,5)) #5285607 (6 Visits)
+#fig = plt.figure(1, figsize=(15,5)) #5285607 (6 Visits)
 fig.text(0.5, 0.04, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center', va='center', size='large')
 fig.text(0.07, 0.5, 'Broadening Function', ha='center', va='center', size='large', rotation='vertical')
 for i in range (1, nspec):
@@ -408,7 +408,10 @@ for i in range (1, nspec):
         ax.set_yticklabels(())
     if i < nspec-windowcols:
         ax.set_xticklabels(())
-    plt.subplots_adjust(wspace=0, hspace=0)
+    plt.subplots_adjust(wspace=0, hspace=0.0)
+#    plt.subplots_adjust(wspace=0, hspace=0.0, bottom=0.2) #6131659 
+#    plt.subplots_adjust(wspace=0, hspace=0.0, bottom=0.2) #6449358
+#    plt.plot_adjust(wspace=0, hspace=0)
     plt.axis([xmin, xmax, ymin, ymax])
     plt.tick_params(axis='both', which='major')
     plt.text(xmax - 0.19*(np.abs(xmax-xmin)), 0.60*ymax, '%.3f $\phi$' % (phase[i]), size='small')
@@ -420,60 +423,31 @@ for i in range (1, nspec):
     #gauss2 = gaussian(bf_ind, bffitlist[i][0][3], bffitlist[i][0][4], bffitlist[i][0][5])
     plt.plot(rvraw1[i], 0.1, color=colors[6], marker='|', ms=15)#, label='RV 1')
     plt.plot(rvraw2[i], 0.1, color=colors[2], marker='|', ms=15)#, label='RV 2')
-    plt.plot(thirdpeak[i-1], 0.1, color=colors[8], marker ='|', ms=15)
+    #plt.plot(thirdpeak[i-1], 0.1, color=colors[8], marker ='|', ms=15)
     if rvraw3[i] is not None:
         plt.plot(rvraw3[i], 0.1, color=colors[8], marker='|', ms=15)#, label='RV 3')
     #plt.plot(bf_ind, gauss1, color=colors[6], lw=3, ls='--')#, label='Gaussian fit 1')
     #plt.plot(bf_ind, gauss2, color=colors[2], lw=3, ls='--')#, label='Gaussian fit 2')
     # OPTION TO PLOT VERTICAL LINE AT ZERO
     #plt.axvline(x=0, color=colors[15])    
-
+#ax.legend(bbox_to_anchor=(0.5,-1.5), loc=4, borderaxespad=0., 
+#       frameon=False, handlelength=3, prop={'size':16})
 
     # MAKE A LEGEND
-    
-#ax.legend(bbox_to_anchor=(2.5,0.7), loc=1, borderaxespad=0., 
-#                      frameon=False, handlelength=3, prop={'size':18})
-    if nspec - 1 == windowcols * (windowrows - 1): # square plot, you must adjust the rows for room
-        # in this situation, the legend is printed below the final subplot
-        if i==nspec-1:
-            ax.legend(bbox_to_anchor=(0.5,-1.2), loc=4, borderaxespad=0., 
-                      frameon=False, handlelength=3, prop={'size':16})
-    else:
-        # in this situation, the legend is printed to the right of the final subplot
-        if i==nspec-1: 
-            ax.legend(bbox_to_anchor=(2.1,0.7), loc=1, borderaxespad=0., 
+#1.2
+ax.legend(bbox_to_anchor=(2.5,0.7), loc=1, borderaxespad=0., 
                       frameon=False, handlelength=3, prop={'size':18})
-                      
+if nspec - 1 == windowcols * (windowrows - 1): # square plot, you must adjust the rows for room
+    # in this situation, the legend is printed below the final subplot
+    if i==nspec-1:
+        ax.legend(bbox_to_anchor=(0.5,-1.2), loc=4, borderaxespad=0., 
+                  frameon=False, handlelength=3, prop={'size':16})
+else:
+    # in this situation, the legend is printed to the right of the final subplot
+    if i==nspec-1: 
+        ax.legend(bbox_to_anchor=(2.1,0.7), loc=1, borderaxespad=0., 
+                  frameon=False, handlelength=3, prop={'size':18})
+                
 plt.show()
-#fig.savefig('3247294bfrv.png')
+fig.savefig('6864859bfrv_new.eps')
 #fig.savefig('3247294bfrv.eps')
-
-######################################################
-# JONI PLEASE MOVE THE BELOW TO A DIFFERENT SCRIPT !!!
-######################################################
-#Calculate the Area underneath the BF curves 
-
-#PAmp, Perr, PWidth, Samp, Serr, SWidth = np.loadtxt('data/6864859/6864859Gin.txt',
-#	usecols=(0,1,2,3,4,5),unpack=True)
-
-
-#PArea = (PAmp*PWidth)/(2.35*0.3984)
-#PAAve = np.mean(PArea)
-#SArea = (Samp*SWidth)/(2.35*0.3984)
-#SAAve = np.mean(SArea)
-
-#AreaRat = (PArea/SArea)
-#AvAreaRat = (PAAve/SAAve)
-
-#print(AvAreaRat)
-
-#dataout = np.vstack((PArea,SArea))
-#np.savetxt('6864859BFAreaout.txt', dataout.T, fmt = '%.5f')
-
-#BFAreaout = open(areaout, 'w')
-#print(PArea, file=BFAreaout)
-    #print('Secondary BF Area: {0} +/- {1} width {2} xmax {3}'.format(bffitlist[idx][0][3], bffitlist[idx][2][3], bffitlist[idx][0][5], bffitlist[idx][0][4]), file=gout)
-
-#BFAreaout.close()
-    
-#print('BF Areas printed to outfile, Area Ratio star2/star1?=', AvAreaRat)
