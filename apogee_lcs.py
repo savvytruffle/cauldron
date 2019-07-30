@@ -386,109 +386,180 @@ def make_lcrv_plots(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, 
     return True
 
 def make_lcrv_plots_poster(kic, allpars, prefix, suffix='', savefig=True, polyorder=2, ooe=True, thresh=10.):
+
     plt.rc('font', size=14, weight='normal')
+
     plt.rc('text', usetex=True)
+
     plt.rc('xtick', labelsize=14)
+
     plt.rc('xtick.major', size=6, width=1)
+
     plt.rc('axes', labelsize=18, titlesize=22)
+
     plt.rc('figure', titlesize=22)
+
     from matplotlib.ticker import MaxNLocator
 
-
     lp = lnprob_lcrv(allpars, qua=np.unique(keblat.quarter))
+
     lcpars = keblat.getpars(partype='lc')[:13]
+
     lcmod, lcpol = keblat.lcfit(lcpars, keblat.jd[keblat.clip], keblat.quarter[keblat.clip],
-    				keblat.flux[keblat.clip], keblat.fluxerr[keblat.clip],
-    				keblat.crowd[keblat.clip], polyorder=2, ooe=ooe)
+
+                    keblat.flux[keblat.clip], keblat.fluxerr[keblat.clip],
+
+                    keblat.crowd[keblat.clip], polyorder=2, ooe=ooe)
 
     phase = ((keblat.jd[keblat.clip]-lcpars[4]) % lcpars[3])/lcpars[3]
+
     phase[phase<-np.clip(keblat.pwidth*3., 0., 0.2)]+=1.
+
     phase[phase>np.clip(keblat.sep+keblat.swidth*3., keblat.sep, 1.0)]-=1.
 
     lcres = keblat.flux[keblat.clip] - lcmod*lcpol
+
     lcMAD = np.nanpercentile(abs(keblat.flux[keblat.clip] - lcmod*lcpol), 67)
+
     fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(121)
+
+    ax = plt.subplot2grid((2,2),(0,0))
 
     ax.errorbar(phase, keblat.flux[keblat.clip]/lcpol,
+
                  keblat.fluxerr[keblat.clip], fmt='C7.', ecolor='gray', zorder=1)
-    ax.plot(phase, lcmod, 'C0.')
+
+    ax.plot(phase, lcmod, 'C0.', label='Primary Eclipse')
+
     ax.set_xlim((-1.2*keblat.pwidth, 1.2*keblat.pwidth))
+
     ax.set_ylim((np.min(lcmod)*0.98, np.max(lcmod)*1.02))
+
     ax.set_ylabel('Kepler Flux')
 
+    ax.legend(loc='lower right', shadow=False, frameon=False, markerscale=0, fontsize=10)
+
     divider = make_axes_locatable(ax)
-    axb = divider.append_axes("bottom", size=2.0, pad=0, sharex=ax)
+
+    axb = divider.append_axes("bottom", size=0.8, pad=0, sharex=ax)
 
     axb.errorbar(phase, lcres,
+
                  np.sqrt(keblat.fluxerr[keblat.clip]**2 + keblat.pars['lcerr']**2), fmt='C7.', ecolor='gray', zorder=1)
 
     axb.set_xlim((-1.2*keblat.pwidth, 1.2*keblat.pwidth))
+
     axb.set_ylim((-thresh*lcMAD, thresh*lcMAD))
-    axb.set_ylabel('Data - Model')
-    axb.set_xlabel('Phase (Primary Eclipse)')
+
+#    axb.set_ylabel('Resid.')
+
+#    axb.set_xlabel('Phase (Primary Eclipse)')
+
     #axb.set_yticklabels(axb.yaxis.get_majorticklabels()[1:])
 
-    ax2 = fig.add_subplot(122)
+    ax2 = plt.subplot2grid((2,2),(0,1))
 
     ax2.errorbar(phase, keblat.flux[keblat.clip]/lcpol,
+
                  keblat.fluxerr[keblat.clip], fmt='C7.', ecolor='gray', zorder=1)
-    ax2.plot(phase, lcmod, 'C0.')
+
+    ax2.plot(phase, lcmod, 'C0.', label='Secondary Eclipse')
+
     ax2.set_xlim((-1.2*keblat.swidth+keblat.sep, 1.2*keblat.swidth+keblat.sep))
+
     ax2.set_ylim((np.min(lcmod)*0.98, np.max(lcmod)*1.02))
 
+    ax2.legend(loc='lower right', shadow=False, frameon=False, markerscale=0, fontsize=10)
+
     divider2 = make_axes_locatable(ax2)
-    ax2b = divider2.append_axes("bottom", size=2.0, pad=0, sharex=ax2)
+
+    ax2b = divider2.append_axes("bottom", size=0.8, pad=0, sharex=ax2)
 
     ax2b.errorbar(phase, lcres,
+
                  np.sqrt(keblat.fluxerr[keblat.clip]**2 + keblat.pars['lcerr']**2), fmt='C7.', ecolor='gray')
 
     ax2b.set_xlim((-1.2*keblat.swidth+keblat.sep, 1.2*keblat.swidth+keblat.sep))
+
     ax2b.set_ylim((-thresh*lcMAD, thresh*lcMAD))
-    ax2b.set_xlabel('Phase (Secondary Eclipse)')
+
+#    ax2b.set_xlabel('Phase (Secondary Eclipse)')
 
     #ax2b.set_yticklabels(ax2b.yaxis.get_majorticklabels()[1:])
 
-
     plt.setp(ax.get_xticklabels(), visible=False)
+
     plt.setp(ax2.get_xticklabels(), visible=False)
-    plt.suptitle('KIC '+str(kic)+' LC (simultaneous)')
-    if savefig:
-        plt.savefig(prefix+suffix+'_LC.png', dpi=300)
+
+#    plt.suptitle('KIC '+str(kic)+' LC (simultaneous)')
+
+#    if savefig:
+
+#        plt.savefig(prefix+suffix+'_LC.png', dpi=300)
 
     # rvpars = keblat.getpars(partype='rv')
+
     rvpars = np.array([keblat.pars['msum'], keblat.pars['mrat'], keblat.pars['period'], keblat.pars['tpe'],
+
                        keblat.pars['esinw'], keblat.pars['ecosw'], keblat.pars['inc'], keblat.pars['k0'], keblat.pars['rverr']])
 
     rv_fit = keblat.rvfit(rvpars, keblat.rv_t)
-    fig = plt.figure(figsize=(10,8))
-    ax = fig.add_subplot(111)
+
+#    fig = plt.figure(figsize=(10,8))
+
+    ax = plt.subplot2grid((2,2),(1,0), colspan=2)
+
+#    fig.subplots_adjust(hspace=0.2)
+
     rvphase = (keblat.rv_t - keblat.pars['tpe'])%keblat.pars['period']/keblat.pars['period']
-    ax.errorbar(rvphase[~keblat.bad1], keblat.rv1_obs[~keblat.bad1], np.sqrt(keblat.rv1_err_obs**2+rvpars[-1]**2)[~keblat.bad1], fmt='k.', ecolor='gray')
-    ax.errorbar(rvphase[~keblat.bad2], keblat.rv2_obs[~keblat.bad2], np.sqrt(keblat.rv2_err_obs**2+rvpars[-1]**2)[~keblat.bad2], fmt='k.', ecolor='gray')
+
+    ax.errorbar(rvphase[~keblat.bad1], keblat.rv1_obs[~keblat.bad1]*1e-3, np.sqrt(keblat.rv1_err_obs**2+rvpars[-1]**2)[~keblat.bad1]*1e-3, fmt='k.', ecolor='gray')
+
+    ax.errorbar(rvphase[~keblat.bad2], keblat.rv2_obs[~keblat.bad2]*1e-3, np.sqrt(keblat.rv2_err_obs**2+rvpars[-1]**2)[~keblat.bad2]*1e-3, fmt='k.', ecolor='gray')
+
     rvt = np.linspace(0, 1, 100)*keblat.pars['period']+keblat.pars['tpe']
+
     rvmod = keblat.rvfit(rvpars, rvt)
-    ax.plot(np.linspace(0, 1, 100), rvmod[0], 'C1-', lw=2)
-    ax.plot(np.linspace(0, 1, 100), rvmod[1], 'C3-', lw=2)
-    ax.set_ylabel('RV (m/s)')
-    
+
+    ax.plot(np.linspace(0, 1, 100), rvmod[0]*1e-3, 'C1-', lw=2)
+
+    ax.plot(np.linspace(0, 1, 100), rvmod[1]*1e-3, 'C3-', lw=2)
+
+    ax.set_ylabel('RV (km/s)')
+
+    ax.set_xlim((0,1))
+
     locator=MaxNLocator(prune='both',nbins=5)
+
     ax.yaxis.set_major_locator(locator)
+
     #ax.set_yticklabels(ax.yaxis.get_majorticklabels()[:-1])
 
     divider = make_axes_locatable(ax)
-    ax2 = divider.append_axes("bottom", size=1.5, pad=0, sharex=ax)
-    ax2.errorbar(rvphase[~keblat.bad1], (keblat.rv1_obs-rv_fit[0])[~keblat.bad1], np.sqrt(keblat.rv1_err_obs**2+rvpars[-1]**2)[~keblat.bad1], fmt='C1.')
-    ax2.errorbar(rvphase[~keblat.bad2], (keblat.rv2_obs-rv_fit[1])[~keblat.bad2], np.sqrt(keblat.rv2_err_obs**2+rvpars[-1]**2)[~keblat.bad2], fmt='C3.')
+
+    ax2 = divider.append_axes("bottom", size=0.8, pad=0, sharex=ax)
+
+    ax2.errorbar(rvphase[~keblat.bad1], (keblat.rv1_obs-rv_fit[0])[~keblat.bad1]*1e-3, np.sqrt(keblat.rv1_err_obs**2+rvpars[-1]**2)[~keblat.bad1]*1e-3, fmt='C1.')
+
+    ax2.errorbar(rvphase[~keblat.bad2], (keblat.rv2_obs-rv_fit[1])[~keblat.bad2]*1e-3, np.sqrt(keblat.rv2_err_obs**2+rvpars[-1]**2)[~keblat.bad2]*1e-3, fmt='C3.')
+
+    ax2.set_ylim((-1.2*np.nanmax(abs((keblat.rv1_obs-rv_fit[0])[~keblat.bad1]*1e-3)), 1.2*np.nanmax(abs((keblat.rv1_obs-rv_fit[0])[~keblat.bad1]*1e-3))))
+
+    ax2.set_xlim((0,1))
 
     ax2.set_xlabel('Phase')
-    ax2.set_ylabel('Data - Model')
+
+#    ax2.set_ylabel('Resid.')
+
     plt.setp(ax.get_xticklabels(), visible=False)
+
     #plt.setp(ax2.get_yticklabels()[-1], visible=False)
 
-    plt.suptitle('KIC '+str(kic)+' RV (simultaneous)')
+#    plt.suptitle('KIC '+str(kic)+' RV (simultaneous)')
+
     if savefig:
-        plt.savefig(prefix+suffix+'_RV.png', dpi=300)
+
+        plt.savefig(prefix+suffix+'_simu.png', dpi=300)
 
     return True
 
@@ -665,6 +736,7 @@ def lnlike_rv(fisopars, residual=True):
 
 def lnlike_lcrv(fisopars, qua=[1], polyorder=2, residual=True):
     pars = get_pars2vals(fisopars, partype='lcrv')
+    pars[[-1, -3]][pars[[-1,-3]]<0] = np.exp(pars[[-1, -3]][pars[[-1,-3]]<0])
     res = keblat.lnlike_lcrv(pars, qua=qua, polyorder=polyorder, residual=residual)
     if residual:
         if np.any(np.isinf(res)) or np.sum(np.isnan(res)) > 0.05 * len(res):
@@ -1375,6 +1447,7 @@ def opt_rv(**kwargs):
     return rvpars
 
 def opt_lcrv(**kwargs):
+    vary_msum = kwargs.pop('vary_msum', True)
     fit_pars = Parameters()
     for name, val in kwargs.items():
         if name in keblat.parbounds.keys():
@@ -1383,7 +1456,7 @@ def opt_lcrv(**kwargs):
             fit_pars.add(name, value=val)
     kws = {'qua': np.unique(keblat.quarter), 'polyorder': 2, 'residual': True}
     fit_kws = {'maxfev': 2000 * (len(fit_pars) + 1)}
-
+    fit_pars['msum'].vary=vary_msum
 
     print("==========================================================================")
     print("================= Starting LC + RV simultaneous fit... ===================")
@@ -1940,26 +2013,25 @@ print(blah)
 ######## code snippet for 644 BF and RV cases overplot #######
 t, rv1, rv1err, rv2, rv2err = np.loadtxt('data/6449358Outfile_final.txt', usecols=(2, 3, 4, 5, 6), unpack=True)
 
-
 opt_lcrvpars = np.loadtxt(prefix+'lcrv_mass1.0_fix.lmfit')
+m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3*np.nan, rv1err*1e3, rv2err*1e3)
 make_lcrv_plots(kic, opt_lcrvpars, prefix, savefig=False)
 lcpars = [keblat.pars[zz] for zz in parnames_dict['lc']]
-m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3*np.nan, rv1err*1e3, rv2err*1e3)
 rvpars_case1 = [keblat.pars[zz] for zz in parnames_dict['rv']]
 rv1_case1, rv2_case1 = keblat.rvfit(rvpars_case1, keblat.rv_t)
 
 opt_lcrvpars = np.loadtxt(prefix+'lcrv_mass4.9_fix.lmfit')
+m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3*np.nan, rv1err*1e3, rv2err*1e3)
 make_lcrv_plots(kic, opt_lcrvpars, prefix, savefig=False)
 lcpars2 = [keblat.pars[zz] for zz in parnames_dict['lc']]
-m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3*np.nan, rv1err*1e3, rv2err*1e3)
 rvpars_case2 = [keblat.pars[zz] for zz in parnames_dict['rv']]
 rv1_case2, rv2_case2 = keblat.rvfit(rvpars_case2, keblat.rv_t)
 
 
 opt_lcrvpars = np.loadtxt(prefix+'lcrv_mass2.5_fix.lmfit')
+m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3*np.nan, rv1err*1e3, rv2err*1e3)
 make_lcrv_plots(kic, opt_lcrvpars, prefix, savefig=False)
 lcpars3 = [keblat.pars[zz] for zz in parnames_dict['lc']]
-m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3*np.nan, rv1err*1e3, rv2err*1e3)
 rvpars_case3 = [keblat.pars[zz] for zz in parnames_dict['rv']]
 rv1_case3, rv2_case3 = keblat.rvfit(rvpars_case3, keblat.rv_t)
 
@@ -1990,19 +2062,21 @@ for ii in range(15):
 bfout = np.array(bfout)
 
 bcv = np.loadtxt('data/6449358_bcv.txt')
-plt.figure()
+fig=plt.figure()
 for ii in range(15):                                                                                                                                                                 
-    plt.subplot(4,4,ii+1)
-    plt.plot(bfout[ii, :, 0], bfout[ii, :, 1])
-    plt.text(-244, -0.016, r'$\phi$='+str((timestamps[ii]-keblat.tpe)%keblat.period/keblat.period)[:5])
-    plt.xlim((-250, 250))
-    plt.axvline(rv2_case1[ii]*1e-3-bcv[ii,1], color='green', ls='--', 
-                label=str(np.round(rvpars_case1[0], 1))+', '+str(np.round(rvpars_case1[1], 1)))
-    plt.axvline(rv2_case2[ii]*1e-3-bcv[ii,1], color='red', ls='--', 
-                label=str(np.round(rvpars_case2[0], 1)) +', '+str(np.round(rvpars_case2[1], 1)))
-    plt.axvline(rv2_case3[ii]*1e-3-bcv[ii,1], color='orange', ls='--', 
-                label=str(np.round(rvpars_case3[0], 1)) +', '+str(np.round(rvpars_case3[1], 1)))
-    plt.legend(loc='upper left')
+    ax = fig.add_subplot(4,4,ii+1)
+    ax.plot(bfout[ii, :, 0], bfout[ii, :, 1])
+    ax.text(-244, -0.016, r'$\phi$='+str((timestamps[ii]-keblat.tpe)%keblat.period/keblat.period)[:5])
+    ax.set_xlim((-250, 250))
+    ax.axvline(rv2_case1[ii]*1e-3-bcv[ii,1], color='green', ls='--', 
+                label=str(np.round(rvpars_case1[0], 1))+', '+str(np.round(rvpars_case1[1], 2)))
+    ax.axvline(rv2_case3[ii]*1e-3-bcv[ii,1], color='orange', ls='--', 
+                label=str(np.round(rvpars_case3[0], 1)) +', '+str(np.round(rvpars_case3[1], 2)))
+    ax.axvline(rv2_case2[ii]*1e-3-bcv[ii,1], color='red', ls='--', 
+                label=str(np.round(rvpars_case2[0], 1)) +', '+str(np.round(rvpars_case2[1], 2)))
+fig.text(0.5, 0.04, 'Uncorrected Radial Velocity (km s$^{-1}$)', ha='center')
+fig.text(0.04, 0.5, 'Broadening Function', va='center', rotation='vertical')
+plt.legend(loc='upper left')
 
 
 
@@ -2093,12 +2167,13 @@ for kk in range(len(isonames)):
     bffile.write("""#{0} = {1[0]} +{1[1]} -{1[2]}\n""".format(str(isonames[kk]),
           bfpars[kk]))
 
-changeofvar_names = ['m1', 'm2', 'r1', 'r2', 'inc', 'e']
+changeofvar_names = ['m1', 'm2', 'r1', 'r2', 'inc', 'e', 'mass_func']
 params_changeofvar = np.zeros((params.shape[0], params.shape[1], len(changeofvar_names)))
 params_changeofvar[:,:,0], params_changeofvar[:,:,1] = keblat.sumrat_to_12(params[:,:,0], params[:,:,1])
 params_changeofvar[:,:,2], params_changeofvar[:,:,3] = keblat.sumrat_to_12(params[:,:,2], params[:,:,3])
 params_changeofvar[:,:,4] = keblat.get_inc(params[:,:,8], params_changeofvar[:,:,2], keblat.get_a(params[:,:,4], params[:,:,0]))
 params_changeofvar[:,:,5] = np.sqrt(params[:,:,6]**2 + params[:,:,7]**2)
+params_changeofvar[:,:,6] = params[:,:,1]**3 * np.sin(params_changeofvar[:,:,4])**3 * params[:,:,0] / (1.+params[:,:,1])
 
 bfpars_changeofvar = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
              zip(*np.percentile(params_changeofvar.reshape((-1, len(changeofvar_names))),
