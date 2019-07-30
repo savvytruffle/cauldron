@@ -664,7 +664,7 @@ void qats(double *d, int DeltaMin, int DeltaMax, int N, int q, double *Sbest, in
   double c_Sbest;
   int M, i;
 
-  *Sbest = -10000.;
+  *Sbest = -100000000.;
 
   for (M=MMin; M <= MMax; M++) {
     double **Smn = malloc(3 * sizeof(*Smn));
@@ -1130,8 +1130,104 @@ int dchiChoosePC(double *dchi, double *t, int *rinds, double *f, double *ef, dou
   return 0;
 }
 
-// dchi computation (chi_polyonly - chi_poly*tran) with transits MASKED in polyfitting
-// and gaussian error weighting
+// dchi computation (chi_polyonly - chi_poly*tran) with transits NOT MASKED in polyfitting
+// testing single cwidth sides
+int dchi_fn(double *dchi, double *t, long *jumps, double *f, double *ef, double *depth,
+		long *duration, int ndep, int ndur, int njumps, long *porder, long *cwidth, long Ntot) {
+  long lw, mt, rw, lt, rt;
+  int i, j, k, ii, npts, jj, i_lo, i_hi;
+  double *tt, *ff, *eff, *fmod, *efmod, *coeffs_tran, *coeffs_notran;//, *ttt, *fff, *efff;
+  double chisq_notran, chisq_tran, tmp_notran, tmp_tran, tmean, t_tmp;
+  for (i=0; i < ndep; i++) {
+    for (j=0; j < ndur; j++) {
+      //npts = duration[j]+2*cwidth[j];
+      coeffs_notran = malloc((porder[j]+1)*sizeof(double));
+      coeffs_tran = malloc((porder[j]+1)*sizeof(double));
+
+      for (k=0; k < njumps-1; k++) {
+        lw = jumps[k];
+        mt = jumps[k] + 5 + duration[j]/2;
+        lt = jumps[k] + 5;
+        rt = jumps[k] + 5 + duration[j] - 1;
+        //printf("%d %d %d %d %d\n", duration[j], cwidth[j], MIN(cwidth[j], duration[j]), lw, mt);
+        rw = rt + cwidth[j];//jumps[k] + 2*cwidth[j] + duration[j] - 1;
+        jj=0;
+        while (rt < jumps[k+1]-5) {
+          chisq_notran=0;
+          chisq_tran=0;
+          //lw = MAX(lw, jumps[k]);
+          //rw = MIN(rw, jumps[k+1]-1);
+          npts = rw-lw+1;
+          tt = malloc(npts*sizeof(double));
+          ff = malloc(npts*sizeof(double));
+          eff = malloc(npts*sizeof(double));
+          fmod = malloc(npts*sizeof(double));
+          efmod = malloc(npts*sizeof(double));
+
+          for (ii=0; ii < npts; ii++) {
+            tt[ii] = t[lw+ii] - t[mt];
+            ff[ii] = f[lw+ii];
+            eff[ii] = ef[lw+ii];
+
+          }
+          //tmean = mean(tt, npts);
+          //for (ii=0; ii<npts;ii++) {
+          //  tt[ii] = tt[ii] - tmean;
+          //  // no weighting
+          //  eff[ii] = ef[lw+ii];
+          //}
+          for (ii=0; ii<npts;ii++) {
+            fmod[ii] = 1.0;
+            if (t[lt] <= t[lw+ii] && t[lw+ii] <= t[rt]) {
+              t_tmp = tt[ii]/(duration[j]*0.0204340278*0.5);
+              if (t_tmp <= transit_x[0] | t_tmp >= transit_x[TRSZ-1]) {
+              }
+              else {
+                i_lo = binarysearch(transit_x, t_tmp, 0, TRSZ, TRSZ);
+                fmod[ii] = 1. - depth[i] * interp1d(transit_x[i_lo], transit_x[i_lo+1], transit_y[i_lo], transit_y[i_lo+1], t_tmp);
+              }
+            }
+            efmod[ii] = eff[ii] / fmod[ii];
+            fmod[ii] = ff[ii] / fmod[ii];
+          }
+          polynomialfit_w(npts, porder[j]+1, tt, ff, eff, coeffs_notran);
+
+          polynomialfit_w(npts, porder[j]+1, tt, fmod, efmod, coeffs_tran);
+
+
+	     for (ii=0; ii < npts; ii++) {
+            tmp_notran = (poly_eval(coeffs_notran, porder[j]+1, tt[ii]) - ff[ii])/eff[ii];
+            tmp_tran = (poly_eval(coeffs_tran, porder[j]+1, tt[ii]) - fmod[ii])/(efmod[ii]);
+            chisq_notran = chisq_notran + tmp_notran*tmp_notran;
+            chisq_tran = chisq_tran + tmp_tran*tmp_tran;
+          }
+          dchi[i*ndur*Ntot + j*Ntot + mt] = (chisq_notran/(npts-1) - chisq_tran/(npts-3));// /npts;
+          mt=mt+1;
+          lt=lt+1;
+          rt=rt+1;
+          jj+=1;
+          if (mt <= jumps[k]+cwidth[j]+duration[j]/2) {lw = jumps[k];}
+          else {lw=lw+1;}
+          if (mt >= jumps[k+1]-1-cwidth[j]-duration[j]/2) {rw = jumps[k+1]-1;}
+          else {rw=rw+1;}      
+          free(tt);
+          free(ff);
+          free(eff);
+          free(fmod);
+          free(efmod);
+        }
+      }
+
+      free(coeffs_notran);
+      free(coeffs_tran);
+
+    }
+  }
+  return 0;
+}
+
+
+// dchi computation (chi_polyonly - chi_poly*tran) with transits NOT MASKED in polyfitting
 int dchi_fn2(double *dchi, double *t, long *jumps, double *f, double *ef, double *depth,
 		long *duration, int ndep, int ndur, int njumps, long *porder, long *cwidth, long Ntot) {
   long lw, mt, rw;
@@ -1315,28 +1411,33 @@ int dchi_fn2(double *dchi, double *t, long *jumps, double *f, double *ef, double
   return 0;
 }
 
-// new dchi, (N_dof - chi_poly*tran), w/ transits masked during polyfitting
-int dchi_fn(double *dchi, double *t, long *jumps, double *f, double *ef, double *depth,
+// dchi computation (chi_polyonly - chi_poly*tran) with transits MASKED in polyfitting
+int dchi_fn_mask(double *dchi, double *t, long *jumps, double *f, double *ef, double *depth,
 		long *duration, int ndep, int ndur, int njumps, long *porder, long *cwidth, long Ntot) {
   long lw, mt, rw;
-  int i, j, k, ii, npts, jj;
-  double *mod, *tt, *ff, *eff, *coeffs;
-  double chisq_tran, tmp_tran, tmean;
-  double *u_x, *u_y;
-  u_x = malloc(3*sizeof(double));
-  u_y = malloc(3*sizeof(double));
-  u_y[0] = 1.0;
-  u_y[2] = 1.0;
+  int i, j, k, ii, npts, jj, i_lo, i_hi;
+  double *tt, *ff, *eff, *fmod, *efmod, *coeffs, *ttt, *fff, *efff; //*coeffs_tran, *coeffs_notran;
+  double chisq_notran, chisq_tran, tmp_notran, tmp_tran, tmean, t_tmp;
+  //double *u_x, *u_y;
+  //u_x = malloc(3*sizeof(double));
+  //u_y = malloc(3*sizeof(double));
+  //u_y[0] = 1.0;
+  //u_y[2] = 1.0;
   for (i=0; i < ndep; i++) {
-    u_y[1] = 1.0 - depth[i];
+    //u_y[1] = 1.0 - depth[i];
     for (j=0; j < ndur; j++) {
       npts = duration[j]+2*cwidth[j];
       tt = malloc(npts*sizeof(double));
-      mod = malloc(npts*sizeof(double));
+      ff = malloc(npts*sizeof(double));
+      eff = malloc(npts*sizeof(double));
+      fmod = malloc(npts*sizeof(double));
+      efmod = malloc(npts*sizeof(double));
+      //coeffs_notran = malloc((porder[j]+1)*sizeof(double));
+      //coeffs_tran = malloc((porder[j]+1)*sizeof(double));
       coeffs = malloc((porder[j]+1)*sizeof(double));
-      //tt = malloc((npts-duration[j])*sizeof(double));
-      ff = malloc((npts)*sizeof(double));
-      eff = malloc((npts)*sizeof(double));
+      ttt = malloc((npts-duration[j])*sizeof(double));
+      fff = malloc((npts-duration[j])*sizeof(double));
+      efff = malloc((npts-duration[j])*sizeof(double));
 
       for (k=0; k < njumps-1; k++) {
         /*
@@ -1350,10 +1451,11 @@ int dchi_fn(double *dchi, double *t, long *jumps, double *f, double *ef, double 
         lw = jumps[k];
         mt = jumps[k] + cwidth[j] + duration[j]/2;
         rw = jumps[k] + 2*cwidth[j] + duration[j] - 1;
-
+        jj=0;
         /*printf("%d %d %d %ld %ld %ld\n", i, j, k, lw, mt, rw);*/
         while (rw < jumps[k+1]) {
         /*while (rt < jumps[k+1]-MIN(10, cwidth[j])-1) {*/
+          chisq_notran=0;
           chisq_tran=0;
           lw = MAX(lw, jumps[k]);
           rw = MIN(rw, jumps[k+1]-1);
@@ -1361,7 +1463,7 @@ int dchi_fn(double *dchi, double *t, long *jumps, double *f, double *ef, double 
           for (ii=0; ii < npts; ii++) {
             tt[ii] = t[lw+ii];
             ff[ii] = f[lw+ii];
-            eff[ii] = ef[lw+ii];
+            //eff[ii] = ef[lw+ii];
             /*
             fmod[ii] = f[lw+ii];
             efmod[ii] = ef[lw+ii];
@@ -1372,65 +1474,105 @@ int dchi_fn(double *dchi, double *t, long *jumps, double *f, double *ef, double 
             */
           }
           tmean = mean(tt, npts);
+//          if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
+//            printf("\n%d %d %d %d %d\n", i, j, k, lw, npts);
+//          }
           for (ii=0; ii<npts;ii++) {
             tt[ii] = tt[ii] - tmean;
+            // no weighting
+            eff[ii] = ef[lw+ii];
+            // Gaussian weighting
+            //eff[ii] = ef[lw+ii] / exp(-tt[ii]*tt[ii] / (2. * (duration[j]+cwidth[j]) * (duration[j]+cwidth[j]) * 0.00018188455877));
+//            if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
+//              printf("%.7f ", tt[ii]);
+//            }
           }
-          u_x[0]=tt[cwidth[j]];
-          u_x[1]=tt[cwidth[j]+duration[j]/2];
-          u_x[2]=tt[duration[j]+cwidth[j]-1];
+//          if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {printf("\n");}
+
+          //u_x[0]=tt[cwidth[j]];
+          //u_x[1]=tt[cwidth[j]+duration[j]/2];
+          //u_x[2]=tt[duration[j]+cwidth[j]-1];
+          jj=0;
           for (ii=0; ii<npts;ii++) {
-            mod[ii] = 1.0;
+            fmod[ii] = 1.0;
             if (cwidth[j] <= ii && ii <=duration[j]+cwidth[j]-1) {
-              mod[ii] = utransit(u_x, u_y, tt[ii]);
-              //printf("tran %d %d %d %.5e\n", k, ii, jj, mod[ii]);
+              t_tmp = tt[ii]/(duration[j]*0.0204340278*0.5);
+              if (t_tmp <= transit_x[0] | t_tmp >= transit_x[TRSZ-1]) {
+                //fmod[ii] = 1.0;
+              }
+              else {
+                i_lo = binarysearch(transit_x, t_tmp, 0, TRSZ, TRSZ);
+                fmod[ii] = 1. - depth[i] * interp1d(transit_x[i_lo], transit_x[i_lo+1], transit_y[i_lo], transit_y[i_lo+1], t_tmp);
+                //pow((1.-(tt[ii]*tt[ii])/(tt[cwidth[j]]*tt[cwidth[j]])), 0.2);//utransit(u_x, u_y, tt[ii]);
+              }
             }
-            ff[ii] = ff[ii] / mod[ii];
-            eff[ii] = eff[ii] / mod[ii];
-              //printf("NOtran %d %d %d %.5e %.5e %.5e\n", k, ii, jj, tt[jj], tt0[ii], f[lw+ii]);
-
+            else {
+//            if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
+//              printf("%.7f ", ff[ii]);
+//            }
+              ttt[jj] = tt[ii];
+              fff[jj] = ff[ii];
+              efff[jj] = ef[ii];
+              jj+=1;
+            }
+            efmod[ii] = eff[ii] / fmod[ii];
+            fmod[ii] = ff[ii] / fmod[ii];
           }
 
-          polynomialfit_w(npts, porder[j]+1, tt, ff, eff, coeffs);
+//          if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
+//            printf("\n");
+//            for (ii=0;ii<npts;ii++) {
+//              printf("%.7f ", fmod[ii]);
+//            }
+//            printf("\n");
+//          }
+//
+//          if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
+//            for (ii=0;ii<npts;ii++) {
+//              printf("%.7f ", eff[ii]);
+//            }
+//            printf("\n");
+//          }
 
           /*
-          for (ii=0;ii<porder[j]+1; ii++) {
-            printf("%.8e ", coeff_notran[ii]);
+          jj=0;
+          for (ii=0; ii<npts;ii++) {
+            if (cwidth[j] <= ii && ii <=duration[j]+cwidth[j]-1) {
+            }
+            else {
+              ttt[jj] = tt[ii];
+              fff[jj] = ff[ii];
+              efff[jj] = eff[ii];
+              jj+=1;
+            }
           }
-          printf("\n");
           */
+          polynomialfit_w(npts-duration[j], porder[j]+1, ttt, fff, efff, coeffs);
+          //polynomialfit_w(npts, porder[j]+1, tt, ff, eff, coeffs_notran);
+
+          //polynomialfit_w(npts, porder[j]+1, tt, fmod, efmod, coeffs_tran);
+
+//          if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
+//            for (ii=0;ii<porder[j]+1;ii++) {
+//              printf("%.7e ", coeffs_tran[ii]);
+//            }
+//            printf("\n");
+//          }
+
 	      for (ii=0; ii < npts; ii++) {
             /*printf("%10.8f ", poly_eval(coeff_notran, porder[j]+1, tt[ii]));*/
-            tmp_tran = (poly_eval(coeffs, porder[j]+1, tt[ii]) - ff[ii])/eff[ii];
+            tmp_notran = (poly_eval(coeffs, porder[j]+1, tt[ii]) - ff[ii])/eff[ii];
+            tmp_tran = (poly_eval(coeffs, porder[j]+1, tt[ii]) - fmod[ii])/(efmod[ii]);
+            //tmp_notran = (poly_eval(coeffs_notran, porder[j]+1, tt[ii]) - ff[ii])/eff[ii];
+            //tmp_tran = (poly_eval(coeffs_tran, porder[j]+1, tt[ii]) - fmod[ii])/(efmod[ii]);
+            chisq_notran = chisq_notran + tmp_notran*tmp_notran;
             chisq_tran = chisq_tran + tmp_tran*tmp_tran;
-            /*if (ii % 6==0) {
-              printf("\n");
-            }*/
+//            if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
+//              printf("%.7f ", poly_eval(coeffs_tran, porder[j]+1, tt[ii]));
+//            }
+
           }
-          if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
-            printf("%d %d %d %ld %d \n", i, j, k, lw, npts);
-            for (ii=0; ii<npts;ii++) {
-              printf("%10.8f ", tt[ii]);
-            }
-            printf("\n");
-            for (ii=0; ii<npts;ii++) {
-              printf("%10.8f ", ff[ii]);
-            }
-            printf("\n");
-            for (ii=0; ii<npts;ii++) {
-              printf("%10.8f ", eff[ii]);
-            }
-            printf("\n");
-            for (ii=0;ii<porder[j]+1; ii++) {
-              printf("%.8e ", coeffs[ii]);
-            }
-            printf("\n");
-            for (ii=0; ii<npts;ii++) {
-              printf("%10.8f ", poly_eval(coeffs, porder[j]+1, tt[ii]));
-            }
-            printf("\n");
-            printf("%.8e\n", chisq_tran);
-          }
-          dchi[i*ndur*Ntot + j*Ntot + mt] = npts - porder[j] - 1 - chisq_tran;
+          dchi[i*ndur*Ntot + j*Ntot + mt] = chisq_notran/(npts-porder[j]-1) - chisq_tran/(npts-porder[j]-1-2);
           /*
           lt+=1;
           lw=lt-cwidth[j];
@@ -1441,20 +1583,353 @@ int dchi_fn(double *dchi, double *t, long *jumps, double *f, double *ef, double 
           lw=lw+1;
           mt=mt+1;
           rw=rw+1;
+          jj+=1;
         }
         /*printf("%d %d %d %ld %ld %ld\n", i, j, k, lw, mt, rw);*/
       }
       free(tt);
       free(ff);
       free(eff);
-      free(mod);
+      free(fmod);
+      free(efmod);
+      free(ttt);
+      free(fff);
+      free(efff);
+      //free(coeffs_notran);
+      //free(coeffs_tran);
       free(coeffs);
+
     }
   }
-  free(u_x);
-  free(u_y);
+  //free(u_x);
+  //free(u_y);
   return 0;
 }
+
+// dchi computation but w/ gaussian weighting for polynomial fit
+int dchi_fn_gs(double *dchi, double *t, long *jumps, double *f, double *ef, double *depth,
+		long *duration, int ndep, int ndur, int njumps, long *porder, long *cwidth, long Ntot) {
+  long lw, mt, rw;
+  int i, j, k, ii, npts, jj, i_lo, i_hi;
+  double *tt, *ff, *eff, *fmod, *efmod, *coeffs_tran, *coeffs_notran;//, *ttt, *fff, *efff;
+  double chisq_notran, chisq_tran, tmp_notran, tmp_tran, tmean, t_tmp;
+  //double *u_x, *u_y;
+  //u_x = malloc(3*sizeof(double));
+  //u_y = malloc(3*sizeof(double));
+  //u_y[0] = 1.0;
+  //u_y[2] = 1.0;
+  for (i=0; i < ndep; i++) {
+    //u_y[1] = 1.0 - depth[i];
+    for (j=0; j < ndur; j++) {
+      npts = duration[j]+2*cwidth[j];
+      tt = malloc(npts*sizeof(double));
+      ff = malloc(npts*sizeof(double));
+      eff = malloc(npts*sizeof(double));
+      fmod = malloc(npts*sizeof(double));
+      efmod = malloc(npts*sizeof(double));
+      coeffs_notran = malloc((porder[j]+1)*sizeof(double));
+      coeffs_tran = malloc((porder[j]+1)*sizeof(double));
+      //ttt = malloc((npts-duration[j])*sizeof(double));
+      //fff = malloc((npts-duration[j])*sizeof(double));
+      //efff = malloc((npts-duration[j])*sizeof(double));
+
+      for (k=0; k < njumps-1; k++) {
+        /*
+        lt = jumps[k]+MIN(10, cwidth[j]);
+        lw = lt - cwidth[j];
+        rt = lt + duration[j] - 1;
+        mt = lt + duration[j]/2;
+        rw = rt + cwidth[j];
+        */
+
+        lw = jumps[k];
+        mt = jumps[k] + cwidth[j] + duration[j]/2;
+        rw = jumps[k] + 2*cwidth[j] + duration[j] - 1;
+        jj=0;
+        /*printf("%d %d %d %ld %ld %ld\n", i, j, k, lw, mt, rw);*/
+        while (rw < jumps[k+1]) {
+        /*while (rt < jumps[k+1]-MIN(10, cwidth[j])-1) {*/
+          chisq_notran=0;
+          chisq_tran=0;
+          lw = MAX(lw, jumps[k]);
+          rw = MIN(rw, jumps[k+1]-1);
+          npts = rw-lw+1;
+          for (ii=0; ii < npts; ii++) {
+            tt[ii] = t[lw+ii];
+            ff[ii] = f[lw+ii];
+            //eff[ii] = ef[lw+ii];
+            /*
+            fmod[ii] = f[lw+ii];
+            efmod[ii] = ef[lw+ii];
+            if (cwidth[j]+1 <= ii && ii<=duration[j]+cwidth[j]-2) {
+              fmod[ii] = fmod[ii] / (1.-depth[i]);
+              efmod[ii] = ef[lw+ii] / (1.-depth[i]);
+            }
+            */
+          }
+          tmean = mean(tt, npts);
+//          if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
+//            printf("\n%d %d %d %d %d\n", i, j, k, lw, npts);
+//          }
+          for (ii=0; ii<npts;ii++) {
+            tt[ii] = tt[ii] - tmean;
+            // no weighting
+            //eff[ii] = ef[lw+ii];
+            // Gaussian weighting
+            eff[ii] = ef[lw+ii] / exp(-tt[ii]*tt[ii] / (2. * (duration[j]+cwidth[j]) * (duration[j]+cwidth[j]) * 0.00018188455877));
+//            if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
+//              printf("%.7f ", tt[ii]);
+//            }
+          }
+//          if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {printf("\n");}
+
+          //u_x[0]=tt[cwidth[j]];
+          //u_x[1]=tt[cwidth[j]+duration[j]/2];
+          //u_x[2]=tt[duration[j]+cwidth[j]-1];
+          for (ii=0; ii<npts;ii++) {
+            fmod[ii] = 1.0;
+            if (cwidth[j] <= ii && ii <=duration[j]+cwidth[j]-1) {
+              t_tmp = tt[ii]/(duration[j]*0.0204340278*0.5);
+              if (t_tmp <= transit_x[0] | t_tmp >= transit_x[TRSZ-1]) {
+                //fmod[ii] = 1.0;
+              }
+              else {
+                i_lo = binarysearch(transit_x, t_tmp, 0, TRSZ, TRSZ);
+                fmod[ii] = 1. - depth[i] * interp1d(transit_x[i_lo], transit_x[i_lo+1], transit_y[i_lo], transit_y[i_lo+1], t_tmp);
+                //pow((1.-(tt[ii]*tt[ii])/(tt[cwidth[j]]*tt[cwidth[j]])), 0.2);//utransit(u_x, u_y, tt[ii]);
+              }
+            }
+//            if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
+//              printf("%.7f ", ff[ii]);
+//            }
+            efmod[ii] = eff[ii] / fmod[ii];
+            fmod[ii] = ff[ii] / fmod[ii];
+          }
+
+//          if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
+//            printf("\n");
+//            for (ii=0;ii<npts;ii++) {
+//              printf("%.7f ", fmod[ii]);
+//            }
+//            printf("\n");
+//          }
+//
+//          if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
+//            for (ii=0;ii<npts;ii++) {
+//              printf("%.7f ", eff[ii]);
+//            }
+//            printf("\n");
+//          }
+
+          /*
+          jj=0;
+          for (ii=0; ii<npts;ii++) {
+            if (cwidth[j] <= ii && ii <=duration[j]+cwidth[j]-1) {
+            }
+            else {
+              ttt[jj] = tt[ii];
+              fff[jj] = ff[ii];
+              efff[jj] = eff[ii];
+              jj+=1;
+            }
+          }
+          */
+          //polynomialfit_w(npts-duration[j], porder[j]+1, ttt, fff, efff, coeffs);
+          polynomialfit_w(npts, porder[j]+1, tt, ff, eff, coeffs_notran);
+
+          polynomialfit_w(npts, porder[j]+1, tt, fmod, efmod, coeffs_tran);
+
+//          if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
+//            for (ii=0;ii<porder[j]+1;ii++) {
+//              printf("%.7e ", coeffs_tran[ii]);
+//            }
+//            printf("\n");
+//          }
+
+	      for (ii=0; ii < npts; ii++) {
+            /*printf("%10.8f ", poly_eval(coeff_notran, porder[j]+1, tt[ii]));*/
+            tmp_notran = (poly_eval(coeffs_notran, porder[j]+1, tt[ii]) - ff[ii])/eff[ii];
+            tmp_tran = (poly_eval(coeffs_tran, porder[j]+1, tt[ii]) - fmod[ii])/(efmod[ii]);
+            chisq_notran = chisq_notran + tmp_notran*tmp_notran;
+            chisq_tran = chisq_tran + tmp_tran*tmp_tran;
+//            if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
+//              printf("%.7f ", poly_eval(coeffs_tran, porder[j]+1, tt[ii]));
+//            }
+
+          }
+          dchi[i*ndur*Ntot + j*Ntot + mt] = chisq_notran - chisq_tran;
+          /*
+          lt+=1;
+          lw=lt-cwidth[j];
+          mt+=1;
+          rt+=1;
+          rw=rt+cwidth[j];
+          */
+          lw=lw+1;
+          mt=mt+1;
+          rw=rw+1;
+          jj+=1;
+        }
+        /*printf("%d %d %d %ld %ld %ld\n", i, j, k, lw, mt, rw);*/
+      }
+      free(tt);
+      free(ff);
+      free(eff);
+      free(fmod);
+      free(efmod);
+      //free(ttt);
+      //free(fff);
+      //free(efff);
+      free(coeffs_notran);
+      free(coeffs_tran);
+
+    }
+  }
+  //free(u_x);
+  //free(u_y);
+  return 0;
+}
+
+//// new dchi, (N_dof - chi_poly*tran), w/ transits masked during polyfitting
+//int dchi_fn(double *dchi, double *t, long *jumps, double *f, double *ef, double *depth,
+//		long *duration, int ndep, int ndur, int njumps, long *porder, long *cwidth, long Ntot) {
+//  long lw, mt, rw;
+//  int i, j, k, ii, npts, jj;
+//  double *mod, *tt, *ff, *eff, *coeffs;
+//  double chisq_tran, tmp_tran, tmean;
+//  double *u_x, *u_y;
+//  u_x = malloc(3*sizeof(double));
+//  u_y = malloc(3*sizeof(double));
+//  u_y[0] = 1.0;
+//  u_y[2] = 1.0;
+//  for (i=0; i < ndep; i++) {
+//    u_y[1] = 1.0 - depth[i];
+//    for (j=0; j < ndur; j++) {
+//      npts = duration[j]+2*cwidth[j];
+//      tt = malloc(npts*sizeof(double));
+//      mod = malloc(npts*sizeof(double));
+//      coeffs = malloc((porder[j]+1)*sizeof(double));
+//      //tt = malloc((npts-duration[j])*sizeof(double));
+//      ff = malloc((npts)*sizeof(double));
+//      eff = malloc((npts)*sizeof(double));
+//
+//      for (k=0; k < njumps-1; k++) {
+//        /*
+//        lt = jumps[k]+MIN(10, cwidth[j]);
+//        lw = lt - cwidth[j];
+//        rt = lt + duration[j] - 1;
+//        mt = lt + duration[j]/2;
+//        rw = rt + cwidth[j];
+//        */
+//
+//        lw = jumps[k];
+//        mt = jumps[k] + cwidth[j] + duration[j]/2;
+//        rw = jumps[k] + 2*cwidth[j] + duration[j] - 1;
+//
+//        /*printf("%d %d %d %ld %ld %ld\n", i, j, k, lw, mt, rw);*/
+//        while (rw < jumps[k+1]) {
+//        /*while (rt < jumps[k+1]-MIN(10, cwidth[j])-1) {*/
+//          chisq_tran=0;
+//          lw = MAX(lw, jumps[k]);
+//          rw = MIN(rw, jumps[k+1]-1);
+//          npts = rw-lw+1;
+//          for (ii=0; ii < npts; ii++) {
+//            tt[ii] = t[lw+ii];
+//            ff[ii] = f[lw+ii];
+//            eff[ii] = ef[lw+ii];
+//            /*
+//            fmod[ii] = f[lw+ii];
+//            efmod[ii] = ef[lw+ii];
+//            if (cwidth[j]+1 <= ii && ii<=duration[j]+cwidth[j]-2) {
+//              fmod[ii] = fmod[ii] / (1.-depth[i]);
+//              efmod[ii] = ef[lw+ii] / (1.-depth[i]);
+//            }
+//            */
+//          }
+//          tmean = mean(tt, npts);
+//          for (ii=0; ii<npts;ii++) {
+//            tt[ii] = tt[ii] - tmean;
+//          }
+//          u_x[0]=tt[cwidth[j]];
+//          u_x[1]=tt[cwidth[j]+duration[j]/2];
+//          u_x[2]=tt[duration[j]+cwidth[j]-1];
+//          for (ii=0; ii<npts;ii++) {
+//            mod[ii] = 1.0;
+//            if (cwidth[j] <= ii && ii <=duration[j]+cwidth[j]-1) {
+//              mod[ii] = utransit(u_x, u_y, tt[ii]);
+//              //printf("tran %d %d %d %.5e\n", k, ii, jj, mod[ii]);
+//            }
+//            ff[ii] = ff[ii] / mod[ii];
+//            eff[ii] = eff[ii] / mod[ii];
+//              //printf("NOtran %d %d %d %.5e %.5e %.5e\n", k, ii, jj, tt[jj], tt0[ii], f[lw+ii]);
+//
+//          }
+//
+//          polynomialfit_w(npts, porder[j]+1, tt, ff, eff, coeffs);
+//
+//          /*
+//          for (ii=0;ii<porder[j]+1; ii++) {
+//            printf("%.8e ", coeff_notran[ii]);
+//          }
+//          printf("\n");
+//          */
+//	      for (ii=0; ii < npts; ii++) {
+//            /*printf("%10.8f ", poly_eval(coeff_notran, porder[j]+1, tt[ii]));*/
+//            tmp_tran = (poly_eval(coeffs, porder[j]+1, tt[ii]) - ff[ii])/eff[ii];
+//            chisq_tran = chisq_tran + tmp_tran*tmp_tran;
+//            /*if (ii % 6==0) {
+//              printf("\n");
+//            }*/
+//          }
+//          if (i==0 && j==0 && k%10==0 && lw==jumps[0]) {
+//            printf("%d %d %d %ld %d \n", i, j, k, lw, npts);
+//            for (ii=0; ii<npts;ii++) {
+//              printf("%10.8f ", tt[ii]);
+//            }
+//            printf("\n");
+//            for (ii=0; ii<npts;ii++) {
+//              printf("%10.8f ", ff[ii]);
+//            }
+//            printf("\n");
+//            for (ii=0; ii<npts;ii++) {
+//              printf("%10.8f ", eff[ii]);
+//            }
+//            printf("\n");
+//            for (ii=0;ii<porder[j]+1; ii++) {
+//              printf("%.8e ", coeffs[ii]);
+//            }
+//            printf("\n");
+//            for (ii=0; ii<npts;ii++) {
+//              printf("%10.8f ", poly_eval(coeffs, porder[j]+1, tt[ii]));
+//            }
+//            printf("\n");
+//            printf("%.8e\n", chisq_tran);
+//          }
+//          dchi[i*ndur*Ntot + j*Ntot + mt] = npts - porder[j] - 1 - chisq_tran;
+//          /*
+//          lt+=1;
+//          lw=lt-cwidth[j];
+//          mt+=1;
+//          rt+=1;
+//          rw=rt+cwidth[j];
+//          */
+//          lw=lw+1;
+//          mt=mt+1;
+//          rw=rw+1;
+//        }
+//        /*printf("%d %d %d %ld %ld %ld\n", i, j, k, lw, mt, rw);*/
+//      }
+//      free(tt);
+//      free(ff);
+//      free(eff);
+//      free(mod);
+//      free(coeffs);
+//    }
+//  }
+//  free(u_x);
+//  free(u_y);
+//  return 0;
+//}
 
 int poly_lc(double *polvals, double *t, double *f, double *ef, double *model,
             long *jumps, int porder, int njumps) {
@@ -1475,12 +1950,12 @@ int poly_lc(double *polvals, double *t, double *f, double *ef, double *model,
       }
 
       if (ooe<porder+1) {
-        /*printf("%.5f, %.5f\n", model[jumps[i]], model[jumps[i+1]-1]);*/
+        //printf("%i, %i, %.5f, %.5f\n", ooe, porder+1, model[jumps[i]], model[jumps[i+1]-1]);
         free(tt0);
         /*printf("Npts out of eclipse = %i", ooe);*/
       }
       else {
-        if ((model[jumps[i]]<1.) || (model[jumps[i+1]-1]<1.)) {porder_orig=porder; porder=1;}
+        //if ((model[jumps[i]]<1.) || (model[jumps[i+1]-1]<1.)) {porder_orig=porder; porder=1;}
         coeffs = malloc((porder+1)*sizeof(double));
 
         t0mean = mean(tt0, npts);
@@ -1511,7 +1986,7 @@ int poly_lc(double *polvals, double *t, double *f, double *ef, double *model,
         for (j=0;j<npts;j++) {
           polvals[jumps[i]+j] = poly_eval(coeffs, porder+1, tt0[j]);
         }
-        if ((model[jumps[i]]<1.) || (model[jumps[i+1]-1]<1.)) {porder=porder_orig;}
+        //if ((model[jumps[i]]<1.) || (model[jumps[i+1]-1]<1.)) {porder=porder_orig;}
         free(tt0);
         free(tt);
         free(fmod);
@@ -1524,70 +1999,68 @@ int poly_lc(double *polvals, double *t, double *f, double *ef, double *model,
 
 int poly_lc_ooe(double *polvals, double *t, double *f, double *ef, double *model,
             long *jumps, int porder, int njumps) {
-  int i, j, k, npts, porder_orig;
-  double *tt0, *fmod, *efmod, *coeffs;
-  double t0mean;
+  int i, j, k, npts, ooe, porder_orig;
+  double *tt0, *tt, *fmod, *efmod, *coeffs;
+  double t0mean, tmean;
 
   for (i=0; i < njumps-1; i++) {
       npts = jumps[i+1]-jumps[i];
-//      ooe = 0;
+      ooe = 0;
       tt0 = malloc(npts*sizeof(double));
 
       for (j=0;j<npts;j++) {
         tt0[j] = t[jumps[i]+j];
-//        if (model[jumps[i]+j]>=1.) {
-//          ooe+=1;
-//        }
-      }
-
-//      if (ooe<porder+1) {
-//        /*printf("%.5f, %.5f\n", model[jumps[i]], model[jumps[i+1]-1]);*/
-//        free(tt0);
-//        /*printf("Npts out of eclipse = %i", ooe);*/
-//      }
-//      else {
-      porder_orig=porder;
-      if ((model[jumps[i]]<1.) || (model[jumps[i+1]-1]<1.)) {porder=1;}
-      coeffs = malloc((porder+1)*sizeof(double));
-
-      t0mean = mean(tt0, npts);
-
-//      tt = malloc(ooe*sizeof(double));
-      fmod = malloc(npts*sizeof(double));
-      efmod = malloc(npts*sizeof(double));
-
-//        k=0;
-      for (j=0; j<npts; j++) {
-        tt0[j] = tt0[j] - t0mean;
-//          if (model[jumps[i]+j]>=1.) {
-//        tt[j] = t[jumps[i]+j];
-        fmod[j] = f[jumps[i]+j] / model[jumps[i]+j];
-        efmod[j] = ef[jumps[i]+j] / model[jumps[i]+j];
-        if (model[jumps[i]+j]>=1.){
-          efmod[j] *= 3.;
+        if (model[jumps[i]+j]>0.) {
+          ooe+=1;
         }
-//            k+=1;
-//          }
       }
 
-//        tmean = mean(tt, ooe);
-//        for (k=0;k<ooe;k++) {
-//          tt[k] = tt[k] - tmean;
-//        }
-
-
-      polynomialfit_w(npts, porder+1, tt0, fmod, efmod, coeffs);
-
-      for (j=0;j<npts;j++) {
-        polvals[jumps[i]+j] = poly_eval(coeffs, porder+1, tt0[j]);
+      if (ooe<porder+1) {
+        /*printf("%.5f, %.5f\n", model[jumps[i]], model[jumps[i+1]-1]);*/
+        //printf("ooe<porder+1; %i %i\n", ooe, porder+1);
+        free(tt0);
+        /*printf("Npts out of eclipse = %i", ooe);*/
       }
-      porder=porder_orig;
-      free(tt0);
-//        free(tt);
-      free(fmod);
-      free(efmod);
-      free(coeffs);
-//      }
+      else {
+        //if ((model[jumps[i]]<1.) || (model[jumps[i+1]-1]<1.)) {porder_orig=porder; porder=1;}
+        coeffs = malloc((porder+1)*sizeof(double));
+
+        t0mean = mean(tt0, npts);
+
+        tt = malloc(ooe*sizeof(double));
+        fmod = malloc(ooe*sizeof(double));
+        efmod = malloc(ooe*sizeof(double));
+
+        k=0;
+        for (j=0; j<npts; j++) {
+          tt0[j] = tt0[j] - t0mean;
+          if (model[jumps[i]+j]>0.) {
+            tt[k] = t[jumps[i]+j];
+            fmod[k] = f[jumps[i]+j] / model[jumps[i]+j];
+            efmod[k] = ef[jumps[i]+j] / model[jumps[i]+j];
+            k+=1;
+          }
+        }
+
+        tmean = mean(tt, ooe);
+        for (k=0;k<ooe;k++) {
+          tt[k] = tt[k] - tmean;
+        }
+
+        //printf("\nBefore polyfit, porder=%i, ooe=%i, npts=%i, t=%.5f\n", porder, ooe, npts, tt[0]);
+        polynomialfit_w(ooe, porder+1, tt, fmod, efmod, coeffs);
+        //printf("After polyfit\n");
+        for (j=0;j<npts;j++) {
+          polvals[jumps[i]+j] = poly_eval(coeffs, porder+1, tt0[j]);
+          //printf("%.5f ", polvals[jumps[i]+j]);
+        }
+        //if ((model[jumps[i]]<1.) || (model[jumps[i+1]-1]<1.)) {porder=porder_orig;}
+        free(tt0);
+        free(tt);
+        free(fmod);
+        free(efmod);
+        free(coeffs);
+      }
     }
   return 0;
 }
@@ -1595,7 +2068,8 @@ int poly_lc_ooe(double *polvals, double *t, double *f, double *ef, double *model
 double getE(double M, double e)
 {
     double E = M, eps = 1.0e-7;
-    while(fabs(E - e*sin(E) - M) > eps) {
+    int niter;
+    while(fabs(E - e*sin(E) - M) > eps && niter<30) {
         E = E - (E - e*sin(E) - M) / (1.0 - e*cos(E));
     }
     return E;
@@ -1618,316 +2092,4 @@ int rsky(double *t, double *f, double e, double P, double t0, double eps, int Np
     }
     return 0;
 }
-
-
-/* ================================================== */
-/* ============ runge kutta nbody int. ============== */
-/* =========  computational class @ Wes  ============ */
-/* ============ not currently used ================== */
-
-void center_of_mass(int N, double mass[NMAX], double r[NMAX][NDIM], 
-		    double rcm[NDIM]) 
-{
-  int i, k;
-  double mtot;
-	
-  mtot = 0;
-  for (k=0; k<NDIM; k++) {
-    rcm[k] = 0;
-  }
-
-  for (i=0; i<N; i++) {
-    mtot += mass[i];
-    for (k=0; k<NDIM; k++) {
-      rcm[k] += mass[i]*r[i][k];
-    }
-  }
-
-  for (k=0; k<NDIM; k++)
-    rcm[k] /= mtot;
-
-}
-
-
-/*
-Kinetic energy.  This functions receives N, the mass[NMAX], and
-v[NMAX][NDIM] and must return the kinetic energy of the system.
-Recall that kinetic energy is defined by
-
-KE = 1/2 * m * v (dot) v
-*/
-
-double kinetic_energy(int N, double mass[NMAX], double v[NMAX][NDIM])
-{
-  int i, k;
-  double ke;
-
-  ke = 0;
-  for (i=0; i<N; i++) {
-    for (k=0; k<NDIM; k++) {
-      ke += mass[i]*v[i][k]*v[i][k];
-    }
-  }
-
-  ke *= 0.5;
-
-  return ke;
-}
-
-/*
-Potential energy.  This functions receives the variables N,
-mass[NMAX], and r[NMAX][NDIM] and must return the potential energy of
-the system.  In the expression for the potential energy the
-gravitational interaction must be cut-off below a definite minimum
-value of the separation RMIN=0.1 in order to avoid singularities if
-two of the objects accidentally come too close.  Thus, define
-rij=sqrt((x(1,i)-x(1,j))**2+(x(2,i)-x(2,j))**2) if the sqrt is >=
-RMIN, rij=RMIN otherwise, then the potential energy is given by the
-sum over all i from 1 to n and all j from 1 to i-1 of
-
--G * m(i)*m(j) / rij .
-*/
-
-double potential(int N, double mass[NMAX], double r[NMAX][NDIM])
-{
-  int i, j, k;
-  double pe, rij, r2;
-
-  pe = 0;
-
-  for (i=0; i<N-1; i++) {
-    for (j=i+1; j<N; j++) {
-
-      r2 = 0;
-      for (k=0; k<NDIM; k++) {
-	r2 += (r[i][k]-r[j][k])*(r[i][k]-r[j][k]);
-      }
-      rij = sqrt(r2);
-      if (rij < RMIN)
-	rij = RMIN;
-      pe -= G*mass[i]*mass[j]/rij;
-    }
-  }
-
-  return pe;
-}
- 
-/*
-Second-order Runge-Kutta integration algorithm. This subroutine
-receives the variables N, mass[NMAX], r[NMAX][NDIM], v[NMAX][NDIM],
-the number of steps nsteps and the value of the time step dt.  This
-subroutine must implement nsteps steps of the Runge-Kutta method.
-Recall that in the second-order Runge-Kutta method, coordinates and
-velocities are first evolved to the mid-point of the interval, i.e.,
-their values after dt/2 are calculated, and subsequently these values,
-equated to the central derivatives, are used to evolve the variables
-from the beginning to the end of the interval of duration dt.
-
-Your routine will integrate Newton's equations of motion, namely
-
-   dr[i][k]/dt = v[i][k]       dv[i][k]/dt = f[i][k]/m
-
-Using the potential energy given above, the force on object i due to
-object j is given by:
-
-f[i][k] = - G * mass[i]*mass[j] * (r[i][k]-r[j][k]) / rij^3 
-
-where rij is the scalar magnitude of the separation of i and j.  If rij
->= RMIN, we use the above expression; if rij < RMIN, we set f[i][k] = 0,
-to be consistant with our definition of the energy.  The acceleration of
-i is simply f[i][k]/mass[i].
-
-It is convenient and speeds things up to recognize that the the force on
-i due to j, denoted fij = -fji --- better known as Newton's third law.
-In other words, once you know the force on i due to j, you get the force
-on j due to i, so there is no reason to repea the calculation.  However,
-you may find it easier in your coding not to take advantage of this
-fact.
-
-Depending on your approach, you will need a temporary array for the
-positions, velocoties, or accelerations of the objects.  You can
-declare such a multidimensional array by something like
-'double r_temp[NMAX][NDIM]' --- note the use of NMAX!
-
-Please notice: this subroutine, like the ones that follow, must implement
-exactly the specified method of integration, with all the approximations
-it entails, because the testing program may check, by taking dt large,
-that the error is as expected.
- 
-*/
-
-void move_runge_kutta(int N, double mass[NMAX], double r[NMAX][NDIM], 
-		      double v[NMAX][NDIM], int nsteps, double dt)
-{
-  int i, j, k, n;
-  double a[NDIM], rij[NDIM], r1, r3;
-  double deltav[NMAX][NDIM], rmid[NMAX][NDIM], vmid[NMAX][NDIM];
-
-  for (n=0; n<nsteps; n++) {	
-
-    for (i=0; i<N; i++) {
-      for (k=0; k<NDIM; k++) {
-	deltav[i][k] = 0;
-      }
-    }
-
-    /* double loops over objects to get accelarations and the resulting
-       change of velocity */
-    for (i=0; i<N-1; i++) {
-      for (j=i+1; j<N; j++) {
-
-	/* calculate separation of i & j */
-	r1 = 0;
-	for (k=0; k<NDIM; k++) {
-	  rij[k] = r[i][k] - r[j][k];
-	  r1 += rij[k]*rij[k];
-	}
-	r1 = sqrt(r1);
-
-	/* no force if they are very close */
-	if (r1 < RMIN) {
-	  for (k=0; k<NDIM; k++) {
-	    a[k] = 0;
-	  }
-	}
-	else {
-	  r3 = pow(r1, 3.0);
-	  for (k=0; k<NDIM; k++) {
-	    a[k] = -G *rij[k] / r3;
-	  }
-	}
-
-	/* change in velocity from the acceleration, making use of
-	   Newton's 3rd law */
-	for (k=0; k<NDIM; k++) {
-	  deltav[i][k] += mass[j]*a[k]*dt;
-	  deltav[j][k] -= mass[i]*a[k]*dt;
-	}
-      }
-    }
-    /* update the positions and velocities to the midpoint*/
-    for (i=0; i<N; i++) {
-      for (k=0; k<NDIM; k++) {
-	rmid[i][k] = r[i][k] + 0.5*v[i][k]*dt;
-	vmid[i][k] = v[i][k] + 0.5*deltav[i][k];
-      }
-    }
-
-    for (i=0; i<N; i++) {
-      for (k=0; k<NDIM; k++) {
-	deltav[i][k] = 0;
-      }
-    }
-
-    /* double loops over objects to get accelarations and the resulting
-       change of velocity */
-    for (i=0; i<N-1; i++) {
-      for (j=i+1; j<N; j++) {
-
-	/* calculate separation of i & j */
-	r1 = 0;
-	for (k=0; k<NDIM; k++) {
-	  rij[k] = rmid[i][k] - rmid[j][k];
-	  r1 += rij[k]*rij[k];
-	}
-	r1 = sqrt(r1);
-
-	/* no force if they are very close */
-	if (r1 < RMIN) {
-	  for (k=0; k<NDIM; k++) {
-	    a[k] = 0;
-	  }
-	}
-	else {
-	  r3 = pow(r1, 3.0);
-	  for (k=0; k<NDIM; k++) {
-	    a[k] = -G *rij[k] / r3;
-	  }
-	}
-
-	/* change in velocity from the acceleration, making use of
-	   Newton's 3rd law */
-	for (k=0; k<NDIM; k++) {
-	  deltav[i][k] += mass[j]*a[k]*dt;
-	  deltav[j][k] -= mass[i]*a[k]*dt;
-	}
-      }
-    }
-    /* finally update the positions and velocities */
-    for (i=0; i<N; i++) {
-      for (k=0; k<NDIM; k++) {
-	r[i][k] += vmid[i][k]*dt;
-	v[i][k] += deltav[i][k];
-      }
-    }
-
-  }
-}
-
-
-int nbody_rk(double *r_arr, double *v_arr, double *mass, double dt, int N, int Nsteps, int downsample) {
-  int i, k, t1, Nps, t1ps;
-  double KE, PE;
-  double r[NMAX][NDIM], v[NMAX][NDIM];
-  double rcm[NDIM], vcm[NDIM];
-  Nps = Nsteps/downsample;
-  printf("\nRescaling positions and velocities so that the\n");
-  printf("center of mass is fixed at the origin\n");
-  for (i=0;i<N;i++) {
-    for (k=0;k<NDIM;k++) {
-      r[i][k] = r_arr[i*NDIM*Nps + k*Nps];
-      v[i][k] = v_arr[i*NDIM*Nps + k*Nps];
-    }
-  }
-  center_of_mass(N, mass, r, rcm);
-  center_of_mass(N, mass, v, vcm);
-  for (i=0;i<N;i++) {
-    for (k=0;k<NDIM;k++) {
-      printf("%d %lf %lf", k, rcm[k], vcm[k]);
-      r[i][k] -= rcm[k];
-      v[i][k] -= vcm[k];
-    }
-  }
-  printf("\nINITIAL CONDITIONS:\n");
-  center_of_mass(N, mass, r, rcm);
-  center_of_mass(N, mass, v, vcm);
-
-  printf("\tCOM position: %lf %lf %lf \n", rcm[0], rcm[1], rcm[2]);
-  printf("\tCOM velocity: %lf %lf %lf \n", vcm[0], vcm[1], vcm[2]);
-
-  KE = kinetic_energy(N, mass, v);
-  PE = potential(N, mass, r);
-  printf("\tEnergies:\n\tKinetic: %lf\n\tPotential: %lf\n\tTotal: %lf\n",
-	 KE, PE, KE+PE); 
-  t1ps=0;
-  for (t1=0; t1<Nsteps; t1++) {
-    if (t1%downsample==0) {
-      for (i=0; i<N; i++) {
-        for (k=0;k<NDIM;k++) {
-          r_arr[i*NDIM*Nps + k*Nps + t1ps] = r[i][k];
-          v_arr[i*NDIM*Nps + k*Nps + t1ps] = v[i][k];
-        }
-      }
-      t1ps+=1;
-    }
-    move_runge_kutta(N, mass, r, v, 1, dt);
-  }
-
-  printf("\nFINAL STATE:\n");
-  center_of_mass(N, mass, r, rcm);
-  center_of_mass(N, mass, v, vcm);
-
-  printf("\tCOM position: %lf %lf %lf\n", rcm[0], rcm[1], rcm[2]);
-  printf("\tCOM velocity: %lf %lf %lf\n", vcm[0], vcm[1], vcm[2]);
-  /*  printf("\tAngular momentum: %lf\n", angular_mom(N, mass, r, v));*/
-  KE = kinetic_energy(N, mass, v);
-  PE = potential(N, mass, r);
-  printf("\tEnergies:\n\tKinetic: %lf\n\tPotential: %lf\n\tTotal: %lf\n",
-	 KE, PE, KE+PE);
-
-  /*free(rcm);
-  free(vcm);*/
-  return 0;
-}
-
 

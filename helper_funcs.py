@@ -9,6 +9,7 @@ import subprocess
 import itertools
 #import warnings
 import sys
+import kplr
 
 #############################################
 ################ constants ##################
@@ -143,6 +144,24 @@ dchi_fn2.argtypes = [ndpointer(dtype=ctypes.c_double), ndpointer(dtype=ctypes.c_
                     ndpointer(dtype=ctypes.c_long), ctypes.c_int, ctypes.c_int, ctypes.c_int,
                     ndpointer(dtype=ctypes.c_long), ndpointer(dtype=ctypes.c_long), ctypes.c_long]
 
+dchi_fn_mask = lib.dchi_fn_mask
+dchi_fn_mask.restype = ctypes.c_int
+dchi_fn_mask.argtypes = [ndpointer(dtype=ctypes.c_double), ndpointer(dtype=ctypes.c_double),
+                    ndpointer(dtype=ctypes.c_long), ndpointer(dtype=ctypes.c_double),
+                    ndpointer(dtype=ctypes.c_double), ndpointer(dtype=ctypes.c_double),
+                    ndpointer(dtype=ctypes.c_long), ctypes.c_int, ctypes.c_int, ctypes.c_int,
+                    ndpointer(dtype=ctypes.c_long), ndpointer(dtype=ctypes.c_long), ctypes.c_long]
+
+
+dchi_fn_gs = lib.dchi_fn_gs
+dchi_fn_gs.restype = ctypes.c_int
+dchi_fn_gs.argtypes = [ndpointer(dtype=ctypes.c_double), ndpointer(dtype=ctypes.c_double),
+                    ndpointer(dtype=ctypes.c_long), ndpointer(dtype=ctypes.c_double),
+                    ndpointer(dtype=ctypes.c_double), ndpointer(dtype=ctypes.c_double),
+                    ndpointer(dtype=ctypes.c_long), ctypes.c_int, ctypes.c_int, ctypes.c_int,
+                    ndpointer(dtype=ctypes.c_long), ndpointer(dtype=ctypes.c_long), ctypes.c_long]
+
+
 dchiChoosePC = lib.dchiChoosePC
 dchiChoosePC.restype = ctypes.c_int
 dchiChoosePC.argtypes = [ndpointer(dtype=ctypes.c_double), ndpointer(dtype=ctypes.c_double),
@@ -223,6 +242,37 @@ def call_qats_c(dmin, dmax, y, q=1):
     call_qats(dmin, dmax, q, N, y, ctypes.byref(Sbest), ctypes.byref(Mbest))
     return Sbest.value, Mbest.value
 
+def load_kplr(kic, lc=True):
+    star = kplr.API().star(kic).get_light_curves(short_cadence=not lc)
+    jd, flux, dflux = np.array([], dtype='float64'), np.array([], dtype='float64'), np.array([], dtype='float64')
+    cadnum, quarter = np.array([], dtype='float64'), np.array([], dtype='float64')
+    quality, crowd = np.array([], dtype='float64'), np.array([], dtype='float64')
+    for ii in range(len(star)):
+        _s = star[ii].open(clobber=False)
+        _Npts = _s[1].data.shape[0]
+        jd = np.append(jd, _s[1].data['TIME'])
+        flux = np.append(flux, _s[1].data['SAP_FLUX'])
+        dflux = np.append(dflux, _s[1].data['SAP_FLUX_ERR'])
+        cadnum = np.append(cadnum, _s[1].data['CADENCENO'])
+        quarter = np.append(quarter, np.zeros(_Npts, dtype=int) + _s[0].header['QUARTER'])
+        quality = np.append(quality, _s[1].data['SAP_QUALITY'])
+        crowd = np.append(crowd, np.zeros(_Npts) + _s[1].header['CROWDSAP'])
+        naninds = np.isnan(flux)
+        jd = jd[~naninds]
+        dflux = dflux[~naninds]
+        cadnum = cadnum[~naninds]
+        quarter = quarter[~naninds]
+        quality = quality[~naninds]
+        crowd = crowd[~naninds]
+        flux = flux[~naninds]
+
+    a = np.nanmedian(flux)
+    if a>1:
+        flux = flux/a
+        dflux = abs(dflux/a)
+        
+    return jd, flux, dflux, cadnum.astype(int), quarter.astype(int), quality, crowd
+
 def call_qats_indices_c(dmin, dmax, y, M, q=1):
     N = len(y)
     Sbest = ctypes.c_double(0.0)
@@ -248,9 +298,9 @@ def poly_lc_cwrapper(t, f, ef, model, chunks, porder=2, ooe=True):
     totpol = np.ones(len(t), dtype=np.float64)
     f, ef = f.astype(np.float64), ef.astype(np.float64)
     if ooe:
-        poly_lc(totpol, t, f, ef, model, chunks, porder, len(chunks))
+        poly_lc(totpol, t.copy(), f.copy(), ef.copy(), model.copy(), chunks.copy(), porder, len(chunks))
     else:
-        poly_lc_ooe(totpol, t, f, ef, model, chunks, porder, len(chunks))
+        poly_lc_ooe(totpol, t.copy(), f.copy(), ef.copy(), model.copy(), chunks.copy(), porder, len(chunks))
     return totpol
 
 def poly_lc_python(jd, flux, dflux, totmod, chunk, porder=2):
@@ -299,11 +349,44 @@ def dchiPC_c(t, rinds, f, ef, depth, duration, ndur, Nrinds, porder, cwidth):
 #                  int ndur, int Nrinds, int porder, int cwidth
 
 
-def dchigrid_c(t, jumps, f, ef, depth, duration, ndep, ndur, fname, porder, cwidth, dchi=None):
-    if os.path.isfile(fname):
-        print "File already exists; loading."
-        dchi = np.loadtxt(fname)
-        return dchi.reshape((ndep, ndur, len(t)))
+#def dchigrid_c(t, jumps, f, ef, depth, duration, ndep, ndur, fname, porder, cwidth, dchi=None):
+#    if os.path.isfile(fname):
+#        print "File already exists; loading."
+#        dchi = np.loadtxt(fname)
+#        return dchi.reshape((ndep, ndur, len(t)))
+#    assert len(porder) == ndur, "Porder array must have size = # of durations"
+#    Ntot = len(t)
+#    t, f, ef, depth = t.astype(np.float64), f.astype(np.float64), ef.astype(np.float64), depth.astype(np.float64)
+#    if dchi is None:
+#        dchi = np.zeros((ndep, ndur, Ntot)).flatten()
+#    else:
+#        if len(dchi.shape)>1:
+#            dchi = dchi.flatten()
+#    dchi_fn(dchi, t, jumps, f, ef, depth, duration, ndep, ndur, len(jumps), porder, cwidth, Ntot)
+#    dchi = dchi.reshape((ndep, ndur, Ntot))
+#    # baseline = np.ones((ndep, ndur, 1))
+#    # for ii in range(ndep):
+#    #     for jj in range(ndur):
+#    #         for ll in range(len(jumps)-1):
+#    #             zeros = (dchi[ii, jj, jumps[ll]:jumps[ll+1]]==0.) | (np.isnan(dchi[ii, jj, jumps[ll]:jumps[ll+1]]))
+#    #             baseline[ii, jj, 0] = np.nanmedian(np.sort(dchi[ii, jj, jumps[ll]:jumps[ll+1]][~zeros])[int(0.16*np.sum(~zeros)):int(0.84*np.sum(~zeros))])
+#    #             dchi[ii, jj, jumps[ll]:jumps[ll+1]][zeros] = baseline[ii, jj, 0]
+#            #dchi[ii, jj, :][ecl_mask] = baseline[ii, jj, 0]
+#    print "Creating file:", fname
+#    with file(fname, 'w') as outfile:
+#        outfile.write('# Array shape: {0}\n'.format(dchi.shape))
+#        for data_slice in dchi:
+#            np.savetxt(outfile, data_slice, fmt='%.6e')
+#    return dchi
+
+def dchigrid_c2(t, jumps, f, ef, depth, duration, ndep, ndur, fname, porder, cwidth, dchi=None,
+                gauss_weighting=False, strict_start=True, clobber=False):
+    if os.path.isfile(fname+'.npz') and not clobber:
+        print "NPZ file already exists; loading."
+#        dchi = np.loadtxt(fname)
+#        return dchi.reshape((ndep, ndur, len(t)))
+        dchi = np.load(fname+'.npz')['dchi']
+        return dchi
     assert len(porder) == ndur, "Porder array must have size = # of durations"
     Ntot = len(t)
     t, f, ef, depth = t.astype(np.float64), f.astype(np.float64), ef.astype(np.float64), depth.astype(np.float64)
@@ -312,7 +395,14 @@ def dchigrid_c(t, jumps, f, ef, depth, duration, ndep, ndur, fname, porder, cwid
     else:
         if len(dchi.shape)>1:
             dchi = dchi.flatten()
-    dchi_fn(dchi, t, jumps, f, ef, depth, duration, ndep, ndur, len(jumps), porder, cwidth, Ntot)
+    if gauss_weighting:
+        dchi_fn_gs(dchi, t, jumps, f, ef, depth, duration, ndep, ndur, len(jumps), porder, cwidth, Ntot)
+    else:
+        if strict_start:
+            #changed this from dchi_fn2 to dchi_fn_mask
+            dchi_fn_mask(dchi, t, jumps, f, ef, depth, duration, ndep, ndur, len(jumps), porder, cwidth, Ntot)
+        else:
+            dchi_fn(dchi, t, jumps, f, ef, depth, duration, ndep, ndur, len(jumps), porder, cwidth, Ntot)
     dchi = dchi.reshape((ndep, ndur, Ntot))
     # baseline = np.ones((ndep, ndur, 1))
     # for ii in range(ndep):
@@ -322,15 +412,18 @@ def dchigrid_c(t, jumps, f, ef, depth, duration, ndep, ndur, fname, porder, cwid
     #             baseline[ii, jj, 0] = np.nanmedian(np.sort(dchi[ii, jj, jumps[ll]:jumps[ll+1]][~zeros])[int(0.16*np.sum(~zeros)):int(0.84*np.sum(~zeros))])
     #             dchi[ii, jj, jumps[ll]:jumps[ll+1]][zeros] = baseline[ii, jj, 0]
             #dchi[ii, jj, :][ecl_mask] = baseline[ii, jj, 0]
-    print "Creating file:", fname
-    with file(fname, 'w') as outfile:
-        outfile.write('# Array shape: {0}\n'.format(dchi.shape))
-        for data_slice in dchi:
-            np.savetxt(outfile, data_slice, fmt='%.6e')
+    print("Creating file {0}.npz...".format(fname))
+    np.savez(fname+'.npz', dchi=dchi, depth=depth, duration=duration, p_choose=porder, 
+             c_choose=cwidth, gw=gauss_weighting, st=strict_start)
+#    with file(fname, 'w') as outfile:
+#        outfile.write('# Array shape: {0}\n'.format(dchi.shape))
+#        for data_slice in dchi:
+#            np.savetxt(outfile, data_slice, fmt='%.6e')
     return dchi
 
-def dchigrid_c2(t, jumps, f, ef, depth, duration, ndep, ndur, fname, porder, cwidth, dchi=None):
-    if os.path.isfile(fname):
+def dchigrid_c_mask(t, jumps, f, ef, depth, duration, ndep, ndur, fname, porder, cwidth, dchi=None,
+                gauss_weighting=False, strict_start=True, clobber=False):
+    if os.path.isfile(fname) and not clobber:
         print "File already exists; loading."
         dchi = np.loadtxt(fname)
         return dchi.reshape((ndep, ndur, len(t)))
@@ -342,7 +435,13 @@ def dchigrid_c2(t, jumps, f, ef, depth, duration, ndep, ndur, fname, porder, cwi
     else:
         if len(dchi.shape)>1:
             dchi = dchi.flatten()
-    dchi_fn2(dchi, t, jumps, f, ef, depth, duration, ndep, ndur, len(jumps), porder, cwidth, Ntot)
+    if gauss_weighting:
+        dchi_fn_gs(dchi, t, jumps, f, ef, depth, duration, ndep, ndur, len(jumps), porder, cwidth, Ntot)
+    else:
+        if strict_start:
+            dchi_fn_mask(dchi, t, jumps, f, ef, depth, duration, ndep, ndur, len(jumps), porder, cwidth, Ntot)
+        else:
+            dchi_fn(dchi, t, jumps, f, ef, depth, duration, ndep, ndur, len(jumps), porder, cwidth, Ntot)
     dchi = dchi.reshape((ndep, ndur, Ntot))
     # baseline = np.ones((ndep, ndur, 1))
     # for ii in range(ndep):
@@ -387,7 +486,7 @@ def reinterpret_x_c(t, x, tbary):
     xshift[bad] = np.median(xshift[~bad])
     return xshift
 
-def user_rc(lw=1.5, fontsize=10):
+def user_rc(lw=1.5, fontsize=16, usetex=True):
     """Set plotting RC parameters"""
     # These are the "Tableau 20" colors as RGB.
     tableau20 = [(31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),
@@ -402,12 +501,60 @@ def user_rc(lw=1.5, fontsize=10):
         tableau20[i] = (r / 255., g / 255., b / 255.)
 
     plt.rc('lines', linewidth=lw)
-    plt.rc('axes', color_cycle=tableau20)
+    import matplotlib
+    if matplotlib.__version__[0]=='2':
+        from cycler import cycler
+#        plt.rc('axes', prop_cycle=cycler(c=tableau20), lw=1, labelsize=18, titlesize=22)
+        plt.rc('axes', lw=lw, labelsize=fontsize, titlesize=22)
+
+    else:
+#        plt.rc('axes', axes_cycle=tableau20, lw=1, labelsize=18, titlesize=22)
+        plt.rc('axes', lw=lw, labelsize=fontsize, titlesize=22)
+    if usetex:
+        plt.rc('text', usetex=True)
+        plt.rc('font', **{'family': 'serif', 'serif': ['Computer Modern Roman', 'Times']})
+    else:
+        plt.rc('text', usetex=False)
+        plt.rc('font', **{'family': 'serif', 'serif': ['Ubuntu'], 'monospace': ['Ubuntu Mono']})#['Computer Modern']})
+    plt.rc('xtick', labelsize=max(15, int(fontsize*0.8)))
+    plt.rc('ytick', labelsize=max(15, int(fontsize*0.8)))
+    plt.rc('figure', titlesize=22, figsize=(10,8))
+#    plt.tight_layout()
+#    plt.subplots_adjust(left=0.11, right=0.92, bottom=0.1)
+#    plt.rcParams['text.latex.preamble'] = [r'\boldmath']
+    return
     #plt.rc('font', size=7)
 
+def adjacent_values(vals, q1, q3):
+    upper_adjacent_value = q3 + (q3 - q1) * 1.5
+    upper_adjacent_value = np.clip(upper_adjacent_value, q3, vals[-1])
 
+    lower_adjacent_value = q1 - (q3 - q1) * 1.5
+    lower_adjacent_value = np.clip(lower_adjacent_value, vals[0], q1)
+    return lower_adjacent_value, upper_adjacent_value
 
-def get_excludelist(fname='/astro/users/windemut/keblat/data/makesedfile/sed_flag_file_0328'):
+def violin_whiskers_plot(x, y, ax, cvio=None, cwhis=None, w=0.5, alpha=0.9):
+    parts = ax.violinplot(y, x, showmeans=False, showmedians=False, showextrema=False,
+                          widths=w)
+    if cwhis is None:
+        cwhis="0.3"
+    if cvio is None:
+        cvio="0.7"
+    for pc in parts['bodies']:
+        pc.set_facecolor(cvio)
+        pc.set_edgecolor(cwhis)
+        pc.set_alpha(alpha)
+    quartile1, medians, quartile3 = np.zeros(len(x)), np.zeros(len(x)), np.zeros(len(x))
+    for ii in range(len(x)):
+        quartile1[ii], medians[ii], quartile3[ii] = np.nanpercentile(y[ii], [25, 50, 75])
+    whiskers = np.array([adjacent_values(np.sort(sorted_array), q1, q3) for sorted_array, q1, q3 in zip(y, quartile1, quartile3)])
+    whiskersMin, whiskersMax = whiskers[:,0], whiskers[:,1]
+    ax.scatter(x, medians, marker='o', color='white', s=10, zorder=3)
+    ax.vlines(x, quartile1, quartile3, color=cwhis, linestyle='-', lw=5)
+    ax.vlines(x, whiskersMin, whiskersMax, color=cwhis, linestyle='-', lw=1)
+    return whiskersMin, whiskersMax
+
+def get_excludelist(fname='data/sed_flag_file_0328'):
     # cols are kic#, ubv, sdss, wise, 2mass
     flaglist = np.loadtxt(fname, dtype=int)
     flag_headers = ['Umag','Bmag','Vmag','gmag','rmag','imag',
@@ -425,7 +572,7 @@ def get_excludelist(fname='/astro/users/windemut/keblat/data/makesedfile/sed_fla
 def get3dmap(kic):
     """Get 3D Panstarrs dust map information; returns ebv_arr, ebv_sig,
     ebv_dist_bounds, ebv_bounds"""
-    red3d = np.load('data/makesedfile/ebv3d_0216_full.npz')
+    red3d = np.load('data/ebv3d_0216.npz')
     indx = np.where(red3d['kic'] == kic)[0]
     if indx is None:
         print "Sorry no 3D dust map information available. Using 2D instead."
@@ -436,8 +583,17 @@ def get3dmap(kic):
     ebv_bounds = (ebv_arr[np.searchsorted(ebv_dist, ebv_dist_bounds[0])],
                           ebv_arr[np.searchsorted(ebv_dist, ebv_dist_bounds[1])-1])
     return ebv_arr, ebv_sig, ebv_dist_bounds, ebv_bounds
-
-
+   
+def during_eclipse(t, tpe, period, pwidth, swidth, sep, clip_tol=1.5, both=True):
+    t = np.atleast_1d(t)
+    phase = ((t-tpe)%period/period)
+    phase[phase<-np.clip(pwidth*2., 0., 0.2)] += 1
+    phase[phase>1.-np.clip(pwidth*2., 0., 0.2)] -= 1
+    phase[phase>np.clip(sep+swidth*2., sep, 1.0)] -= 1
+    if both:
+        return (abs(phase)<clip_tol*pwidth) | (abs(phase-1.0)<clip_tol*pwidth) | (abs(phase-sep)<clip_tol*swidth)
+    return (abs(phase)<clip_tol*pwidth) | (abs(phase-1.0)<clip_tol*pwidth)
+    
 def eclipse_mask(phase, sep, pwidth, swidth, tol=1.2, mask=False):
     """Returns indices of eclipses"""
     if mask:
@@ -529,7 +685,26 @@ def padcads(t0, cadnum0, f0, ef0, chunks, flagged, tolmin = 1, tolmax = 7, cad =
         cadnum = np.insert(cadnum, fillcad[ii]+1, (np.arange(nfillers-1)+1) + cadnum[fillcad[ii]])
     return t, cadnum, f, ef
 
-def identify_gaps(tcad, tol = 15, retbounds_inds=True):
+def get_sed_binary_mod(mags1, mags2):
+    return mags1-2.5*np.log10(1.+10**((mags1-mags2)/2.5))
+
+def get_sed_triple_mod(mags1, mags2, mags3):
+    return mags1-2.5*np.log10(1.+10**((mags2-mags1)/-2.5) + 10**((mags3-mags1)/-2.5))
+
+def roll_np(x, N, threshold=1.0):
+    if threshold is None:
+        res = (np.roll(x, N))
+    else:
+        res = (np.roll(x, N) < threshold)
+    if N < 0:
+        res[N:] = [False] * abs(N)
+    elif N > 0:
+        res[:N] = [False] * N
+    else:
+        print("N={0}".format(N))
+    return res
+    
+def identify_gaps(tcad, tol = 15, quarts=None, retbounds_inds=True):
     """Returns indices of gaps where no data for > 7 Kepler cadences; if
     retbounds_inds is True, returns inds of beginning and end of condition"""
     jumps = np.where((np.diff(tcad)>tol))[0]
@@ -537,6 +712,9 @@ def identify_gaps(tcad, tol = 15, retbounds_inds=True):
         jumps+=1
         jumps = np.insert(jumps, 0, 0)
         jumps = np.append(jumps, len(tcad))
+    if quarts is not None:
+        qdiff = np.where(np.diff(quarts)>0)[0]+1
+        jumps = np.unique(np.append(jumps, qdiff))
     return jumps
 
 def prep_lc(t0, cadnum0, phase0, f0, ef0, quality0, sep, pwidth, swidth, tpe, period,
@@ -752,3 +930,116 @@ def check_dir_exists(path):
         os.makedirs(path)
         print "Directory made: ", path
     return
+
+def downsample_cad(*args, **kwargs):
+    Nexp = kwargs.pop('exp', 30)
+    as_strided = np.lib.stride_tricks.as_strided
+    res = []
+    for count, thingie in enumerate(args):
+        _x = as_strided(thingie, (len(thingie)+1-Nexp, Nexp), (thingie.strides * 2))
+        res.append(np.mean(_x, axis=1))
+    return res
+
+def movingaverage(interval, window_size):
+    window= np.ones(int(window_size))/float(window_size)
+    return np.convolve(interval, window, 'valid')
+    
+def moving_average(x, N, method='cumsum'):
+    if method == 'cumsum':
+        cumsum = np.cumsum(np.insert(x, 0, 0)) 
+        return (cumsum[N:] - cumsum[:-N]) / N 
+    elif method == 'convolve':
+        window = np.ones(int(N))/float(N)
+        return np.convolve(x, window, 'valid')
+    
+def gr_B(chains):
+    """Computes between-chains variance B = N/(M-1) \sum_{m=1}^{M} (T_m-T)^2""" 
+    M, N = chains.shape
+    theta_m = np.nanmean(chains, axis=1)
+    return N/(M-1.) * np.sum((theta_m-np.sum(theta_m)/M)**2)
+
+def gr_W(chains):
+    """Computes within-chain variance W = 1/M \sum_{m=1}^{M} \sigma_m^2"""
+    M, N = chains.shape
+    sigma_m = np.nanvar(chains, axis=1)
+    return 1./M * np.sum(sigma_m**2)
+
+def gr_PSRF(B, W, N):
+    """Computes potential scale reduction factor (PSRF), the Gelman-Rubin statistic"""
+    return (1-1./N)*W + 1/N * B
+
+def gr_R(V, W):
+    return np.sqrt(V/W)
+
+def gelman_rubin(chains):
+    M, N = chains.shape
+    B = gr_B(chains)
+    W = gr_W(chains)
+    V = gr_PSRF(B, W, N)
+    return gr_R(V, W)
+
+
+def smooth(x,window_len=11,window='flat'):
+    """smooth the data using a window with requested size.
+    
+    This method is based on the convolution of a scaled window with the signal.
+    The signal is prepared by introducing reflected copies of the signal 
+    (with the window size) in both ends so that transient parts are minimized
+    in the begining and end part of the output signal.
+    
+    input:
+        x: the input signal 
+        window_len: the dimension of the smoothing window; should be an odd integer
+        window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
+            flat window will produce a moving average smoothing.
+
+    output:
+        the smoothed signal
+        
+    example:
+
+    t=linspace(-2,2,0.1)
+    x=sin(t)+randn(len(t))*0.1
+    y=smooth(x)
+    
+    see also: 
+    
+    numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
+    scipy.signal.lfilter
+ 
+    TODO: the window parameter could be the window itself if an array instead of a string
+    NOTE: length(output) != length(input), to correct this: return y[(window_len/2-1):-(window_len/2)] instead of just y.
+    """
+
+    if x.ndim != 1:
+        raise ValueError, "smooth only accepts 1 dimension arrays."
+
+    if x.size < window_len:
+        raise ValueError, "Input vector needs to be bigger than window size."
+
+
+    if window_len<3:
+        return x
+
+
+    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
+        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+
+
+    s=np.r_[x[window_len-1:0:-1],x,x[-2:-window_len-1:-1]]
+    #print(len(s))
+    if window == 'flat': #moving average
+        w=np.ones(window_len,'d')
+    else:
+        w=eval('np.'+window+'(window_len)')
+
+    y=np.convolve(w/w.sum(),s,mode='valid')
+    return y
+
+def get_flicker(x, mad=False, window=16):
+    smoothed_x = smooth(x, window_len=window)[window/2:-window/2+1]
+    if mad:
+        flckr = np.nanmedian(abs(x - smoothed_x))
+    else:
+        flckr = np.nanstd(x - smoothed_x)
+    return smoothed_x, flckr
