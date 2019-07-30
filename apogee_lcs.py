@@ -408,87 +408,91 @@ def make_lcrv_plots_poster(kic, allpars, prefix, suffix='', savefig=True, polyor
     lcres = keblat.flux[keblat.clip] - lcmod*lcpol
     lcMAD = np.nanpercentile(abs(keblat.flux[keblat.clip] - lcmod*lcpol), 67)
     fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(121)
+    ax = plt.subplot2grid((2,2),(0,0))
 
     ax.errorbar(phase, keblat.flux[keblat.clip]/lcpol,
                  keblat.fluxerr[keblat.clip], fmt='C7.', ecolor='gray', zorder=1)
-    ax.plot(phase, lcmod, 'C0.')
+    ax.plot(phase, lcmod, 'C0.', label='Primary Eclipse')
     ax.set_xlim((-1.2*keblat.pwidth, 1.2*keblat.pwidth))
     ax.set_ylim((np.min(lcmod)*0.98, np.max(lcmod)*1.02))
     ax.set_ylabel('Kepler Flux')
+    ax.legend(loc='lower right', shadow=False, frameon=False, markerscale=0, fontsize=10)
 
     divider = make_axes_locatable(ax)
-    axb = divider.append_axes("bottom", size=2.0, pad=0, sharex=ax)
+    axb = divider.append_axes("bottom", size=0.8, pad=0, sharex=ax)
 
     axb.errorbar(phase, lcres,
                  np.sqrt(keblat.fluxerr[keblat.clip]**2 + keblat.pars['lcerr']**2), fmt='C7.', ecolor='gray', zorder=1)
 
     axb.set_xlim((-1.2*keblat.pwidth, 1.2*keblat.pwidth))
     axb.set_ylim((-thresh*lcMAD, thresh*lcMAD))
-    axb.set_ylabel('Data - Model')
-    axb.set_xlabel('Phase (Primary Eclipse)')
+#    axb.set_ylabel('Resid.')
+#    axb.set_xlabel('Phase (Primary Eclipse)')
     #axb.set_yticklabels(axb.yaxis.get_majorticklabels()[1:])
 
-    ax2 = fig.add_subplot(122)
+    ax2 = plt.subplot2grid((2,2),(0,1))
 
     ax2.errorbar(phase, keblat.flux[keblat.clip]/lcpol,
                  keblat.fluxerr[keblat.clip], fmt='C7.', ecolor='gray', zorder=1)
-    ax2.plot(phase, lcmod, 'C0.')
+    ax2.plot(phase, lcmod, 'C0.', label='Secondary Eclipse')
     ax2.set_xlim((-1.2*keblat.swidth+keblat.sep, 1.2*keblat.swidth+keblat.sep))
     ax2.set_ylim((np.min(lcmod)*0.98, np.max(lcmod)*1.02))
+    ax2.legend(loc='lower right', shadow=False, frameon=False, markerscale=0, fontsize=10)
 
     divider2 = make_axes_locatable(ax2)
-    ax2b = divider2.append_axes("bottom", size=2.0, pad=0, sharex=ax2)
+    ax2b = divider2.append_axes("bottom", size=0.8, pad=0, sharex=ax2)
 
     ax2b.errorbar(phase, lcres,
                  np.sqrt(keblat.fluxerr[keblat.clip]**2 + keblat.pars['lcerr']**2), fmt='C7.', ecolor='gray')
 
     ax2b.set_xlim((-1.2*keblat.swidth+keblat.sep, 1.2*keblat.swidth+keblat.sep))
     ax2b.set_ylim((-thresh*lcMAD, thresh*lcMAD))
-    ax2b.set_xlabel('Phase (Secondary Eclipse)')
+#    ax2b.set_xlabel('Phase (Secondary Eclipse)')
 
     #ax2b.set_yticklabels(ax2b.yaxis.get_majorticklabels()[1:])
 
 
     plt.setp(ax.get_xticklabels(), visible=False)
     plt.setp(ax2.get_xticklabels(), visible=False)
-    plt.suptitle('KIC '+str(kic)+' LC (simultaneous)')
-    if savefig:
-        plt.savefig(prefix+suffix+'_LC.png', dpi=300)
+#    plt.suptitle('KIC '+str(kic)+' LC (simultaneous)')
+#    if savefig:
+#        plt.savefig(prefix+suffix+'_LC.png', dpi=300)
 
     # rvpars = keblat.getpars(partype='rv')
     rvpars = np.array([keblat.pars['msum'], keblat.pars['mrat'], keblat.pars['period'], keblat.pars['tpe'],
                        keblat.pars['esinw'], keblat.pars['ecosw'], keblat.pars['inc'], keblat.pars['k0'], keblat.pars['rverr']])
 
     rv_fit = keblat.rvfit(rvpars, keblat.rv_t)
-    fig = plt.figure(figsize=(10,8))
-    ax = fig.add_subplot(111)
+#    fig = plt.figure(figsize=(10,8))
+    ax = plt.subplot2grid((2,2),(1,0), colspan=2)
+#    fig.subplots_adjust(hspace=0.2)
     rvphase = (keblat.rv_t - keblat.pars['tpe'])%keblat.pars['period']/keblat.pars['period']
-    ax.errorbar(rvphase[~keblat.bad1], keblat.rv1_obs[~keblat.bad1], np.sqrt(keblat.rv1_err_obs**2+rvpars[-1]**2)[~keblat.bad1], fmt='k.', ecolor='gray')
-    ax.errorbar(rvphase[~keblat.bad2], keblat.rv2_obs[~keblat.bad2], np.sqrt(keblat.rv2_err_obs**2+rvpars[-1]**2)[~keblat.bad2], fmt='k.', ecolor='gray')
+    ax.errorbar(rvphase[~keblat.bad1], keblat.rv1_obs[~keblat.bad1]*1e-3, np.sqrt(keblat.rv1_err_obs**2+rvpars[-1]**2)[~keblat.bad1]*1e-3, fmt='k.', ecolor='gray')
+    ax.errorbar(rvphase[~keblat.bad2], keblat.rv2_obs[~keblat.bad2]*1e-3, np.sqrt(keblat.rv2_err_obs**2+rvpars[-1]**2)[~keblat.bad2]*1e-3, fmt='k.', ecolor='gray')
     rvt = np.linspace(0, 1, 100)*keblat.pars['period']+keblat.pars['tpe']
     rvmod = keblat.rvfit(rvpars, rvt)
-    ax.plot(np.linspace(0, 1, 100), rvmod[0], 'C1-', lw=2)
-    ax.plot(np.linspace(0, 1, 100), rvmod[1], 'C3-', lw=2)
-    ax.set_ylabel('RV (m/s)')
-    
+    ax.plot(np.linspace(0, 1, 100), rvmod[0]*1e-3, 'C1-', lw=2)
+    ax.plot(np.linspace(0, 1, 100), rvmod[1]*1e-3, 'C3-', lw=2)
+    ax.set_ylabel('RV (km/s)')
+    ax.set_xlim((0,1))
     locator=MaxNLocator(prune='both',nbins=5)
     ax.yaxis.set_major_locator(locator)
     #ax.set_yticklabels(ax.yaxis.get_majorticklabels()[:-1])
 
     divider = make_axes_locatable(ax)
-    ax2 = divider.append_axes("bottom", size=1.5, pad=0, sharex=ax)
-    ax2.errorbar(rvphase[~keblat.bad1], (keblat.rv1_obs-rv_fit[0])[~keblat.bad1], np.sqrt(keblat.rv1_err_obs**2+rvpars[-1]**2)[~keblat.bad1], fmt='C1.')
-    ax2.errorbar(rvphase[~keblat.bad2], (keblat.rv2_obs-rv_fit[1])[~keblat.bad2], np.sqrt(keblat.rv2_err_obs**2+rvpars[-1]**2)[~keblat.bad2], fmt='C3.')
-
+    ax2 = divider.append_axes("bottom", size=0.8, pad=0, sharex=ax)
+    ax2.errorbar(rvphase[~keblat.bad1], (keblat.rv1_obs-rv_fit[0])[~keblat.bad1]*1e-3, np.sqrt(keblat.rv1_err_obs**2+rvpars[-1]**2)[~keblat.bad1]*1e-3, fmt='C1.')
+    ax2.errorbar(rvphase[~keblat.bad2], (keblat.rv2_obs-rv_fit[1])[~keblat.bad2]*1e-3, np.sqrt(keblat.rv2_err_obs**2+rvpars[-1]**2)[~keblat.bad2]*1e-3, fmt='C3.')
+    ax2.set_ylim((-1.2*np.nanmax(abs((keblat.rv1_obs-rv_fit[0])[~keblat.bad1]*1e-3)), 1.2*np.nanmax(abs((keblat.rv1_obs-rv_fit[0])[~keblat.bad1]*1e-3))))
+    ax2.set_xlim((0,1))
     ax2.set_xlabel('Phase')
-    ax2.set_ylabel('Data - Model')
+#    ax2.set_ylabel('Resid.')
     plt.setp(ax.get_xticklabels(), visible=False)
     #plt.setp(ax2.get_yticklabels()[-1], visible=False)
 
-    plt.suptitle('KIC '+str(kic)+' RV (simultaneous)')
+#    plt.suptitle('KIC '+str(kic)+' RV (simultaneous)')
     if savefig:
-        plt.savefig(prefix+suffix+'_RV.png', dpi=300)
+        plt.savefig(prefix+suffix+'_simu.png', dpi=300)
 
     return True
 
@@ -963,6 +967,7 @@ def opt_lc(**kwargs):
     #set_upperb = kwargs.pop('set_upperb', 2.0)
     vary_msum = kwargs.pop('vary_msum', True)
     fit_crowd = kwargs.pop('fit_crowd', False)
+    vary_all = kwargs.pop('fit_crowd', True)
     ooe = kwargs.pop('ooe', True)
     keblat.updatepars(**kwargs)
 
@@ -987,13 +992,13 @@ def opt_lc(**kwargs):
         else:
             fit_params.add(name, value=val, vary=False)
 
-    fit_params['rrat'].vary=True
-    fit_params['rsum'].vary=True
-    fit_params['b'].vary=True
-    fit_params['frat'].vary=True
-    fit_params['esinw'].vary=True
-    fit_params['ecosw'].vary=True
-    fit_params['tpe'].vary=True
+    fit_params['rrat'].vary=vary_all
+    fit_params['rsum'].vary=vary_all
+    fit_params['b'].vary=vary_all
+    fit_params['frat'].vary=vary_all
+    fit_params['esinw'].vary=vary_all
+    fit_params['ecosw'].vary=vary_all
+    fit_params['tpe'].vary=vary_all
 
     fit_kws={'maxfev':100*(len(fit_params)+1)}
     if fit_crowd:
@@ -1035,18 +1040,18 @@ def opt_lc(**kwargs):
     redchi2 = np.sum((rez(get_pars2vals(result0.params, partype='lc'), polyorder=1))**2) / np.sum(keblat.clip)
 
     fit_params['msum'].vary=vary_msum
-    fit_params['tpe'].vary=True
-    fit_params['period'].vary=True
-    fit_params['b'].vary=True
-    fit_params['frat'].vary=True
-    fit_params['esinw'].vary=True
-    fit_params['ecosw'].vary=True
-    fit_params['rsum'].vary=True
-    fit_params['rrat'].vary=True
-    fit_params['q1'].vary=True
-    fit_params['q2'].vary=True
-    fit_params['q3'].vary=True
-    fit_params['q4'].vary=True
+    fit_params['tpe'].vary=vary_all
+    fit_params['period'].vary=vary_all
+    fit_params['b'].vary=vary_all
+    fit_params['frat'].vary=vary_all
+    fit_params['esinw'].vary=vary_all
+    fit_params['ecosw'].vary=vary_all
+    fit_params['rsum'].vary=vary_all
+    fit_params['rrat'].vary=vary_all
+    fit_params['q1'].vary=vary_all
+    fit_params['q2'].vary=vary_all
+    fit_params['q3'].vary=vary_all
+    fit_params['q4'].vary=vary_all
 
     result0 = minimize(rez, fit_params, kws={'polyorder': 1}, iter_cb=MinimizeStopper(10), **fit_kws)
 #    current_redchi = np.sum((result0.residual)**2) / (len(result0.residual)-result0.nfev)
@@ -1884,6 +1889,7 @@ def run_emcee(pars, mcfile, p0_scale=None, nwalkers=64, niter=40000, clobber=Tru
             p0_scale = np.ones(ndim)*1e-4
         p0 = [pars + p0_scale*pars*np.random.randn(ndim) for ii in range(nwalkers)]
         p0 = np.array(p0)
+        p0[:,-7:-3] = np.clip(p0[:,-7:-3], 0, 1.)
     elif pars.ndim == 2:
         print(pars.ndim)
         p0 = pars.copy()   
@@ -1933,12 +1939,13 @@ lcchi2_threshold = 3/np.nanmedian(np.array([np.nanmedian(abs(keblat.flux[chunks[
                                                           np.nanmedian(keblat.flux[chunks[ii]:chunks[ii+1]])))
                                           for ii in range(len(chunks)-1)]))
 
+print(blah)
 
 prefix = 'kics/{0}/'.format(kic)
-print(blah)
 niter=50000
 nwalkers=128
-ndim=len(opt_lcrvpars)
+isonames = parnames_dict['lcrv']
+ndim=len(isonames)
 
 header = prefix+'lcrv_'
 footer = str(nwalkers)+'x'+str(niter/1000)+'k'
