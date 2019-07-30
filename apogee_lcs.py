@@ -1942,6 +1942,81 @@ lcchi2_threshold = 3/np.nanmedian(np.array([np.nanmedian(abs(keblat.flux[chunks[
 print(blah)
 
 prefix = 'kics/{0}/'.format(kic)
+
+
+##############################################################
+######## code snippet for 644 BF and RV cases overplot #######
+t, rv1, rv1err, rv2, rv2err = np.loadtxt('data/6449358Outfile_final.txt', usecols=(2, 3, 4, 5, 6), unpack=True)
+
+
+opt_lcrvpars = np.loadtxt(prefix+'lcrv_mass1.0_fix.lmfit')
+make_lcrv_plots(kic, opt_lcrvpars, prefix, savefig=False)
+lcpars = [keblat.pars[zz] for zz in parnames_dict['lc']]
+m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3*np.nan, rv1err*1e3, rv2err*1e3)
+rvpars_case1 = [keblat.pars[zz] for zz in parnames_dict['rv']]
+rv1_case1, rv2_case1 = keblat.rvfit(rvpars_case1, keblat.rv_t)
+
+opt_lcrvpars = np.loadtxt(prefix+'lcrv_mass4.9_fix.lmfit')
+make_lcrv_plots(kic, opt_lcrvpars, prefix, savefig=False)
+lcpars2 = [keblat.pars[zz] for zz in parnames_dict['lc']]
+m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3*np.nan, rv1err*1e3, rv2err*1e3)
+rvpars_case2 = [keblat.pars[zz] for zz in parnames_dict['rv']]
+rv1_case2, rv2_case2 = keblat.rvfit(rvpars_case2, keblat.rv_t)
+
+
+opt_lcrvpars = np.loadtxt(prefix+'lcrv_mass2.5_fix.lmfit')
+make_lcrv_plots(kic, opt_lcrvpars, prefix, savefig=False)
+lcpars3 = [keblat.pars[zz] for zz in parnames_dict['lc']]
+m1, m2, k0 = keblat.rvprep(t, rv1*1e3, rv2*1e3*np.nan, rv1err*1e3, rv2err*1e3)
+rvpars_case3 = [keblat.pars[zz] for zz in parnames_dict['rv']]
+rv1_case3, rv2_case3 = keblat.rvfit(rvpars_case3, keblat.rv_t)
+
+
+###### uncomment code below to test *any* fix msum predictions ######
+#keblat.updatebounds('period', 'tpe', 'esinw', 'ecosw')
+#keblat.parbounds['msum'] = [1.5, 2.5] 
+#opt_lcrvpars = opt_lcrv(msum=2.0, mrat=0.45,                                                                                                                       
+#                         rsum=lcpars[1], rrat=lcpars[2], period=lcpars[3],
+#                         tpe=lcpars[4], esinw=lcpars[5], ecosw=lcpars[6],
+#                         b=lcpars[7], frat=lcpars[8], q1=lcpars[-4],     
+#                         q2=lcpars[-3], q3=lcpars[-2], q4=lcpars[-1],    
+#                         lcerr=0.0, k0=rvpars_case1[-2], rverr=0.)            
+#make_lcrv_plots(kic, opt_lcrvpars, prefix, savefig=False)
+#rvpars_case3 = [keblat.pars[zz] for zz in parnames_dict['rv']]
+#rv1_case3, rv2_case3 = keblat.rvfit(rvpars_case3, keblat.rv_t)
+
+timestamps = np.array([2456557.73275,  2456559.72268, 2456584.63158, 2456585.63008, 
+                       2456757.89224, 2456760.90501, 2456761.87212, 2456763.88043, 
+                       2456784.82126, 2456786.79775, 2456787.80865, 2456815.78483, 
+                       2456816.76558, 2456818.76389, 2456819.76152])
+timestamps -= 2454833.
+
+## load bfouts per visit ##
+bfout = []
+for ii in range(15):
+    bfout.append(np.loadtxt('data/6449358BFOut_{}.txt'.format(ii+1)))
+bfout = np.array(bfout)
+
+bcv = np.loadtxt('data/6449358_bcv.txt')
+plt.figure()
+for ii in range(15):                                                                                                                                                                 
+    plt.subplot(4,4,ii+1)
+    plt.plot(bfout[ii, :, 0], bfout[ii, :, 1])
+    plt.text(-244, -0.016, r'$\phi$='+str((timestamps[ii]-keblat.tpe)%keblat.period/keblat.period)[:5])
+    plt.xlim((-250, 250))
+    plt.axvline(rv2_case1[ii]*1e-3-bcv[ii,1], color='green', ls='--', 
+                label=str(np.round(rvpars_case1[0], 1))+', '+str(np.round(rvpars_case1[1], 1)))
+    plt.axvline(rv2_case2[ii]*1e-3-bcv[ii,1], color='red', ls='--', 
+                label=str(np.round(rvpars_case2[0], 1)) +', '+str(np.round(rvpars_case2[1], 1)))
+    plt.axvline(rv2_case3[ii]*1e-3-bcv[ii,1], color='orange', ls='--', 
+                label=str(np.round(rvpars_case3[0], 1)) +', '+str(np.round(rvpars_case3[1], 1)))
+    plt.legend(loc='upper left')
+
+
+
+###################################################
+########## code below for mcmc of LC+RV ###########
+>>>>>>> 8aa8addebccc8193ed74707ff781be5d343c673f
 niter=50000
 nwalkers=128
 isonames = parnames_dict['lcrv']

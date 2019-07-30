@@ -29,16 +29,36 @@ dateoffset = 2454833. # this value will be subtracted from bjds in pane vs. time
 #RVmin = -45; RVmax = 180
 
 #sysname = '6449358'; filename = 'data/6449358/6449358Outfile.txt'
-#timestart = 1725; timeend = 1986
+#timestart = 1700; timeend = 2000
 #phasemin = 0.5; phasemax = 1.5
-#RVmin = 150; RVmax = 270
+#RVmin = 0; RVmax = 140
 
 colors = user_rc()
 
-sysname = '5285607'; filename = 'data/5285607/5285607OutfileJC.txt'
-timestart = 975; timeend = 1040
-phasemin = 0.5; phasemax = 1.5
-RVmin = -50; RVmax = 200 # 5285607
+sysname = '3247294'; filename = 'data/3247294/3247294outfile.txt'
+timestart = 970; timeend = 1040
+phasemin = -0.1; phasemax = 1.0
+RVmin = 0; RVmax = 150
+
+#sysname = '5285607'; filename = 'data/5285607/5285607OutfileJC.txt'
+#timestart = 975; timeend = 1040
+#phasemin = 0.5; phasemax = 1.5
+#RVmin = -50; RVmax = 200 # 5285607
+
+#sysname = '6131659'; filename = 'data/6131659/6131659outfileALL.txt'
+#timestart = 1520; timeend = 2000
+#phasemin = -0.1; phasemax = 1.0
+#RVmin = 0; RVmax = 200
+
+#sysname = '6781535'; filename = 'data/6781535/6781535Outfile.txt'#
+#timestart = 1700; timeend = 2000
+#phasemin = -0.1; phasemax = 1.0
+#RVmin = -100; RVmax = 200
+
+#sysname = '4285087'; filename = 'data/4285087/4285087Outfile.txt'
+#timestart = 1700; timeend = 2000
+#phasemin = -0.1; phasemax = 1.0
+#RVmin = 0; RVmax = 200
 
 #sysname = '6778289'; filename = 'data/6778289/6778289OutfileJC.txt'
 #timestart = 1720; timeend = 1990
@@ -55,12 +75,15 @@ red = '#e34a33' # red, star 1
 yel = '#fdbb84' # yellow, star 2
 
 # usecols=(0,1,3,4,5,6) # this is the default, with RVs in 3,4,5,6 not 8,9,10,11
-bjd, phase, rv1, rverr1, rv2, rverr2 = np.loadtxt(filename, comments='#', 
-    dtype={'names': ('bjd', 'phase', 'rv1', 'rverr1', 'rv2', 'rverr2'),
-    'formats': (np.float64, np.float64, np.float64, np.float64, np.float64, np.float64)},
-    usecols=(0,1, 3,4,5,6), unpack=True)
+rvdata = np.loadtxt(filename, comments='#', unpack=True)
 
-# Skip any RV values that have 0 for error bars
+bjd = rvdata[0]
+phase = rvdata[1]
+rv1 = rvdata[3]; rverr1 = rvdata[4]
+rv2 = rvdata[5]; rverr2 = rvdata[6]
+rv3 = rvdata[7]; rverr3 = rvdata[8]
+
+# Skip any RV values that have 0 for error bars or are already None
 for idx, err in enumerate(rverr1):
     if err == 0:
         rv1[idx] = None
@@ -71,13 +94,16 @@ for idx, err in enumerate(rverr2):
         rverr2[idx] = None
 rv1mask = np.isfinite(rv1)
 rv2mask = np.isfinite(rv2)
+rv3mask = np.isfinite(rv3)
 
 # Double the arrays so we can plot any phase from 0 to phase 2... assuming phase is in range (0,1)
 rv1_double = np.concatenate((rv1,rv1), axis=0)
 rv2_double = np.concatenate((rv2,rv2), axis=0)
+rv3_double = np.concatenate((rv3,rv3), axis=0)
 phase_double = np.concatenate((np.array(phase),np.array(phase)+1.0), axis=0)
 rverr1_double = np.concatenate((rverr1,rverr1), axis=0)
 rverr2_double = np.concatenate((rverr2,rverr2), axis=0)
+rverr3_double = np.concatenate((rverr3, rverr3), axis=0)
 
 # Set up the figure
 fig = plt.figure(1, figsize=(13,9))
@@ -93,9 +119,11 @@ plt.tick_params(axis='both', which='major')
 # dotted lines to guide the eye
 plt.plot(bjd[rv1mask]-dateoffset, rv1[rv1mask], color=colors[15], mfc=None, mec=None, lw=1.5, ls=':')
 plt.plot(bjd[rv2mask]-dateoffset, rv2[rv2mask], color=colors[15], mfc=None, mec=None, lw=1.5, ls=':')
+plt.plot(bjd[rv3mask]-dateoffset, rv3[rv3mask], color=colors[15], mfc=None, mec=None, lw=1.5, ls=':')
 for idx, date in enumerate(bjd):
     plt.errorbar(date-dateoffset, rv1[idx], yerr=rverr1[idx], fmt='ko', color=colors[15], mfc=colors[6], mec=colors[14], ms=10, lw=1.5)
     plt.errorbar(date-dateoffset, rv2[idx], yerr=rverr2[idx], fmt='ko', color=colors[15], mfc=colors[2], mec=colors[14], ms=10, lw=1.5)
+    plt.errorbar(date-dateoffset, rv3[idx], yerr=rverr3[idx], fmt='ko', color=colors[15], mfc=colors[8], mec=colors[14], ms=10, lw=1.5)
 plt.xlabel("Time (BJD -- {0:.0f})".format(dateoffset))
 
 # Folded RV vs phase
@@ -109,6 +137,7 @@ plt.tick_params(axis='both', which='major')
 for idx, ph in enumerate(phase_double):
     plt.errorbar(phase_double[idx], rv1_double[idx], yerr=rverr1_double[idx], marker='o', color=colors[6], mec=colors[14], ecolor=colors[6], ms=10, ls='None', lw=1.5)
     plt.errorbar(phase_double[idx], rv2_double[idx], yerr=rverr2_double[idx], marker='o', color=colors[2], mec=colors[14], ecolor=colors[2], ms=10, ls='None', lw=1.5)
+    plt.errorbar(phase_double[idx], rv3_double[idx], yerr=rverr3_double[idx], marker='o', color=colors[8], mec=colors[14], ecolor=colors[8], ms=10, ls='None', lw=1.5)
 plt.xlabel("Orbital Phase")
 
 # Draw vertical lines at phase = 0.5
@@ -123,3 +152,4 @@ fig.text(0.14, 0.55, 'Unfolded')
 fig.text(0.14, 0.9, sysname, size='large')
 
 plt.show()
+fig.savefig('3247294rv.png')

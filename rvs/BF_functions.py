@@ -1,4 +1,5 @@
 from __future__ import print_function
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator
@@ -134,7 +135,7 @@ def read_specfiles(infiles = 'infiles_BF.txt', bjdinfile = 'bjds_baryvels.txt', 
         checkAPOGEE = False #all the infiles are APOGEE so we don't have to search
     i = 0 # keep track of which spectrum we're on
     for line in f1: # This loop happens once for each spectrum
-        infile = line.rstrip()
+        infile = os.path.expandvars(line.rstrip())
         if checkAPOGEE == True: # check to see if a subset of infiles are from APOGEE or not
             if 'apogee' in infile or 'APOGEE' in infile: isAPOGEE = True
             else: isAPOGEE = False
@@ -247,12 +248,6 @@ def gaussparty(gausspars, nspec, filenamelist, bfsmoothlist, bf_ind, amplimits, 
         if len(partest) == 6: ngauss = 2
         elif len(partest) == 9: ngauss = 3
         else: print('something is wrong with your gausspars file!')       
-        # min and max pars for peak 1: amp, rv, width
-        #minpars=[0.8, float(partest[1])-threshold, 0]
-        #maxpars=[1.0,   float(partest[1])+threshold, 7]
-        # min and max pars for peak 2: amp, rv, width
-        #minpars.extend([0.05, float(partest[4])-threshold, 0])
-        #maxpars.extend([0.20, float(partest[4])+threshold, 40])
         minpars = [amplimits[0], float(partest[1])-threshold, widlimits[0]]
         maxpars = [amplimits[1], float(partest[1])+threshold, widlimits[1]]
         minpars.extend([amplimits[2], float(partest[4])-threshold, widlimits[2]])
@@ -263,9 +258,10 @@ def gaussparty(gausspars, nspec, filenamelist, bfsmoothlist, bf_ind, amplimits, 
                     limitedmin=[True,True,True], limitedmax=[True,True,True], 
                     minpars=minpars, maxpars=maxpars, quiet=True, shh=True)
         elif ngauss == 3:
-            # min and max pars for peak 3: amp, rv, width (hardwired)
-            minpars.extend([0.05, float(partest[7])-threshold, 0])
-            maxpars.extend([1.0,  float(partest[7])+threshold, 30])
+            # min and max pars for peak 3: amp, rv, width
+            # this will not work if len(amplimits) < 6 or len(widlimits) < 6
+            minpars.extend([amplimits[4], float(partest[7])-threshold, widlimits[4]])
+            maxpars.extend([amplimits[5],  float(partest[7])+threshold, widlimits[5]])
             bffit = gf.multigaussfit(bf_ind, bfsmoothlist[i], ngauss=ngauss, 
                     params=partest, err=error_array,
                     limitedmin=[True,True,True], limitedmax=[True,True,True], 
@@ -292,20 +288,27 @@ def gaussparty(gausspars, nspec, filenamelist, bfsmoothlist, bf_ind, amplimits, 
         # RV1 for observation i is bffitlist[i][0][1] +/- bffitlist[i][2][1].
         # RV2 for observation i is bffitlist[i][0][4] +/- bffitlist[i][2][4].
         # (note: need to check if bffit[2] == None before calling bffit[2][1] or bffit[2][4])
-        print('{0:s}    {1:.3f} {2:.2f} {3:.4f} {4:.4f} \t {5:.3f} {6:.2f} {7:.4f} {8:.4f}'.format(
-            filenamelist[i][-20:], newbffit[0][0], newbffit[0][2], newbffit[0][1], newbffit[2][1],
-            newbffit[0][3], newbffit[0][5], newbffit[0][4], newbffit[2][4]))
+        if ngauss == 2:
+            print('{0:s}    {1:.3f} {2:.2f} {3:.4f} {4:.4f} \t {5:.3f} {6:.2f} {7:.4f} {8:.4f}'.format(
+                filenamelist[i][-20:], newbffit[0][0], newbffit[0][2], newbffit[0][1], newbffit[2][1],
+                newbffit[0][3], newbffit[0][5], newbffit[0][4], newbffit[2][4]))
+        elif ngauss == 3:
+            print('{0:s}    {1:.3f} {2:.2f} {3:.4f} {4:.4f} \t {5:.3f} {6:.2f} {7:.4f} {8:.4f} \t {9:.3f} {10:.2f} {11:.4f} {12:.4f}'.format(
+                filenamelist[i][-20:], newbffit[0][0], newbffit[0][2], newbffit[0][1], newbffit[2][1],
+                newbffit[0][3], newbffit[0][5], newbffit[0][4], newbffit[2][4], newbffit[0][6], newbffit[0][8], newbffit[0][7], newbffit[2][7]))
     print(' ')
     print('You MUST manually guesstimate the location of each Gaussian\'s peak in %s!' % gausspars)
     print('Until you do, the above values will be WRONG and the plot will look TERRIBLE.')
     print(' ')
     return bffitlist
 
-def rvphasecalc(bjdinfile, bjdoffset, nspec, period, BJD0, rvraw1, rvraw1_err, rvraw2, rvraw2_err, rvstd, bcvstd):
-    rv1 = []; rv2 = []
-    rv1.append(0); rv2.append(0)
-    rv1_err = []; rv2_err = []
-    rv1_err.append(0); rv2_err.append(0)
+def rvphasecalc(bjdinfile, bjdoffset, nspec, period, BJD0, rvrawlist, rvstd, bcvstd):
+    rvraw1 = rvrawlist[0]; rvraw1_err = rvrawlist[1]; rvraw2 = rvrawlist[2]; rvraw2_err = rvrawlist[3]
+    rvraw3 = rvrawlist[4]; rvraw3_err = rvrawlist[5]
+    rv1 = []; rv2 = []; rv3 = []
+    rv1.append(0); rv2.append(0); rv3.append(0)
+    rv1_err = []; rv2_err = []; rv3_err = []
+    rv1_err.append(0); rv2_err.append(0); rv3_err.append(0)
     g1 = open(bjdinfile)
     #g2 = open(outfile, 'w')
     print('Calculating RVs...')
@@ -323,8 +326,17 @@ def rvphasecalc(bjdinfile, bjdoffset, nspec, period, BJD0, rvraw1, rvraw1_err, r
             cycle = int(fracP)
         rv1.append(rvraw1[i] + bcv[i] - rvstd - bcvstd) # DON'T MESS UP THE +/- SIGNS
         rv2.append(rvraw2[i] + bcv[i] - rvstd - bcvstd)
+        if rvraw3[i] is not None:
+            rv3.append(rvraw3[i] + bcv[i] - rvstd - bcvstd)
+        else:
+            rv3.append(None)
         rv1_err.append(rvraw1_err[i])
         rv2_err.append(rvraw2_err[i])
+        if rvraw3[i] is not None:
+            rv3_err.append(rvraw3_err[i])
+        else:
+            rv3_err.append(None)
+    rvfinals = [rv1, rv1_err, rv2, rv2_err, rv3, rv3_err]
         #print ('%.9f %.9f %.9f %.5f %.5f %.5f %.5f' % (bjdmid[i], phase[i], bjdfunny[i], 
         #        rv1[i], rv1_err[i], rv2[i], rv2_err[i]), file=g2)
     g1.close()
@@ -332,4 +344,4 @@ def rvphasecalc(bjdinfile, bjdoffset, nspec, period, BJD0, rvraw1, rvraw1_err, r
     print(' ')
     #print('BJD, phase, and RVs written to %s.' % outfile)
     #print('Use rvplotmaker.py to plot the RV curve.')
-    return phase, bjdfunny, rv1, rv2, rv1_err, rv2_err
+    return phase, bjdfunny, rvfinals
