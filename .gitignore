@@ -1,6 +1,7 @@
 rvs/isochrones
 src/
 kics/
+scratch/
 .cache
 *.so
 *.pyc
