@@ -1,4 +1,4 @@
-data/PHOENIX/Z-0.0/lte04900-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes_apogee_norm.txt   0   0
+/Users/jmc2/PHOENIX/Z-0.0/lte04900-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes_apogee_norm.txt   0   0
 data/6131659/apVisitnorm-6093-56368-071_despiked.txt   2456368.99876   10.42595499
 data/6131659/apVisitnorm-6093-56411-077_despiked.txt   2456411.91961   14.24299841
 data/6131659/apVisitnorm-7125-56557-123_despiked.txt   2456557.73279   -11.01031302

@@ -1,4 +1,4 @@
-data/PHOENIX/Z-0.0/lte06000-4.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes_apogee_norm.txt
+/Users/jmc2/PHOENIX/Z-0.0/lte06000-4.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes_apogee_norm.txt
 data/4285087/apVisitnorm-5214-55813-062_despiked.txt
 data/4285087/apVisitnorm-5215-55823-164_despiked.txt
 data/4285087/apVisitnorm-5215-55840-164_despiked.txt

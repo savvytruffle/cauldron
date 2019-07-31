@@ -96,16 +96,19 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #infiles = 'data/4285087/4285087infiles.txt'; bjdinfile = 'data/4285087/4285087bjdinfile.txt'
 #gausspars = 'data/4285087/4285087gausspars.txt'
 #outfile = 'data/4285087/4285087outfile.txt'; bfoutfile = 'data/4285087/4285087BFOut.txt'
+#gaussoutfile = 'data/4285087/4285087gaussout.txt'; areaout = 'data/4285087/4285087BFArea.txt'
 
 #6131659
 #infiles = 'data/6131659/6131659infiles.txt'; bjdinfile = 'data/6131659/6131659bjdinfile.txt'
 #gausspars = 'data/6131659/6131659gausspars.txt'
 #outfile = 'data/6131659/6131659outfile.txt'; bfoutfile = 'data/6131659/6131659BFOut.txt'
+#gaussoutfile = 'data/6131659/6131659gaussout.txt'; areaout = 'data/6131659/6131659BFArea.txt'
 
 #6449358
-#infiles =   'data/6449358/6449358infiles.txt'; bjdinfile = 'data/6449358/6449358bjdinfile.txt'
-#gausspars = 'data/6449358/6449358gausspars.txt'
-#outfile =   'data/6449358/6449358Outfile.txt'; bfoutfile = 'data/6449358/6449358BFOut.txt'
+infiles =   'data/6449358/6449358infiles.txt'; bjdinfile = 'data/6449358/6449358bjdinfile.txt'
+gausspars = 'data/6449358/6449358gausspars.txt'
+outfile =   'data/6449358/6449358Outfile.txt'; bfoutfile = 'data/6449358/6449358BFOut.txt'
+gaussoutfile = 'data/6449358/6449358gaussout.txt'; areaout = 'data/6449358/6449358BFArea.txt'
 
 #5284133
 #infiles =   'data/5284133/5284133infiles.txt'; bjdinfile = 'data/5284133/5284133bjdinfile.txt'
@@ -116,17 +119,20 @@ both in days, and the constant RV and BCV of whatever template you are using.
 #infiles =   'data/6778289/6778289infiles.txt'; bjdinfile = 'data/6778289/6778289bjdinfiles.txt'
 #gausspars = 'data/6778289/6778289gausspars.txt'
 #outfile =   'data/6778289/6778289Outfile.txt'; bfoutfile = 'data/6778289/6778289BFOut.txt'
+#gaussoutfile = 'data/6778289/6778289gaussout.txt'; areaout = 'data/6778289/6778289BFArea.txt'
+
 
 #6781535 (Suspected Triple System)
 #infiles =   'data/6781535/6781535infiles.txt'; bjdinfile = 'data/6781535/6781535bjdinfile.txt'
 #gausspars = 'data/6781535/6781535gausspars.txt'
 #outfile =   'data/6781535/6781535Outfile1.txt'; bfoutfile = 'data/6781535/6781535BFOut.txt'
+#gaussoutfile = 'data/6781535/6781535gaussout.txt'; areaout = 'data/6781535/6781535BFArea.txt'
 
 #6864859
-infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
-gausspars = 'data/6864859/6864859gausspars.txt'
-outfile =   'data/6864859/6864859Outfile.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
-gaussoutfile = 'data/6864859/6864859gaussout.txt'; areaout = 'data/6864859/6864859BFArea.txt'
+#infiles =   'data/6864859/6864859infiles.txt'; bjdinfile = 'data/6864859/6864859bjdinfile.txt'
+#gausspars = 'data/6864859/6864859gausspars.txt'
+#outfile =   'data/6864859/6864859Outfile.txt'; bfoutfile = 'data/6864859/6864859BFOut.txt'
+#gaussoutfile = 'data/6864859/6864859gaussout.txt'; areaout = 'data/6864859/6864859BFArea.txt'
 
 #3247294
 #infiles =   'data/3247294/3247294infiles.txt'; bjdinfile = 'data/3247294/3247294bjdinfile.txt'
@@ -137,11 +143,11 @@ gaussoutfile = 'data/6864859/6864859gaussout.txt'; areaout = 'data/6864859/68648
 # ORBITAL PERIOD AND ZEROPOINT !!!
 #period = 2.47028; BJD0 = 2455813.69734 # 4851217
 #period = 3.8994011; BJD0 = 2454959.576010 # 5285607
-#period = 5.7767904; BJD0 = 2454955.073410 # 6449358
+period = 5.7767904; BJD0 = 2454955.073410 # 6449358
 #period = 8.7845759; BJD0 = 245800.46231 #5284133
 #period = 30.13015; BJD0 = 2456557.73097 #6778289
 #period = 9.1220856; BJD0 = 2454971.834534 #6781535
-period = 40.8778427; BJD0 = 2454955.556300 #6864859
+#period = 40.8778427; BJD0 = 2454955.556300 #6864859
 #period = 61.4228063; BJD0 = 2455813.69734 #4075064
 #period = 1.0472603; BJD0 = 2455811.61005 #3848919
 #period = 11.3009948; BJD0 = 2456557.73097 #6610219
@@ -185,9 +191,9 @@ w00 = 15170; n = 10000; stepV = 2.0 # all of APOGEE, still pretty high res
 #widlimits = [0,13, 0,13]; rvneg = -50; rvpos = 249; ymin = -0.15; ymax = 1.19 # 4285087
 #widlimits = [0,18, 0,19]; rvneg = -70; rvpos = 270; ymin = -0.15; ymax = 1.19 # 5285607
 #widlimits = [0,16, 0,11]; rvneg = -300; rvpos = 500; ymin = -0.15; ymax = 1.2 #6449358 extra wide 
-#widlimits = [0,16, 0,11]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.2 #6449358
+widlimits = [0,16, 0,11]; rvneg = -50; rvpos = 199; ymin = -0.15; ymax = 1.2 #6449358
 #widlimits = [0,12, 0,8]; rvneg = -45; rvpos = 199; ymin = -0.15; ymax = 1.4 #6778289
-widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
+#widlimits = [0,11, 0,10]; rvneg = 30; rvpos = 170; ymin = -0.15; ymax = 1.19 # 6864859
 #widlimits = [0,9, 0,9]; rvneg = -150; rvpos = 50; ymin = -0.15; ymax = 1.19 # 6610259a
 #widlimits = [0,15, 0,15]; rvneg = -50; rvpos = 10; ymin = -0.15; ymax = 1.19 # 6610219b
 
@@ -358,7 +364,8 @@ try:
     for idx in range(1, nspec):
         print('P Amplitude: {0} +/- {1} width {2} xmax {3}'.format(bffitlist[idx][0][0], bffitlist[idx][2][0], bffitlist[idx][0][2], bffitlist[idx][0][1]), file=gout)
         print('S Amplitude: {0} +/- {1} width {2} xmax {3}'.format(bffitlist[idx][0][3], bffitlist[idx][2][3], bffitlist[idx][0][5], bffitlist[idx][0][4]), file=gout)
-
+        #print('T Amplitude: {0} +/- {1} width {2} xmax {3}'.format(bffitlist[idx][0][6], bffitlist[idx][2][6], bffitlist[idx][0][8], bffitlist[idx][0][7]), file=gout)
+        #print(bffitlist[idx][0][6])
     gout.close()
 except:
     print('No gaussoutfile specified, not saving gauss data to file')

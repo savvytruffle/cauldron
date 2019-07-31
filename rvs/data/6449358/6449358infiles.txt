@@ -1,4 +1,4 @@
-data/PHOENIX/Z-0.0/lte07400-3.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes_apogee_norm.txt
+apogee_norm/lte07400-3.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes_apogee_norm.txt
 data/6449358/apVisitnorm-7125-56557-071_despiked.txt
 data/6449358/apVisitnorm-7125-56559-071_despiked.txt
 data/6449358/apVisitnorm-7125-56584-071_despiked.txt
