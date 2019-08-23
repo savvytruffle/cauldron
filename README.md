@@ -8,6 +8,6 @@ The analysis code, resulting plots, and additional supporting materials for [Cun
 * `data` : Files pertaining to the KEBLAT combined light curve and radial velocity modeling
 * `kics` : Plots from the paper organized by star system
 * `rvs` : Files and scripts used for extracting radial velocities from APOGEE spectra
+* `apogee-kepler-poster-AAS229-cunningham.pdf` : Poster from Jan 2017 (229th AAS Meeting) featuring very early results
 
-KEBLAT files (see [Windemuth et al. 2019](https://arxiv.org/abs/1908.00139)) : `eb_fitting.py`, `helper_funcs.py`, `helpers.c`, `keblat.py`
-
+KEBLAT files (see [Windemuth et al. 2019](https://arxiv.org/abs/1908.00139)) : `apogee_lcs.py`, `eb_fitting.py`, `helper_funcs.py`, `helpers.c`, `keblat.py`
